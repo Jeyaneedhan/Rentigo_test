@@ -1,0 +1,229 @@
+<?php
+require_once '../app/helpers/helper.php';
+
+class Admin extends Controller
+{
+    private $userModel;
+
+    public function __construct()
+    {
+        if (!isLoggedIn() || $_SESSION['user_type'] !== 'admin') {
+            redirect('users/login');
+        }
+        $this->userModel = $this->model('M_Users');
+    }
+
+    // Main dashboard page
+    public function index()
+    {
+        $data = [
+            'title' => 'Admin Dashboard - Rentigo',
+            'page' => 'dashboard'
+        ];
+        $this->view('admin/v_dashboard', $data);
+    }
+
+    // Properties management page
+    public function properties()
+    {
+        redirect('AdminProperties/index');
+    }
+
+    // Property managers page
+    public function managers()
+    {
+        $allManagers = $this->userModel->getAllPropertyManagers();
+
+        $data = [
+            'title' => 'Property Managers - Rentigo Admin',
+            'page' => 'managers',
+            'allManagers' => $allManagers
+        ];
+        $this->view('admin/v_managers', $data);
+    }
+
+    // Documents management page
+    public function documents()
+    {
+        $data = [
+            'title' => 'Documents - Rentigo Admin',
+            'page' => 'documents'
+        ];
+        $this->view('admin/v_documents', $data);
+    }
+
+    // Financial management page
+    public function financials()
+    {
+        $data = [
+            'title' => 'Financials - Rentigo Admin',
+            'page' => 'financials'
+        ];
+        $this->view('admin/v_financials', $data);
+    }
+
+    public function providers()
+    {
+        redirect('providers/index');
+    }
+
+    // Policies management page
+    public function policies()
+    {
+        redirect('policies/index');
+    }
+
+    // Notifications page
+    public function notifications()
+    {
+        $data = [
+            'title' => 'Notifications - Rentigo Admin',
+            'page' => 'notifications'
+        ];
+        $this->view('admin/v_notifications', $data);
+    }
+
+    // Property Manager approvals page
+    public function pm_approvals()
+    {
+        $pendingPMs = $this->userModel->getPendingPMs();
+
+        $data = [
+            'title' => 'PM Approvals - Rentigo Admin',
+            'page' => 'pm_approvals',
+            'pending_pms' => $pendingPMs
+        ];
+        $this->view('admin/v_pm_approvals', $data);
+    }
+
+    // Approve Property Manager
+    public function approvePM($userId)
+    {
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+
+            error_log("ApprovePM called with userId: " . $userId);
+
+            if (!isLoggedIn()) {
+                error_log("User not logged in");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'You are not logged in'
+                ]);
+                exit();
+            }
+
+            if ($_SESSION['user_type'] !== 'admin') {
+                error_log("User is not admin: " . $_SESSION['user_type']);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Unauthorized access. Admin role required.'
+                ]);
+                exit();
+            }
+
+            error_log("Attempting to approve PM with ID: " . $userId);
+
+            try {
+                $result = $this->userModel->approvePM($userId);
+                error_log("ApprovePM result: " . ($result ? 'true' : 'false'));
+
+                if ($result) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Property Manager approved successfully'
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Failed to approve Property Manager. Database update returned false.'
+                    ]);
+                }
+            } catch (Exception $e) {
+                error_log("Exception in approvePM: " . $e->getMessage());
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+            exit();
+        } else {
+            redirect('admin/managers');
+        }
+    }
+
+    // Remove Property Manager
+    public function removePropertyManager($userId)
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+
+            if (!isLoggedIn()) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'You are not logged in'
+                ]);
+                exit();
+            }
+
+            if ($_SESSION['user_type'] !== 'admin') {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Unauthorized access. Admin role required.'
+                ]);
+                exit();
+            }
+
+            if ($this->userModel->removePropertyManager($userId)) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Property Manager removed successfully'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to remove Property Manager'
+                ]);
+            }
+            exit();
+        } else {
+            redirect('admin/managers');
+        }
+    }
+
+    // Reject Property Manager
+    public function rejectPM($userId)
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+
+            if (!isLoggedIn() || $_SESSION['user_type'] !== 'admin') {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ]);
+                exit();
+            }
+
+            $adminId = $_SESSION['user_id'];
+
+            if ($this->userModel->rejectPM($userId, $adminId)) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Property Manager application rejected'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to reject application'
+                ]);
+            }
+            exit();
+        } else {
+            redirect('admin/managers');
+        }
+    }
+}
