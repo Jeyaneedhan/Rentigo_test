@@ -16,9 +16,42 @@ class Admin extends Controller
     // Main dashboard page
     public function index()
     {
+        // Load models for dashboard data
+        $propertyModel = $this->model('M_Property');
+        $bookingModel = $this->model('M_Booking');
+        $paymentModel = $this->model('M_Payment');
+
+        // Get statistics
+        $allProperties = $propertyModel->getAllProperties();
+        $allBookings = $bookingModel->getAllBookings();
+        $allPayments = $paymentModel->getAllPayments();
+        $pendingPMs = $this->userModel->getPendingPMs();
+
+        // Calculate active tenants
+        $activeBookings = array_filter($allBookings, fn($b) => $b->status === 'active');
+
+        // Calculate monthly revenue
+        $currentMonth = date('Y-m');
+        $monthlyRevenue = 0;
+        foreach ($allPayments as $payment) {
+            if ($payment->status === 'completed' &&
+                date('Y-m', strtotime($payment->payment_date)) === $currentMonth) {
+                $monthlyRevenue += $payment->amount;
+            }
+        }
+
+        // Get recent properties (last 10)
+        $recentProperties = array_slice($allProperties, -10);
+        $recentProperties = array_reverse($recentProperties);
+
         $data = [
             'title' => 'Admin Dashboard - Rentigo',
-            'page' => 'dashboard'
+            'page' => 'dashboard',
+            'totalProperties' => count($allProperties),
+            'activeTenants' => count($activeBookings),
+            'monthlyRevenue' => $monthlyRevenue,
+            'pendingApprovals' => count($pendingPMs),
+            'recentProperties' => $recentProperties
         ];
         $this->view('admin/v_dashboard', $data);
     }
