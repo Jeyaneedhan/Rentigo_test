@@ -157,9 +157,13 @@ class M_Policies
         $this->db->query("SELECT COUNT(*) as draft FROM policies WHERE policy_status = 'draft'");
         $draft = $this->db->single()->draft;
 
-        // Inactive policies
-        $this->db->query("SELECT COUNT(*) as inactive FROM policies WHERE policy_status = 'inactive'");
-        $inactive = $this->db->single()->inactive;
+        // Archived policies
+        $this->db->query("SELECT COUNT(*) as archived FROM policies WHERE policy_status = 'archived'");
+        $archived = $this->db->single()->archived;
+
+        // Under review policies
+        $this->db->query("SELECT COUNT(*) as under_review FROM policies WHERE policy_status = 'under_review'");
+        $underReview = $this->db->single()->under_review;
 
         // Latest update
         $this->db->query("SELECT MAX(last_updated) as last_updated FROM policies");
@@ -169,7 +173,8 @@ class M_Policies
             'total' => $total,
             'active' => $active,
             'draft' => $draft,
-            'inactive' => $inactive,
+            'archived' => $archived,
+            'under_review' => $underReview,
             'last_updated' => $lastUpdated
         ];
     }
@@ -223,19 +228,20 @@ class M_Policies
         return $this->db->resultSet();
     }
 
-    // Get policy categories
+    // Get policy categories (matches database enum)
     public function getPolicyCategories()
     {
         return [
-            'rental' => 'Rental',
-            'security' => 'Security',
-            'maintenance' => 'Maintenance',
-            'financial' => 'Financial',
-            'general' => 'General'
+            'privacy' => 'Privacy Policy',
+            'terms_of_service' => 'Terms of Service',
+            'refund' => 'Refund Policy',
+            'security' => 'Security Policy',
+            'data_protection' => 'Data Protection',
+            'general' => 'General Policy'
         ];
     }
 
-    // Get policy types
+    // Get policy types (not used in database but kept for compatibility)
     public function getPolicyTypes()
     {
         return [
@@ -244,13 +250,14 @@ class M_Policies
         ];
     }
 
-    // Get policy statuses
+    // Get policy statuses (matches database enum)
     public function getPolicyStatuses()
     {
         return [
             'draft' => 'Draft',
             'active' => 'Active',
-            'inactive' => 'Inactive'
+            'archived' => 'Archived',
+            'under_review' => 'Under Review'
         ];
     }
 }
