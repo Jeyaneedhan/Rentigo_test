@@ -88,9 +88,48 @@ class Admin extends Controller
     // Financial management page
     public function financials()
     {
+        // Load payment model
+        $paymentModel = $this->model('M_Payment');
+        $maintenanceModel = $this->model('M_Maintenance');
+
+        // Get all payments
+        $allPayments = $paymentModel->getAllPayments();
+
+        // Calculate statistics
+        $totalRevenue = 0;
+        $collected = 0;
+        $pending = 0;
+        $overdue = 0;
+        $pendingCount = 0;
+        $overdueCount = 0;
+
+        foreach ($allPayments as $payment) {
+            $totalRevenue += $payment->amount;
+            if ($payment->status === 'completed') {
+                $collected += $payment->amount;
+            } elseif ($payment->status === 'pending') {
+                $pending += $payment->amount;
+                $pendingCount++;
+            } elseif ($payment->status === 'overdue') {
+                $overdue += $payment->amount;
+                $overdueCount++;
+            }
+        }
+
+        // Get recent transactions (payments and maintenance)
+        $recentTransactions = array_slice($allPayments, -20);
+        $recentTransactions = array_reverse($recentTransactions);
+
         $data = [
             'title' => 'Financials - Rentigo Admin',
-            'page' => 'financials'
+            'page' => 'financials',
+            'totalRevenue' => $totalRevenue,
+            'collected' => $collected,
+            'pending' => $pending,
+            'overdue' => $overdue,
+            'pendingCount' => $pendingCount,
+            'overdueCount' => $overdueCount,
+            'recentTransactions' => $recentTransactions
         ];
         $this->view('admin/v_financials', $data);
     }
@@ -109,9 +148,31 @@ class Admin extends Controller
     // Notifications page
     public function notifications()
     {
+        // Load notification model if exists, otherwise use dummy data
+        $notificationModel = $this->model('M_Notification');
+
+        // Get all notifications sent by admin
+        $allNotifications = $notificationModel->getAllAdminNotifications();
+
+        // Calculate statistics
+        $totalSent = count($allNotifications);
+        $delivered = count(array_filter($allNotifications, fn($n) => $n->status === 'sent' || $n->status === 'delivered'));
+        $draft = count(array_filter($allNotifications, fn($n) => $n->status === 'draft'));
+
+        // Calculate total recipients
+        $totalRecipients = 0;
+        foreach ($allNotifications as $notification) {
+            $totalRecipients += $notification->recipient_count ?? 1;
+        }
+
         $data = [
             'title' => 'Notifications - Rentigo Admin',
-            'page' => 'notifications'
+            'page' => 'notifications',
+            'totalSent' => $totalSent,
+            'delivered' => $delivered,
+            'draft' => $draft,
+            'totalRecipients' => $totalRecipients,
+            'notifications' => $allNotifications
         ];
         $this->view('admin/v_notifications', $data);
     }
