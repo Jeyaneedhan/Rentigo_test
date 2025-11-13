@@ -19,7 +19,11 @@ UPDATE `properties` SET `approval_status` =
         ELSE 'pending'
     END;
 
--- Fix property_manager table - rename and add columns
+-- Fix property_manager table
+-- Step 1: Update 'verified' to 'approved' before changing column
+UPDATE `property_manager` SET `verification_status` = 'approved' WHERE `verification_status` = 'verified';
+
+-- Step 2: Rename and add columns
 ALTER TABLE `property_manager`
 CHANGE COLUMN `document_filename` `employee_id_filename` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 CHANGE COLUMN `document_mimetype` `employee_id_filetype` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -36,5 +40,6 @@ ADD CONSTRAINT `fk_property_manager_approved_by` FOREIGN KEY (`approved_by`) REF
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Display confirmation
-SELECT 'Schema updated successfully! Properties table now has approval_status and approved_at columns.' AS message;
+SELECT 'Schema updated successfully! Properties table now has approval_status and approved_at columns.' AS message
+UNION ALL
 SELECT 'Property_manager table now has correct column names matching the code.' AS message;
