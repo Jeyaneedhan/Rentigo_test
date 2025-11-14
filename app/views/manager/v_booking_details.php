@@ -189,7 +189,7 @@
     }
 
     .card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #45a9ea 0%, #3b8fd9 100%);
         color: white;
         padding: 2rem;
         display: flex;
@@ -258,7 +258,7 @@
     }
 
     .info-section h4 i {
-        color: #667eea;
+        color: #45a9ea;
         font-size: 1.25rem;
     }
 
@@ -295,7 +295,7 @@
 
     .amount.total {
         font-size: 1.375rem;
-        color: #7c3aed;
+        color: #45a9ea;
     }
 
     .notes {
@@ -304,7 +304,7 @@
         padding: 1.25rem;
         background: #f9fafb;
         border-radius: 8px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #45a9ea;
         margin: 0;
     }
 

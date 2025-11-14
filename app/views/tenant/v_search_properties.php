@@ -92,17 +92,12 @@
                             <div class="property-actions">
                                 <a class="btn-property-action"
                                     href="<?php echo URLROOT . '/tenantproperties/details/' . $property->id; ?>">
-                                    View Details
+                                    <?php if ($property->status === 'available'): ?>
+                                        View Details & Reserve
+                                    <?php else: ?>
+                                        View Details
+                                    <?php endif; ?>
                                 </a>
-                                <?php if ($property->status === 'available'): ?>
-                                    <button class="btn-property-action" id="btn-reserve-property" onclick=" reserveProperty(<?php echo $property->id; ?>)">
-                                        Reserve Property
-                                    </button>
-                                <?php else: ?>
-                                    <button class="btn-property-action disabled" disabled>
-                                        Not Available
-                                    </button>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
