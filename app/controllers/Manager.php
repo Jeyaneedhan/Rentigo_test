@@ -183,22 +183,26 @@ class Manager extends Controller
         // Load lease agreement model
         $leaseModel = $this->model('M_LeaseAgreements');
 
-        // Get all lease agreements
-        $allLeases = $leaseModel->getAllLeaseAgreements();
+        // Get manager's assigned property leases
+        $manager_id = $_SESSION['user_id'];
+        $allLeases = $leaseModel->getLeasesByManager($manager_id);
 
         // Filter by status
-        $pendingLeases = array_filter($allLeases, fn($l) => $l->validation_status === 'pending_review' || $l->validation_status === 'pending');
-        $validatedLeases = array_filter($allLeases, fn($l) => $l->validation_status === 'validated' || $l->validation_status === 'approved');
-        $rejectedLeases = array_filter($allLeases, fn($l) => $l->validation_status === 'rejected');
+        $draftLeases = array_filter($allLeases, fn($l) => $l->status === 'draft');
+        $activeLeases = array_filter($allLeases, fn($l) => $l->status === 'active');
+        $completedLeases = array_filter($allLeases, fn($l) => $l->status === 'completed');
 
         $data = [
             'title' => 'Lease Agreements',
             'page' => 'leases',
             'user_name' => $_SESSION['user_name'],
             'allLeases' => $allLeases,
-            'pendingLeases' => $pendingLeases,
-            'validatedLeases' => $validatedLeases,
-            'rejectedLeases' => $rejectedLeases,
+            'draftLeases' => $draftLeases,
+            'activeLeases' => $activeLeases,
+            'completedLeases' => $completedLeases,
+            'draftCount' => count($draftLeases),
+            'activeCount' => count($activeLeases),
+            'completedCount' => count($completedLeases),
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_leases', $data);
