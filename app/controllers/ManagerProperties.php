@@ -2,6 +2,7 @@
 class ManagerProperties extends Controller
 {
     private $managerPropertyModel;
+    private $notificationModel;
 
     public function __construct()
     {
@@ -10,6 +11,13 @@ class ManagerProperties extends Controller
         }
 
         $this->managerPropertyModel = $this->model('M_ManagerProperties');
+        $this->notificationModel = $this->model('M_Notifications');
+    }
+
+    // Helper method to get unread notification count
+    private function getUnreadNotificationCount()
+    {
+        return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
     }
 
     // List all properties assigned to this manager
@@ -28,7 +36,8 @@ class ManagerProperties extends Controller
 
         $data = [
             'properties' => $properties,
-            'page' => 'properties'
+            'page' => 'properties',
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         $this->view('manager/v_properties', $data);
@@ -52,7 +61,8 @@ class ManagerProperties extends Controller
 
         $data = [
             'property' => $property,
-            'page' => 'manager_properties'
+            'page' => 'manager_properties',
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         $this->view('manager/v_property_details', $data);

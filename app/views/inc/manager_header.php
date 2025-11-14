@@ -105,12 +105,9 @@
                             <span class="nav-text">Notifications</span>
                             <?php
                             // Show notification badge if there are unread notifications
-                            if (isset($_SESSION['user_id'])) {
-                                $notifModel = new M_Notifications();
-                                $unreadCount = $notifModel->getUnreadCount($_SESSION['user_id']);
-                                if ($unreadCount > 0) {
-                                    echo '<span class="notification-badge">' . $unreadCount . '</span>';
-                                }
+                            $unreadCount = $data['unread_notifications'] ?? 0;
+                            if ($unreadCount > 0) {
+                                echo '<span class="notification-badge">' . $unreadCount . '</span>';
                             }
                             ?>
                         </a>

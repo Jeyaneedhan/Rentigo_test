@@ -15,6 +15,12 @@ class Manager extends Controller
         }
     }
 
+    // Helper method to get unread notification count
+    private function getUnreadNotificationCount()
+    {
+        return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
+    }
+
     public function index()
     {
         $this->dashboard();
@@ -70,7 +76,8 @@ class Manager extends Controller
             'totalIncome' => $totalIncome,
             'totalExpenses' => $totalExpenses,
             'recentPayments' => $recentPayments,
-            'recentMaintenance' => $recentMaintenance
+            'recentMaintenance' => $recentMaintenance,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_dashboard', $data);
     }
@@ -103,7 +110,8 @@ class Manager extends Controller
             'vacatedBookings' => $vacatedBookings,
             'activeCount' => count($activeBookings),
             'pendingCount' => count($pendingBookings),
-            'vacatedCount' => count($vacatedBookings)
+            'vacatedCount' => count($vacatedBookings),
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_tenants', $data);
     }
@@ -134,7 +142,8 @@ class Manager extends Controller
             'quotedRequests' => $quotedRequests,
             'approvedRequests' => $approvedRequests,
             'completedRequests' => $completedRequests,
-            'pendingApprovals' => $pendingApprovals
+            'pendingApprovals' => $pendingApprovals,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_maintenance', $data);
     }
@@ -162,7 +171,8 @@ class Manager extends Controller
             'openIssues' => $openIssues,
             'assignedIssues' => $assignedIssues,
             'inProgressIssues' => $inProgressIssues,
-            'resolvedIssues' => $resolvedIssues
+            'resolvedIssues' => $resolvedIssues,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         $this->view('manager/v_issues', $data);
@@ -188,7 +198,8 @@ class Manager extends Controller
             'allLeases' => $allLeases,
             'pendingLeases' => $pendingLeases,
             'validatedLeases' => $validatedLeases,
-            'rejectedLeases' => $rejectedLeases
+            'rejectedLeases' => $rejectedLeases,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_leases', $data);
     }
@@ -205,7 +216,8 @@ class Manager extends Controller
             'title' => 'Service Providers',
             'page' => 'providers',
             'user_name' => $_SESSION['user_name'],
-            'providers' => $allProviders
+            'providers' => $allProviders,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_providers', $data);
     }
