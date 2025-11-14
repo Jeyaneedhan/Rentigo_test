@@ -65,39 +65,30 @@ class M_Policies
     public function createPolicy($data)
     {
         $this->db->query("INSERT INTO policies (
-            policy_name, 
-            policy_category, 
-            policy_description, 
-            policy_content, 
-            policy_version, 
-            policy_status, 
-            policy_type, 
-            effective_date, 
-            expiry_date,
+            policy_name,
+            policy_category,
+            policy_content,
+            policy_version,
+            policy_status,
+            effective_date,
             created_by
         ) VALUES (
-            :policy_name, 
-            :policy_category, 
-            :policy_description, 
-            :policy_content, 
-            :policy_version, 
-            :policy_status, 
-            :policy_type, 
-            :effective_date, 
-            :expiry_date,
+            :policy_name,
+            :policy_category,
+            :policy_content,
+            :policy_version,
+            :policy_status,
+            :effective_date,
             :created_by
         )");
 
         // Bind values
         $this->db->bind(':policy_name', $data['policy_name']);
         $this->db->bind(':policy_category', $data['policy_category']);
-        $this->db->bind(':policy_description', $data['policy_description']);
         $this->db->bind(':policy_content', $data['policy_content']);
-        $this->db->bind(':policy_version', $data['policy_version'] ?? 'v1.0');
+        $this->db->bind(':policy_version', $data['policy_version'] ?? '1.0');
         $this->db->bind(':policy_status', $data['policy_status'] ?? 'draft');
-        $this->db->bind(':policy_type', $data['policy_type'] ?? 'standard');
-        $this->db->bind(':effective_date', $data['effective_date']);
-        $this->db->bind(':expiry_date', $data['expiry_date'] ?? null);
+        $this->db->bind(':effective_date', $data['effective_date'] ?? date('Y-m-d'));
         $this->db->bind(':created_by', $data['created_by']);
 
         if ($this->db->execute()) {
@@ -109,30 +100,23 @@ class M_Policies
     // Update policy
     public function updatePolicy($data)
     {
-        $this->db->query("UPDATE policies 
+        $this->db->query("UPDATE policies
                          SET policy_name = :policy_name,
                              policy_category = :policy_category,
-                             policy_description = :policy_description,
                              policy_content = :policy_content,
                              policy_version = :policy_version,
                              policy_status = :policy_status,
-                             policy_type = :policy_type,
-                             effective_date = :effective_date,
-                             expiry_date = :expiry_date,
-                             updated_at = CURRENT_TIMESTAMP
+                             effective_date = :effective_date
                          WHERE policy_id = :policy_id");
 
         // Bind values - policy_id comes from $data array
         $this->db->bind(':policy_id', $data['policy_id']);
         $this->db->bind(':policy_name', $data['policy_name']);
         $this->db->bind(':policy_category', $data['policy_category']);
-        $this->db->bind(':policy_description', $data['policy_description']);
         $this->db->bind(':policy_content', $data['policy_content']);
         $this->db->bind(':policy_version', $data['policy_version']);
         $this->db->bind(':policy_status', $data['policy_status']);
-        $this->db->bind(':policy_type', $data['policy_type']);
         $this->db->bind(':effective_date', $data['effective_date']);
-        $this->db->bind(':expiry_date', $data['expiry_date'] ?? null);
 
         return $this->db->execute();
     }
@@ -140,9 +124,8 @@ class M_Policies
     // Update policy status
     public function updatePolicyStatus($policyId, $status)
     {
-        $this->db->query("UPDATE policies SET 
-            policy_status = :status, 
-            updated_at = CURRENT_TIMESTAMP 
+        $this->db->query("UPDATE policies SET
+            policy_status = :status
         WHERE policy_id = :policy_id");
 
         $this->db->bind(':policy_id', $policyId);
@@ -174,19 +157,24 @@ class M_Policies
         $this->db->query("SELECT COUNT(*) as draft FROM policies WHERE policy_status = 'draft'");
         $draft = $this->db->single()->draft;
 
-        // Inactive policies
-        $this->db->query("SELECT COUNT(*) as inactive FROM policies WHERE policy_status = 'inactive'");
-        $inactive = $this->db->single()->inactive;
+        // Archived policies
+        $this->db->query("SELECT COUNT(*) as archived FROM policies WHERE policy_status = 'archived'");
+        $archived = $this->db->single()->archived;
+
+        // Under review policies
+        $this->db->query("SELECT COUNT(*) as under_review FROM policies WHERE policy_status = 'under_review'");
+        $underReview = $this->db->single()->under_review;
 
         // Latest update
-        $this->db->query("SELECT MAX(updated_at) as last_updated FROM policies");
+        $this->db->query("SELECT MAX(last_updated) as last_updated FROM policies");
         $lastUpdated = $this->db->single()->last_updated;
 
         return [
             'total' => $total,
             'active' => $active,
             'draft' => $draft,
-            'inactive' => $inactive,
+            'archived' => $archived,
+            'under_review' => $underReview,
             'last_updated' => $lastUpdated
         ];
     }
@@ -229,31 +217,31 @@ class M_Policies
     // Search policies
     public function searchPolicies($searchTerm)
     {
-        $this->db->query("SELECT p.*, u.name as created_by_name 
-                         FROM policies p 
-                         LEFT JOIN users u ON p.created_by = u.id 
-                         WHERE p.policy_name LIKE :search 
-                            OR p.policy_description LIKE :search 
+        $this->db->query("SELECT p.*, u.name as created_by_name
+                         FROM policies p
+                         LEFT JOIN users u ON p.created_by = u.id
+                         WHERE p.policy_name LIKE :search
                             OR p.policy_content LIKE :search
-                         ORDER BY p.updated_at DESC");
+                         ORDER BY p.last_updated DESC");
 
         $this->db->bind(':search', '%' . $searchTerm . '%');
         return $this->db->resultSet();
     }
 
-    // Get policy categories
+    // Get policy categories (matches database enum)
     public function getPolicyCategories()
     {
         return [
-            'rental' => 'Rental',
-            'security' => 'Security',
-            'maintenance' => 'Maintenance',
-            'financial' => 'Financial',
-            'general' => 'General'
+            'privacy' => 'Privacy Policy',
+            'terms_of_service' => 'Terms of Service',
+            'refund' => 'Refund Policy',
+            'security' => 'Security Policy',
+            'data_protection' => 'Data Protection',
+            'general' => 'General Policy'
         ];
     }
 
-    // Get policy types
+    // Get policy types (not used in database but kept for compatibility)
     public function getPolicyTypes()
     {
         return [
@@ -262,13 +250,14 @@ class M_Policies
         ];
     }
 
-    // Get policy statuses
+    // Get policy statuses (matches database enum)
     public function getPolicyStatuses()
     {
         return [
             'draft' => 'Draft',
             'active' => 'Active',
-            'inactive' => 'Inactive'
+            'archived' => 'Archived',
+            'under_review' => 'Under Review'
         ];
     }
 }
