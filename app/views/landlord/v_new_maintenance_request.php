@@ -122,52 +122,6 @@
                 </div>
             </div>
 
-            <!-- Tenant Information (Optional) -->
-            <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-user"></i> Tenant Information (Optional)
-                </h3>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="tenant_name" class="form-label">Tenant Name</label>
-                        <input type="text"
-                            name="tenant_name"
-                            id="tenant_name"
-                            class="form-control"
-                            placeholder="Enter tenant name if applicable"
-                            value="<?php echo $data['tenant_name']; ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="tenant_contact" class="form-label">Tenant Contact</label>
-                        <input type="text"
-                            name="tenant_contact"
-                            id="tenant_contact"
-                            class="form-control"
-                            placeholder="Phone or email"
-                            value="<?php echo $data['tenant_contact']; ?>">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Access Information -->
-            <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-key"></i> Property Access
-                </h3>
-
-                <div class="form-group">
-                    <label for="access_instructions" class="form-label">Access Instructions</label>
-                    <textarea name="access_instructions"
-                        id="access_instructions"
-                        rows="3"
-                        class="form-control"
-                        placeholder="e.g., Key location, gate code, best time to access, etc."><?php echo $data['access_instructions']; ?></textarea>
-                    <small class="form-text">Help service providers access the property efficiently</small>
-                </div>
-            </div>
-
             <!-- Form Actions -->
             <div class="form-actions">
                 <a href="<?php echo URLROOT; ?>/landlord/maintenance" class="btn btn-secondary">
