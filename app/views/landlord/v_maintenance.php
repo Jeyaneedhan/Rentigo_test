@@ -10,8 +10,10 @@
         <select class="form-control" id="statusFilter">
             <option value="">All Requests</option>
             <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="in_progress">In Progress</option>
             <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
         </select>
         <button>
             <a href="<?php echo URLROOT; ?>/maintenance/create" class="btn btn-primary">
@@ -21,6 +23,8 @@
     </div>
 </div>
 
+<?php flash('maintenance_message'); ?>
+
 <!-- Stats -->
 <div class="stats-grid">
     <div class="stat-card warning">
@@ -29,7 +33,7 @@
         </div>
         <div class="stat-content">
             <h3 class="stat-label">Pending Requests</h3>
-            <div class="stat-value">8</div>
+            <div class="stat-value"><?php echo $data['maintenanceStats']->pending ?? 0; ?></div>
             <div class="stat-change">Awaiting action</div>
         </div>
     </div>
@@ -39,7 +43,7 @@
         </div>
         <div class="stat-content">
             <h3 class="stat-label">In Progress</h3>
-            <div class="stat-value">3</div>
+            <div class="stat-value"><?php echo $data['maintenanceStats']->in_progress ?? 0; ?></div>
             <div class="stat-change">Being worked on</div>
         </div>
     </div>
@@ -48,138 +52,249 @@
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Completed This Month</h3>
-            <div class="stat-value">15</div>
-            <div class="stat-change positive">+3 from last month</div>
+            <h3 class="stat-label">Completed</h3>
+            <div class="stat-value"><?php echo $data['maintenanceStats']->completed ?? 0; ?></div>
+            <div class="stat-change">Total completed</div>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon">
-            <i class="fas fa-clock"></i>
+            <i class="fas fa-dollar-sign"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Average Response Time</h3>
-            <div class="stat-value">2.4</div>
-            <div class="stat-change">days</div>
+            <h3 class="stat-label">Total Cost</h3>
+            <div class="stat-value">LKR <?php echo number_format($data['maintenanceStats']->total_cost ?? 0, 2); ?></div>
+            <div class="stat-change">Maintenance expenses</div>
         </div>
     </div>
 </div>
 
 <!-- Maintenance Requests -->
-<div class="request-card urgent" data-status="pending" data-priority="urgent">
-    <div class="request-header">
-        <div>
-            <h3 style="margin: 0; color: var(--text-primary);">Water Leak in Bathroom</h3>
-            <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">123 Main St, Apt 2A • Submitted 2 hours ago</p>
+<?php if (!empty($data['maintenanceRequests'])): ?>
+    <?php foreach ($data['maintenanceRequests'] as $request): ?>
+        <?php
+            // Determine priority class
+            $priorityClass = '';
+            switch($request->priority) {
+                case 'emergency':
+                    $priorityClass = 'urgent';
+                    break;
+                case 'high':
+                    $priorityClass = 'high';
+                    break;
+                default:
+                    $priorityClass = '';
+            }
+        ?>
+        <div class="request-card <?php echo $priorityClass; ?>" data-status="<?php echo $request->status; ?>">
+            <div class="request-header">
+                <div>
+                    <h3 style="margin: 0; color: var(--text-primary);">
+                        <?php echo htmlspecialchars($request->title); ?>
+                    </h3>
+                    <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">
+                        <?php echo htmlspecialchars($request->property_address); ?> •
+                        Submitted <?php echo timeAgo($request->created_at); ?>
+                    </p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span class="priority-badge priority-<?php echo $request->priority; ?>">
+                        <?php echo strtoupper($request->priority); ?>
+                    </span>
+                    <span class="badge badge-<?php echo getStatusBadgeClass($request->status); ?>">
+                        <?php echo ucfirst(str_replace('_', ' ', $request->status)); ?>
+                    </span>
+                </div>
+            </div>
+            <div class="request-body">
+                <p><strong>Category:</strong> <?php echo ucfirst($request->category); ?></p>
+                <p><strong>Description:</strong> <?php echo htmlspecialchars(substr($request->description, 0, 150)); ?><?php echo strlen($request->description) > 150 ? '...' : ''; ?></p>
+
+                <?php if ($request->provider_name): ?>
+                    <p><strong>Service Provider:</strong> <?php echo htmlspecialchars($request->provider_name); ?></p>
+                <?php endif; ?>
+
+                <?php if ($request->scheduled_date): ?>
+                    <p><strong>Scheduled:</strong> <?php echo date('M d, Y', strtotime($request->scheduled_date)); ?></p>
+                <?php endif; ?>
+
+                <!-- Quotation Status -->
+                <?php if (isset($request->quotation_status)): ?>
+                    <div class="quotation-status">
+                        <?php if ($request->quotation_status === 'pending'): ?>
+                            <span class="badge badge-warning">
+                                <i class="fas fa-file-invoice"></i> Quotation Pending Review
+                            </span>
+                        <?php elseif ($request->quotation_status === 'approved'): ?>
+                            <?php if (isset($request->payment_status) && $request->payment_status === 'completed'): ?>
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check-circle"></i> Payment Completed
+                                </span>
+                            <?php else: ?>
+                                <span class="badge badge-info">
+                                    <i class="fas fa-credit-card"></i> Awaiting Payment
+                                </span>
+                            <?php endif; ?>
+                        <?php elseif ($request->quotation_status === 'rejected'): ?>
+                            <span class="badge badge-danger">
+                                <i class="fas fa-times-circle"></i> Quotation Rejected
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
+                <div style="margin-top: 1rem;">
+                    <a href="<?php echo URLROOT; ?>/maintenance/details/<?php echo $request->id; ?>"
+                       class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+
+                    <?php if ($request->status === 'pending'): ?>
+                        <button class="btn btn-outline btn-sm" onclick="editRequest(<?php echo $request->id; ?>)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    <?php endif; ?>
+
+                    <?php if ($request->status !== 'completed' && $request->status !== 'cancelled'): ?>
+                        <button class="btn btn-danger btn-sm" onclick="cancelRequest(<?php echo $request->id; ?>)">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span class="priority-badge priority-urgent">URGENT</span>
-            <span class="badge badge-warning">Pending</span>
+    <?php endforeach; ?>
+<?php else: ?>
+    <div class="content-card">
+        <div class="card-body text-center">
+            <i class="fas fa-tools" style="font-size: 48px; color: #ccc; margin-bottom: 1rem;"></i>
+            <p style="color: #666; margin-bottom: 1rem;">No maintenance requests found</p>
+            <a href="<?php echo URLROOT; ?>/maintenance/create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Request
+            </a>
         </div>
     </div>
-    <div class="request-body">
-        <p><strong>Tenant:</strong> Sarah Johnson</p>
-        <p><strong>Description:</strong> There's a significant water leak coming from under the bathroom sink. Water is pooling on the floor and may cause damage to the unit below.</p>
-        <p><strong>Contact:</strong> (555) 123-4567</p>
-        <div style="margin-top: 1rem;">
-            <button class="btn btn-primary btn-sm" onclick="assignContractor('REQ001')">
-                <i class="fas fa-user-plus"></i> Assign Contractor
-            </button>
-            <button class="btn btn-warning btn-sm" onclick="scheduleVisit('REQ001')">
-                <i class="fas fa-calendar"></i> Schedule Visit
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="contactTenant('REQ001')">
-                <i class="fas fa-phone"></i> Contact Tenant
-            </button>
+<?php endif; ?>
+
+<!-- Cancel Modal -->
+<div id="cancelModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Cancel Maintenance Request</h3>
+            <span class="close" onclick="closeCancelModal()">&times;</span>
         </div>
+        <form id="cancelForm" method="POST">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cancellation_reason">Reason for Cancellation <span class="required">*</span></label>
+                    <textarea name="cancellation_reason" id="cancellation_reason" class="form-control" rows="4" required
+                              placeholder="Please explain why you are cancelling this request..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeCancelModal()">Back</button>
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Cancel Request
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-<div class="request-card high" data-status="in-progress" data-priority="high">
-    <div class="request-header">
-        <div>
-            <h3 style="margin: 0; color: var(--text-primary);">Heating System Not Working</h3>
-            <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">456 Oak Ave • Submitted 1 day ago</p>
-        </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span class="priority-badge priority-high">HIGH</span>
-            <span class="badge badge-info">In Progress</span>
-        </div>
-    </div>
-    <div class="request-body">
-        <p><strong>Tenant:</strong> Mike Davis</p>
-        <p><strong>Description:</strong> The heating system stopped working yesterday evening. Temperature in the unit is dropping and it's getting uncomfortable.</p>
-        <p><strong>Assigned to:</strong> ABC Heating Services</p>
-        <p><strong>Scheduled:</strong> Tomorrow, 10:00 AM</p>
-        <div style="margin-top: 1rem;">
-            <button class="btn btn-success btn-sm" onclick="markComplete('REQ002')">
-                <i class="fas fa-check"></i> Mark Complete
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="updateStatus('REQ002')">
-                <i class="fas fa-edit"></i> Update Status
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="viewQuote('REQ002')">
-                <i class="fas fa-file-invoice"></i> View Quote
-            </button>
-        </div>
-    </div>
-</div>
+<style>
+.quotation-status {
+    margin: 10px 0;
+}
 
-<div class="request-card" data-status="pending" data-priority="medium">
-    <div class="request-header">
-        <div>
-            <h3 style="margin: 0; color: var(--text-primary);">Kitchen Faucet Dripping</h3>
-            <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">789 Pine St, Unit 5 • Submitted 3 days ago</p>
-        </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span class="priority-badge priority-medium">MEDIUM</span>
-            <span class="badge badge-warning">Pending</span>
-        </div>
-    </div>
-    <div class="request-body">
-        <p><strong>Tenant:</strong> Lisa Chen</p>
-        <p><strong>Description:</strong> Kitchen faucet has been dripping constantly. It's wasting water and the sound is annoying, especially at night.</p>
-        <p><strong>Estimated Cost:</strong> Rs 25,500 - Rs 35,500</p>
-        <div style="margin-top: 1rem;">
-            <button class="btn btn-primary btn-sm" onclick="assignContractor('REQ003')">
-                <i class="fas fa-user-plus"></i> Assign Contractor
-            </button>
-            <button class="btn btn-warning btn-sm" onclick="scheduleVisit('REQ003')">
-                <i class="fas fa-calendar"></i> Schedule Visit
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="getQuote('REQ003')">
-                <i class="fas fa-calculator"></i> Get Quote
-            </button>
-        </div>
-    </div>
-</div>
+.quotation-status .badge {
+    padding: 6px 12px;
+    font-size: 13px;
+}
 
-<div class="request-card" data-status="completed" data-priority="low">
-    <div class="request-header">
-        <div>
-            <h3 style="margin: 0; color: var(--text-primary);">Light Fixture Replacement</h3>
-            <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">321 Elm Dr, Apt 3B • Submitted 1 week ago</p>
-        </div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span class="priority-badge priority-low">LOW</span>
-            <span class="badge badge-success">Completed</span>
-        </div>
-    </div>
-    <div class="request-body">
-        <p><strong>Tenant:</strong> Robert Wilson</p>
-        <p><strong>Description:</strong> Dining room light fixture is outdated and one of the bulbs keeps burning out quickly.</p>
-        <p><strong>Completed by:</strong> XYZ Electrical</p>
-        <p><strong>Cost:</strong> Rs 25,500</p>
-        <div style="margin-top: 1rem;">
-            <button class="btn btn-outline btn-sm" onclick="viewInvoice('REQ004')">
-                <i class="fas fa-file-invoice"></i> View Invoice
-            </button>
-            <button class="btn btn-outline btn-sm" onclick="getTenantFeedback('REQ004')">
-                <i class="fas fa-star"></i> Tenant Feedback
-            </button>
-        </div>
-    </div>
-</div>
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.required {
+    color: #ef4444;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -194,11 +309,8 @@
                     if (selectedStatus === '') {
                         card.style.display = 'block';
                     } else {
-                        const badge = card.querySelector('.badge');
-                        const status = badge.textContent.toLowerCase();
-
-                        if (status.includes(selectedStatus) ||
-                            (selectedStatus === 'in-progress' && status.includes('progress'))) {
+                        const cardStatus = card.getAttribute('data-status');
+                        if (cardStatus === selectedStatus) {
                             card.style.display = 'block';
                         } else {
                             card.style.display = 'none';
@@ -209,94 +321,69 @@
         }
     });
 
-    // Action functions
-    function assignContractor(requestId) {
-        showNotification(`Opening contractor assignment for ${requestId}`, 'info');
+    function editRequest(requestId) {
+        window.location.href = '<?php echo URLROOT; ?>/maintenance/edit/' + requestId;
     }
 
-    function scheduleVisit(requestId) {
-        showNotification(`Scheduling visit for ${requestId}`, 'info');
+    function cancelRequest(requestId) {
+        const modal = document.getElementById('cancelModal');
+        const form = document.getElementById('cancelForm');
+        form.action = '<?php echo URLROOT; ?>/maintenance/cancel/' + requestId;
+        modal.style.display = 'block';
     }
 
-    function contactTenant(requestId) {
-        showNotification(`Opening contact form for ${requestId}`, 'info');
+    function closeCancelModal() {
+        const modal = document.getElementById('cancelModal');
+        modal.style.display = 'none';
+        document.getElementById('cancellation_reason').value = '';
     }
 
-    function markComplete(requestId) {
-        if (confirm('Mark this maintenance request as complete?')) {
-            const card = document.querySelector(`[onclick*="${requestId}"]`).closest('.request-card');
-            const badge = card.querySelector('.badge');
-            badge.textContent = 'Completed';
-            badge.className = 'badge badge-success';
-            showNotification('Request marked as completed', 'success');
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('cancelModal');
+        if (event.target == modal) {
+            closeCancelModal();
         }
     }
-
-    function updateStatus(requestId) {
-        showNotification(`Opening status update for ${requestId}`, 'info');
-    }
-
-    function viewQuote(requestId) {
-        showNotification(`Opening quote for ${requestId}`, 'info');
-    }
-
-    function getQuote(requestId) {
-        showNotification(`Requesting quote for ${requestId}`, 'info');
-    }
-
-    function viewInvoice(requestId) {
-        showNotification(`Opening invoice for ${requestId}`, 'info');
-    }
-
-    function getTenantFeedback(requestId) {
-        showNotification(`Opening tenant feedback for ${requestId}`, 'info');
-    }
-
-    // Notification function
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.textContent = message;
-
-        Object.assign(notification.style, {
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            padding: '1rem 1.5rem',
-            borderRadius: '0.5rem',
-            color: 'white',
-            fontWeight: '500',
-            zIndex: '9999',
-            opacity: '0',
-            transform: 'translateY(-20px)',
-            transition: 'all 0.3s ease'
-        });
-
-        const colors = {
-            success: '#10b981',
-            warning: '#f59e0b',
-            error: '#ef4444',
-            info: '#3b82f6'
-        };
-        notification.style.backgroundColor = colors[type] || colors.info;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.opacity = '1';
-            notification.style.transform = 'translateY(0)';
-        }, 100);
-
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateY(-20px)';
-            setTimeout(() => {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
-    }
 </script>
+
+<?php
+// Helper functions
+function getStatusBadgeClass($status) {
+    switch($status) {
+        case 'pending':
+            return 'warning';
+        case 'scheduled':
+        case 'in_progress':
+            return 'info';
+        case 'completed':
+            return 'success';
+        case 'cancelled':
+            return 'danger';
+        default:
+            return 'secondary';
+    }
+}
+
+function timeAgo($datetime) {
+    $time = strtotime($datetime);
+    $diff = time() - $time;
+
+    if ($diff < 60) {
+        return 'just now';
+    } elseif ($diff < 3600) {
+        $mins = floor($diff / 60);
+        return $mins . ' minute' . ($mins > 1 ? 's' : '') . ' ago';
+    } elseif ($diff < 86400) {
+        $hours = floor($diff / 3600);
+        return $hours . ' hour' . ($hours > 1 ? 's' : '') . ' ago';
+    } elseif ($diff < 604800) {
+        $days = floor($diff / 86400);
+        return $days . ' day' . ($days > 1 ? 's' : '') . ' ago';
+    } else {
+        return date('M d, Y', $time);
+    }
+}
+?>
 
 <?php require APPROOT . '/views/inc/landlord_footer.php'; ?>

@@ -4,7 +4,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-left">
-            <a href="<?php echo URLROOT; ?>/landlord/maintenance" class="back-button">
+            <a href="<?php echo URLROOT; ?>/maintenance/index" class="back-button">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div>
@@ -19,7 +19,7 @@
 
     <!-- New Maintenance Request Form -->
     <div class="form-container">
-        <form action="<?php echo URLROOT; ?>/landlord/create_maintenance_request" method="POST" enctype="multipart/form-data" class="maintenance-form">
+        <form action="<?php echo URLROOT; ?>/maintenance/create" method="POST" enctype="multipart/form-data" class="maintenance-form">
 
             <!-- Property Selection -->
             <div class="form-section">
@@ -84,12 +84,12 @@
                         <label for="priority" class="form-label required">Priority Level</label>
                         <select name="priority" id="priority" class="form-control <?php echo (!empty($data['priority_err'])) ? 'is-invalid' : ''; ?>" required>
                             <option value="">-- Select Priority --</option>
-                            <option value="low" <?php echo ($data['priority'] == 'low') ? 'selected' : ''; ?>>Low - Can wait</option>
-                            <option value="medium" <?php echo ($data['priority'] == 'medium') ? 'selected' : ''; ?>>Medium - Within a week</option>
-                            <option value="high" <?php echo ($data['priority'] == 'high') ? 'selected' : ''; ?>>High - Within 2-3 days</option>
-                            <option value="urgent" <?php echo ($data['priority'] == 'urgent') ? 'selected' : ''; ?>>Urgent - Immediate attention</option>
+                            <option value="low" <?php echo (isset($data['priority']) && $data['priority'] == 'low') ? 'selected' : ''; ?>>Low - Can wait</option>
+                            <option value="medium" <?php echo (isset($data['priority']) && $data['priority'] == 'medium') ? 'selected' : ''; ?>>Medium - Within a week</option>
+                            <option value="high" <?php echo (isset($data['priority']) && $data['priority'] == 'high') ? 'selected' : ''; ?>>High - Within 2-3 days</option>
+                            <option value="emergency" <?php echo (isset($data['priority']) && $data['priority'] == 'emergency') ? 'selected' : ''; ?>>Emergency - Immediate attention</option>
                         </select>
-                        <span class="invalid-feedback"><?php echo $data['priority_err']; ?></span>
+                        <span class="invalid-feedback"><?php echo isset($data['priority_err']) ? $data['priority_err'] : ''; ?></span>
                     </div>
                 </div>
 
@@ -122,9 +122,39 @@
                 </div>
             </div>
 
+            <!-- Additional Information -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i> Additional Information (Optional)
+                </h3>
+
+                <div class="form-group">
+                    <label for="notes" class="form-label">Notes</label>
+                    <textarea name="notes"
+                        id="notes"
+                        rows="3"
+                        class="form-control"
+                        placeholder="Any additional notes or special instructions..."><?php echo isset($data['notes']) ? $data['notes'] : ''; ?></textarea>
+                    <small class="form-text">Include access instructions, tenant contact, or other relevant information</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="estimated_cost" class="form-label">Estimated Cost (LKR)</label>
+                    <input type="number"
+                        name="estimated_cost"
+                        id="estimated_cost"
+                        class="form-control"
+                        step="0.01"
+                        min="0"
+                        placeholder="Optional: Enter estimated cost"
+                        value="<?php echo isset($data['estimated_cost']) ? $data['estimated_cost'] : ''; ?>">
+                    <small class="form-text">If you have an idea of the repair cost</small>
+                </div>
+            </div>
+
             <!-- Form Actions -->
             <div class="form-actions">
-                <a href="<?php echo URLROOT; ?>/landlord/maintenance" class="btn btn-secondary">
+                <a href="<?php echo URLROOT; ?>/maintenance/index" class="btn btn-secondary">
                     <i class="fas fa-times"></i> Cancel
                 </a>
                 <button type="submit" class="btn btn-primary">
