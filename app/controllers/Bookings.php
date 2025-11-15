@@ -223,7 +223,7 @@ class Bookings extends Controller
                 'monthly_rent' => $booking->monthly_rent,
                 'deposit_amount' => $booking->deposit_amount,
                 'terms_and_conditions' => 'Standard lease terms and conditions apply.',
-                'status' => 'draft',
+                'status' => 'active',
                 'lease_duration_months' => $this->calculateMonthsDifference($booking->move_in_date, $booking->move_out_date)
             ];
 
