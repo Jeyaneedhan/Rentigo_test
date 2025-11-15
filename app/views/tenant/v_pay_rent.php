@@ -11,6 +11,48 @@
 
     <?php flash('payment_message'); ?>
 
+    <!-- Payment Statistics -->
+    <?php if (isset($data['totalPayments'])): ?>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="stat-details">
+                <h4>LKR <?php echo number_format(($data['totalPayments']->total_paid ?? 0) * 1.10, 2); ?></h4>
+                <p>Total Paid</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <div class="stat-details">
+                <h4><?php echo $data['totalPayments']->payment_count ?? 0; ?></h4>
+                <p>Payments Made</p>
+            </div>
+        </div>
+        <div class="stat-card <?php echo !empty($data['pendingPayments']) ? 'warning' : ''; ?>">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-details">
+                <h4><?php echo count($data['pendingPayments'] ?? []); ?></h4>
+                <p>Pending Payments</p>
+            </div>
+        </div>
+        <div class="stat-card <?php echo !empty($data['overduePayments']) ? 'danger' : ''; ?>">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="stat-details">
+                <h4><?php echo count($data['overduePayments'] ?? []); ?></h4>
+                <p>Overdue</p>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Current Rent Due -->
     <div class="dashboard-section">
         <div class="section-header">
@@ -58,39 +100,6 @@
             </div>
         <?php endif; ?>
     </div>
-
-    <!-- Payment Statistics -->
-    <?php if (isset($data['totalPayments'])): ?>
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-money-bill-wave"></i>
-            </div>
-            <div class="stat-details">
-                <h4>LKR <?php echo number_format(($data['totalPayments']->total_paid ?? 0) * 1.10, 2); ?></h4>
-                <p>Total Paid</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-receipt"></i>
-            </div>
-            <div class="stat-details">
-                <h4><?php echo $data['totalPayments']->payment_count ?? 0; ?></h4>
-                <p>Payments Made</p>
-            </div>
-        </div>
-        <div class="stat-card <?php echo !empty($data['overduePayments']) ? 'danger' : ''; ?>">
-            <div class="stat-icon">
-                <i class="fas fa-exclamation-circle"></i>
-            </div>
-            <div class="stat-details">
-                <h4><?php echo count($data['overduePayments'] ?? []); ?></h4>
-                <p>Overdue</p>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
 
     <!-- Payment History -->
     <div class="dashboard-section">
@@ -210,7 +219,6 @@
                         <option value="credit_card">Credit Card</option>
                         <option value="debit_card">Debit Card</option>
                         <option value="bank_transfer">Bank Transfer</option>
-                        <option value="cash">Cash</option>
                     </select>
                 </div>
 

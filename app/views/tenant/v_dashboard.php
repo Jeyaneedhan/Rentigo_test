@@ -19,7 +19,8 @@
                 <h3 class="stat-number"><?php echo $data['bookingStats']->total_bookings ?? 0; ?></h3>
                 <p class="stat-label">Total Bookings</p>
                 <span class="stat-subtext">
-                    <?php echo $data['bookingStats']->active_bookings ?? 0; ?> active
+                    <?php echo $data['bookingStats']->active_bookings ?? 0; ?> active,
+                    <?php echo $data['bookingStats']->pending_bookings ?? 0; ?> pending
                 </span>
             </div>
         </div>
@@ -87,7 +88,7 @@
                     </span>
                     <span>
                         <i class="fas fa-money-bill-wave"></i>
-                        LKR <?php echo number_format($data['activeLease']->monthly_rent, 2); ?>/month
+                        LKR <?php echo number_format($data['activeLease']->monthly_rent * 1.10, 2); ?>/month
                     </span>
                 </div>
                 <div class="rental-status">
@@ -122,7 +123,7 @@
                     </span>
                     <span>
                         <i class="fas fa-money-bill-wave"></i>
-                        LKR <?php echo number_format($data['activeBooking']->monthly_rent, 2); ?>/month
+                        LKR <?php echo number_format($data['activeBooking']->monthly_rent * 1.10, 2); ?>/month
                     </span>
                 </div>
                 <div class="rental-status">
@@ -168,7 +169,7 @@
                     <div class="payment-info">
                         <h5><?php echo htmlspecialchars($payment->property_address ?? 'Rent Payment'); ?></h5>
                         <p>
-                            LKR <?php echo number_format($payment->amount, 2); ?> -
+                            LKR <?php echo number_format($payment->amount * 1.10, 2); ?> -
                             Due: <?php echo date('M d, Y', strtotime($payment->due_date)); ?>
                         </p>
                     </div>
