@@ -91,7 +91,7 @@
                                     </td>
                                     <td><?php echo date('M d, Y', strtotime($lease->start_date)); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($lease->end_date)); ?></td>
-                                    <td>Rs <?php echo number_format($lease->monthly_rent); ?></td>
+                                    <td>Rs <?php echo number_format($lease->monthly_rent * 1.10); ?></td>
                                     <td>
                                         <span class="badge badge-<?php echo strtolower($lease->status); ?>">
                                             <?php echo ucfirst($lease->status); ?>
@@ -141,7 +141,7 @@
                                     </td>
                                     <td><?php echo htmlspecialchars($lease->tenant_name ?? 'N/A'); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($lease->start_date)); ?></td>
-                                    <td>Rs <?php echo number_format($lease->monthly_rent); ?></td>
+                                    <td>Rs <?php echo number_format($lease->monthly_rent * 1.10); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($lease->created_at)); ?></td>
                                     <td class="actions">
                                         <a href="<?php echo URLROOT; ?>/leaseagreements/details/<?php echo $lease->id; ?>" class="btn btn-sm btn-primary">
@@ -191,7 +191,7 @@
                                     </td>
                                     <td><?php echo date('M d, Y', strtotime($lease->start_date)); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($lease->end_date)); ?></td>
-                                    <td>Rs <?php echo number_format($lease->monthly_rent); ?></td>
+                                    <td>Rs <?php echo number_format($lease->monthly_rent * 1.10); ?></td>
                                     <td class="actions">
                                         <a href="<?php echo URLROOT; ?>/leaseagreements/details/<?php echo $lease->id; ?>" class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i> View
@@ -238,7 +238,7 @@
                                         <?php echo date('M d, Y', strtotime($lease->start_date)); ?> -
                                         <?php echo date('M d, Y', strtotime($lease->end_date)); ?>
                                     </td>
-                                    <td>Rs <?php echo number_format($lease->monthly_rent * ($lease->lease_duration_months ?? 1)); ?></td>
+                                    <td>Rs <?php echo number_format(($lease->monthly_rent * 1.10) * ($lease->lease_duration_months ?? 1)); ?></td>
                                     <td class="actions">
                                         <a href="<?php echo URLROOT; ?>/leaseagreements/details/<?php echo $lease->id; ?>" class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i> View

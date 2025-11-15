@@ -153,7 +153,7 @@
                                     <?php echo date('M d, Y', strtotime($lease->start_date)); ?> -
                                     <?php echo date('M d, Y', strtotime($lease->end_date)); ?>
                                 </span>
-                                <span><strong>Rent:</strong> LKR <?php echo number_format($lease->monthly_rent * 1.10, 2); ?>/mo <small style="color: #888;">(incl. 10% service fee)</small></span>
+                                <span><strong>Rent:</strong> LKR <?php echo number_format($lease->monthly_rent * 1.10, 2); ?>/mo</span>
                                 <span><strong>Deposit:</strong> LKR <?php echo number_format($lease->deposit_amount, 2); ?></span>
                             </div>
 

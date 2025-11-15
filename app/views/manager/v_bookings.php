@@ -89,7 +89,7 @@
                                     </td>
                                     <td><?php echo date('M d, Y', strtotime($booking->move_in_date)); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($booking->move_out_date)); ?></td>
-                                    <td>Rs <?php echo number_format($booking->monthly_rent); ?></td>
+                                    <td>Rs <?php echo number_format($booking->monthly_rent * 1.10); ?></td>
                                     <td>Rs <?php echo number_format($booking->deposit_amount); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($booking->created_at)); ?></td>
                                     <td class="actions">
@@ -150,7 +150,7 @@
                                     </td>
                                     <td><?php echo date('M d, Y', strtotime($booking->move_in_date)); ?></td>
                                     <td><?php echo date('M d, Y', strtotime($booking->move_out_date)); ?></td>
-                                    <td>Rs <?php echo number_format($booking->monthly_rent); ?></td>
+                                    <td>Rs <?php echo number_format($booking->monthly_rent * 1.10); ?></td>
                                     <td><span class="badge badge-success">Approved</span></td>
                                     <td class="actions">
                                         <a href="<?php echo URLROOT; ?>/bookings/details/<?php echo $booking->id; ?>" class="btn btn-sm btn-primary">

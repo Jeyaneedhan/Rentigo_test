@@ -107,15 +107,7 @@
                     <h4><i class="fas fa-dollar-sign"></i> Financial Details</h4>
                     <div class="info-grid">
                         <div class="info-item">
-                            <label>Base Monthly Rent:</label>
-                            <span class="amount">LKR <?php echo number_format($lease->monthly_rent, 2); ?></span>
-                        </div>
-                        <div class="info-item">
-                            <label>Platform Service Fee (10%):</label>
-                            <span class="amount">LKR <?php echo number_format($lease->monthly_rent * 0.10, 2); ?></span>
-                        </div>
-                        <div class="info-item">
-                            <label>Total Monthly Payment:</label>
+                            <label>Monthly Rent:</label>
                             <span class="amount total">LKR <?php echo number_format($lease->monthly_rent * 1.10, 2); ?></span>
                         </div>
                         <div class="info-item">
@@ -192,7 +184,7 @@
                 <div class="info-section">
                     <h4><i class="fas fa-calendar-check"></i> Payment Schedule</h4>
                     <p style="color: #6b7280; margin-bottom: 1rem;">
-                        Your monthly rent payments (including 10% platform service fee) are due on day <?php echo $lease->payment_day ?? 1; ?> of each month.
+                        Your monthly rent payments are due on day <?php echo $lease->payment_day ?? 1; ?> of each month.
                     </p>
                     <div class="payment-schedule">
                         <?php

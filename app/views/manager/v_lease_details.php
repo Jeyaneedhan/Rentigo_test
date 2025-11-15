@@ -108,7 +108,7 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <label>Monthly Rent:</label>
-                            <span class="amount">Rs <?php echo number_format($lease->monthly_rent); ?></span>
+                            <span class="amount total">Rs <?php echo number_format($lease->monthly_rent * 1.10); ?></span>
                         </div>
                         <div class="info-item">
                             <label>Security Deposit:</label>
@@ -116,7 +116,7 @@
                         </div>
                         <div class="info-item">
                             <label>Total Rent (Full Term):</label>
-                            <span class="amount total">Rs <?php echo number_format($lease->monthly_rent * ($lease->lease_duration_months ?? 1)); ?></span>
+                            <span class="amount total">Rs <?php echo number_format(($lease->monthly_rent * 1.10) * ($lease->lease_duration_months ?? 1)); ?></span>
                         </div>
                     </div>
                 </div>
@@ -174,6 +174,7 @@
                             $start = new DateTime($lease->start_date);
                             $end = new DateTime($lease->end_date);
                             $months = $lease->lease_duration_months ?? 1;
+                            $monthlyPayment = $lease->monthly_rent * 1.10;
 
                             for ($i = 0; $i < $months; $i++) {
                                 $paymentDate = clone $start;
@@ -181,7 +182,7 @@
                                 echo '<div class="payment-item">';
                                 echo '<span class="payment-month">Month ' . ($i + 1) . '</span>';
                                 echo '<span class="payment-date">' . $paymentDate->format('F Y') . '</span>';
-                                echo '<span class="payment-amount">Rs ' . number_format($lease->monthly_rent) . '</span>';
+                                echo '<span class="payment-amount">Rs ' . number_format($monthlyPayment) . '</span>';
                                 echo '</div>';
                             }
                         ?>
