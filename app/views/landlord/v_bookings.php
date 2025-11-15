@@ -17,7 +17,7 @@
         </div>
         <div class="stat-content">
             <h3 class="stat-label">Total Bookings</h3>
-            <div class="stat-value"><?php echo $data['bookingStats']->total_bookings ?? 0; ?></div>
+            <div class="stat-value"><?php echo $data['bookingStats']->total ?? 0; ?></div>
             <div class="stat-change">All time</div>
         </div>
     </div>
@@ -27,7 +27,7 @@
         </div>
         <div class="stat-content">
             <h3 class="stat-label">Pending</h3>
-            <div class="stat-value"><?php echo $data['bookingStats']->pending_bookings ?? 0; ?></div>
+            <div class="stat-value"><?php echo $data['bookingStats']->pending ?? 0; ?></div>
             <div class="stat-change">Awaiting response</div>
         </div>
     </div>
@@ -37,7 +37,7 @@
         </div>
         <div class="stat-content">
             <h3 class="stat-label">Approved</h3>
-            <div class="stat-value"><?php echo $data['bookingStats']->approved_bookings ?? 0; ?></div>
+            <div class="stat-value"><?php echo $data['bookingStats']->approved ?? 0; ?></div>
             <div class="stat-change">Accepted bookings</div>
         </div>
     </div>
@@ -47,7 +47,7 @@
         </div>
         <div class="stat-content">
             <h3 class="stat-label">Active</h3>
-            <div class="stat-value"><?php echo $data['bookingStats']->active_bookings ?? 0; ?></div>
+            <div class="stat-value"><?php echo $data['bookingStats']->active ?? 0; ?></div>
             <div class="stat-change">Currently occupied</div>
         </div>
     </div>
