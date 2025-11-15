@@ -315,4 +315,64 @@ class Manager extends Controller
 
         redirect('manager/notifications');
     }
+
+    // Payment tracking for assigned properties
+    public function payments()
+    {
+        $paymentModel = $this->model('M_Payments');
+        $propertyModel = $this->model('M_ManagerProperties');
+
+        $manager_id = $_SESSION['user_id'];
+
+        // Get assigned properties
+        $assignedProperties = $propertyModel->getAssignedProperties($manager_id);
+        $propertyIds = array_map(fn($p) => $p->id, $assignedProperties ?? []);
+
+        // Get all payments for assigned properties
+        $allPayments = [];
+        if (!empty($propertyIds)) {
+            foreach ($propertyIds as $propertyId) {
+                $propertyPayments = $paymentModel->getPaymentsByProperty($propertyId);
+                $allPayments = array_merge($allPayments, $propertyPayments);
+            }
+        }
+
+        // Sort payments by date (newest first)
+        usort($allPayments, function($a, $b) {
+            $dateA = $a->payment_date ?? $a->due_date;
+            $dateB = $b->payment_date ?? $b->due_date;
+            return strtotime($dateB) - strtotime($dateA);
+        });
+
+        // Calculate statistics
+        $totalIncome = 0;
+        $completedCount = 0;
+        $pendingCount = 0;
+        $pendingAmount = 0;
+
+        foreach ($allPayments as $payment) {
+            if ($payment->status === 'completed') {
+                $totalIncome += $payment->amount;
+                $completedCount++;
+            } else if ($payment->status === 'pending') {
+                $pendingCount++;
+                $pendingAmount += $payment->amount;
+            }
+        }
+
+        $data = [
+            'title' => 'Payment Tracking',
+            'page' => 'payments',
+            'user_name' => $_SESSION['user_name'],
+            'payments' => $allPayments,
+            'totalIncome' => $totalIncome,
+            'completedCount' => $completedCount,
+            'pendingCount' => $pendingCount,
+            'pendingAmount' => $pendingAmount,
+            'propertyCount' => count($assignedProperties),
+            'unread_notifications' => $this->getUnreadNotificationCount()
+        ];
+
+        $this->view('manager/v_payments', $data);
+    }
 }
