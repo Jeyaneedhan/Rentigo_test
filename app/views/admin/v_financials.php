@@ -191,9 +191,13 @@
         const type = row.querySelector('.type-label').textContent
         const description = row.querySelector('.description-title').textContent
         const property = row.querySelector('.property-name').textContent
-        const totalAmount = row.querySelectorAll('.amount-display')[0].textContent.trim()
-        const platformFee = row.querySelectorAll('.amount-display')[1].textContent.trim()
-        const date = row.querySelectorAll('td')[5].textContent.trim()
+
+        // Get all td elements
+        const cells = row.querySelectorAll('td')
+        const totalAmount = cells[3].querySelector('.amount-display').textContent.trim()
+        const platformFee = cells[4].querySelector('.amount-display').textContent.trim()
+        const date = cells[5].textContent.trim()
+
         const status = row.querySelector('.status-badge').textContent.trim()
         const statusClass = row.querySelector('.status-badge').className.split(' ')[1] || 'pending'
 
