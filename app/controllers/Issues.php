@@ -192,6 +192,29 @@ class Issues extends Controller
             redirect('issues/track');
         }
 
+        // Get the issue first to check time restriction
+        $issue = $this->issueModel->getIssueById($id);
+
+        if (!$issue) {
+            flash('issue_message', 'Issue not found', 'alert alert-danger');
+            redirect('issues/track');
+        }
+
+        if ($issue->tenant_id != $_SESSION['user_id']) {
+            flash('issue_message', 'Unauthorized access', 'alert alert-danger');
+            redirect('issues/track');
+        }
+
+        // Check if issue can be edited (within 1 minute of creation)
+        $createdTime = new DateTime($issue->created_at);
+        $currentTime = new DateTime();
+        $timeDiff = $currentTime->getTimestamp() - $createdTime->getTimestamp();
+
+        if ($timeDiff > 60) {
+            flash('issue_message', 'Issues can only be edited within 1 minute of creation', 'alert alert-warning');
+            redirect('issues/track');
+        }
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
 
@@ -272,7 +295,6 @@ class Issues extends Controller
                 $data['category_err'] = $errors['category'] ?? '';
                 $data['priority_err'] = $errors['priority'] ?? '';
 
-                $issue = $this->issueModel->getIssueById($id);
                 $data['issue'] = $issue;
                 $data['properties'] = $this->issueModel->getProperties();
                 $data['page_title'] = 'Edit Issue - TenantHub';
@@ -282,18 +304,6 @@ class Issues extends Controller
                 $this->view('tenant/v_edit_issue', $data);
             }
         } else {
-            $issue = $this->issueModel->getIssueById($id);
-
-            if (!$issue) {
-                flash('issue_message', 'Issue not found', 'alert alert-danger');
-                redirect('issues/track');
-            }
-
-            if ($issue->tenant_id != $_SESSION['user_id']) {
-                flash('issue_message', 'Unauthorized access', 'alert alert-danger');
-                redirect('issues/track');
-            }
-
             $properties = $this->issueModel->getProperties();
 
             $data = [
