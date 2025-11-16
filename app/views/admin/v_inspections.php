@@ -16,7 +16,6 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Property</th>
                         <th>Manager</th>
                         <th>Landlord</th>
@@ -32,7 +31,6 @@
                     <?php if (!empty($data['inspections'])): ?>
                         <?php foreach ($data['inspections'] as $inspection): ?>
                             <tr>
-                                <td><strong>#<?php echo $inspection->id; ?></strong></td>
                                 <td><?php echo htmlspecialchars($inspection->property_address ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($inspection->manager_name ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($inspection->landlord_name ?? 'N/A'); ?></td>
@@ -73,7 +71,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" style="text-align: center; padding: 2rem;">
+                            <td colspan="9" style="text-align: center; padding: 2rem;">
                                 <p>No inspections found.</p>
                             </td>
                         </tr>
