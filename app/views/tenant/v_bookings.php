@@ -69,7 +69,7 @@
                                     <i class="fas fa-map-marker-alt"></i>
                                     <?php echo ucfirst($booking->property_type); ?>
                                 </p>
-                                <p class="booking-price">LKR <?php echo number_format($booking->monthly_rent, 2); ?>/month</p>
+                                <p class="booking-price">LKR <?php echo number_format($booking->monthly_rent * 1.10, 2); ?>/month</p>
                                 <div class="booking-dates">
                                     <span><i class="fas fa-calendar"></i>
                                         <?php echo date('M d, Y', strtotime($booking->move_in_date)); ?> -
@@ -147,7 +147,7 @@
                                     <?php echo date('M Y', strtotime($booking->move_in_date)); ?> -
                                     <?php echo date('M Y', strtotime($booking->move_out_date)); ?>
                                 </td>
-                                <td>LKR <?php echo number_format($booking->monthly_rent, 0); ?></td>
+                                <td>LKR <?php echo number_format($booking->monthly_rent * 1.10, 0); ?></td>
                                 <td>
                                     <?php
                                     $statusClass = '';

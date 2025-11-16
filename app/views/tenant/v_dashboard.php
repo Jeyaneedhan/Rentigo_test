@@ -16,10 +16,11 @@
                 <i class="fas fa-calendar"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['bookingStats']->total_bookings ?? 0; ?></h3>
+                <h3 class="stat-number"><?php echo $data['bookingStats']->total ?? 0; ?></h3>
                 <p class="stat-label">Total Bookings</p>
                 <span class="stat-subtext">
-                    <?php echo $data['bookingStats']->active_bookings ?? 0; ?> active
+                    <?php echo $data['bookingStats']->active ?? 0; ?> active,
+                    <?php echo $data['bookingStats']->pending ?? 0; ?> pending
                 </span>
             </div>
         </div>
@@ -87,7 +88,7 @@
                     </span>
                     <span>
                         <i class="fas fa-money-bill-wave"></i>
-                        LKR <?php echo number_format($data['activeLease']->monthly_rent, 2); ?>/month
+                        LKR <?php echo number_format($data['activeLease']->monthly_rent * 1.10, 2); ?>/month
                     </span>
                 </div>
                 <div class="rental-status">
@@ -122,7 +123,7 @@
                     </span>
                     <span>
                         <i class="fas fa-money-bill-wave"></i>
-                        LKR <?php echo number_format($data['activeBooking']->monthly_rent, 2); ?>/month
+                        LKR <?php echo number_format($data['activeBooking']->monthly_rent * 1.10, 2); ?>/month
                     </span>
                 </div>
                 <div class="rental-status">
@@ -168,7 +169,7 @@
                     <div class="payment-info">
                         <h5><?php echo htmlspecialchars($payment->property_address ?? 'Rent Payment'); ?></h5>
                         <p>
-                            LKR <?php echo number_format($payment->amount, 2); ?> -
+                            LKR <?php echo number_format($payment->amount * 1.10, 2); ?> -
                             Due: <?php echo date('M d, Y', strtotime($payment->due_date)); ?>
                         </p>
                     </div>
@@ -326,7 +327,7 @@
     display: flex;
     gap: 20px;
     padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #45a9ea 0%, #3b8fd9 100%);
     color: white;
     border-radius: 12px;
 }
@@ -468,7 +469,7 @@
     height: 40px;
     background: #f8f9fa;
     border-radius: 8px;
-    color: #667eea;
+    color: #45a9ea;
     font-size: 18px;
     flex-shrink: 0;
 }

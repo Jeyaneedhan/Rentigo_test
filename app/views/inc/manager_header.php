@@ -53,6 +53,15 @@
                         <div class="tooltip">Tenants</div>
                     </li>
                     <li class="nav-item">
+                        <a href="<?php echo URLROOT; ?>/manager/bookings"
+                            class="nav-link <?php echo ($data['page'] ?? '') === 'bookings' ? 'active' : ''; ?>"
+                            data-tooltip="Bookings">
+                            <i class="fas fa-calendar-check"></i>
+                            <span class="nav-text">Bookings</span>
+                        </a>
+                        <div class="tooltip">Bookings</div>
+                    </li>
+                    <li class="nav-item">
                         <a href="<?php echo URLROOT; ?>/manager/maintenance"
                             class="nav-link <?php echo ($data['page'] ?? '') === 'maintenance' ? 'active' : ''; ?>"
                             data-tooltip="Maintenance">
@@ -96,6 +105,22 @@
                             <span class="nav-text">Service Providers</span>
                         </a>
                         <div class="tooltip">Service Providers</div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?php echo URLROOT; ?>/manager/notifications"
+                            class="nav-link <?php echo ($data['page'] ?? '') === 'notifications' ? 'active' : ''; ?>"
+                            data-tooltip="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="nav-text">Notifications</span>
+                            <?php
+                            // Show notification badge if there are unread notifications
+                            $unreadCount = $data['unread_notifications'] ?? 0;
+                            if ($unreadCount > 0) {
+                                echo '<span class="notification-badge">' . $unreadCount . '</span>';
+                            }
+                            ?>
+                        </a>
+                        <div class="tooltip">Notifications</div>
                     </li>
                 </ul>
             </nav>

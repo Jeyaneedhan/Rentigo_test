@@ -188,7 +188,7 @@ class M_Users
     public function getAllPropertyManagers()
     {
         $this->db->query('SELECT u.id, u.name, u.email, u.account_status, u.created_at,
-                                 pm.approval_status, pm.phone, pm.approved_at
+                                 pm.approval_status, pm.phone, pm.approved_at, pm.employee_id_filename
                           FROM users u
                           INNER JOIN property_manager pm ON u.id = pm.user_id
                           WHERE u.user_type = :user_type

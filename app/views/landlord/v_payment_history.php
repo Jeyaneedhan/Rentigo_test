@@ -17,7 +17,7 @@
         </div>
         <div class="stat-content">
             <h3 class="stat-label">Total Income</h3>
-            <div class="stat-value">LKR <?php echo number_format($data['totalIncome'] ?? 0, 0); ?></div>
+            <div class="stat-value">LKR <?php echo number_format($data['totalIncome']->total_income ?? 0, 0); ?></div>
             <div class="stat-change positive">All time earnings</div>
         </div>
     </div>

@@ -4,13 +4,21 @@ require_once '../app/helpers/helper.php';
 class Manager extends Controller
 {
     private $userModel;
+    private $notificationModel;
 
     public function __construct()
     {
         $this->userModel = $this->model('M_Users');
+        $this->notificationModel = $this->model('M_Notifications');
         if (!isLoggedIn() || $_SESSION['user_type'] !== 'property_manager') {
             redirect('users/login');
         }
+    }
+
+    // Helper method to get unread notification count
+    private function getUnreadNotificationCount()
+    {
+        return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
     }
 
     public function index()
@@ -46,12 +54,13 @@ class Manager extends Controller
             $occupiedUnits += $property->occupancy_occupied ?? 0;
         }
 
-        // Calculate total income from payments
+        // Calculate total income from payments (10% platform service fee)
         $totalIncome = 0;
         $totalExpenses = 0;
         foreach ($allPayments as $payment) {
             if ($payment->status === 'completed') {
-                $totalIncome += $payment->amount;
+                // Platform earns 10% service fee from each payment
+                $totalIncome += ($payment->amount * 0.10);
             }
         }
         foreach ($allMaintenance as $maintenance) {
@@ -68,7 +77,8 @@ class Manager extends Controller
             'totalIncome' => $totalIncome,
             'totalExpenses' => $totalExpenses,
             'recentPayments' => $recentPayments,
-            'recentMaintenance' => $recentMaintenance
+            'recentMaintenance' => $recentMaintenance,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_dashboard', $data);
     }
@@ -82,13 +92,21 @@ class Manager extends Controller
     {
         // Load models
         $bookingModel = $this->model('M_Bookings');
-        $userModel = $this->model('M_Users');
+        $propertyModel = $this->model('M_ManagerProperties');
+        $manager_id = $_SESSION['user_id'];
 
-        // Get all bookings to get tenant information
-        $allBookings = $bookingModel->getAllBookings();
+        // Get properties assigned to this manager
+        $assignedProperties = $propertyModel->getAssignedProperties($manager_id);
+        $propertyIds = array_map(fn($p) => $p->id, $assignedProperties ?? []);
+
+        // Get bookings only for assigned properties
+        $allBookings = [];
+        if (!empty($propertyIds)) {
+            $allBookings = $bookingModel->getBookingsByProperties($propertyIds);
+        }
 
         // Separate by status
-        $activeBookings = array_filter($allBookings, fn($b) => $b->status === 'active');
+        $activeBookings = array_filter($allBookings, fn($b) => $b->status === 'active' || $b->status === 'approved');
         $pendingBookings = array_filter($allBookings, fn($b) => $b->status === 'pending');
         $vacatedBookings = array_filter($allBookings, fn($b) => $b->status === 'completed' || $b->status === 'cancelled');
 
@@ -96,12 +114,14 @@ class Manager extends Controller
             'title' => 'Tenant Management',
             'page' => 'tenants',
             'user_name' => $_SESSION['user_name'],
+            'assignedPropertiesCount' => count($assignedProperties ?? []),
             'activeBookings' => $activeBookings,
             'pendingBookings' => $pendingBookings,
             'vacatedBookings' => $vacatedBookings,
             'activeCount' => count($activeBookings),
             'pendingCount' => count($pendingBookings),
-            'vacatedCount' => count($vacatedBookings)
+            'vacatedCount' => count($vacatedBookings),
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_tenants', $data);
     }
@@ -132,7 +152,8 @@ class Manager extends Controller
             'quotedRequests' => $quotedRequests,
             'approvedRequests' => $approvedRequests,
             'completedRequests' => $completedRequests,
-            'pendingApprovals' => $pendingApprovals
+            'pendingApprovals' => $pendingApprovals,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_maintenance', $data);
     }
@@ -160,7 +181,8 @@ class Manager extends Controller
             'openIssues' => $openIssues,
             'assignedIssues' => $assignedIssues,
             'inProgressIssues' => $inProgressIssues,
-            'resolvedIssues' => $resolvedIssues
+            'resolvedIssues' => $resolvedIssues,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         $this->view('manager/v_issues', $data);
@@ -171,22 +193,27 @@ class Manager extends Controller
         // Load lease agreement model
         $leaseModel = $this->model('M_LeaseAgreements');
 
-        // Get all lease agreements
-        $allLeases = $leaseModel->getAllLeaseAgreements();
+        // Get manager's assigned property leases
+        $manager_id = $_SESSION['user_id'];
+        $allLeases = $leaseModel->getLeasesByManager($manager_id);
 
         // Filter by status
-        $pendingLeases = array_filter($allLeases, fn($l) => $l->validation_status === 'pending_review' || $l->validation_status === 'pending');
-        $validatedLeases = array_filter($allLeases, fn($l) => $l->validation_status === 'validated' || $l->validation_status === 'approved');
-        $rejectedLeases = array_filter($allLeases, fn($l) => $l->validation_status === 'rejected');
+        $draftLeases = array_filter($allLeases, fn($l) => $l->status === 'draft');
+        $activeLeases = array_filter($allLeases, fn($l) => $l->status === 'active');
+        $completedLeases = array_filter($allLeases, fn($l) => $l->status === 'completed');
 
         $data = [
             'title' => 'Lease Agreements',
             'page' => 'leases',
             'user_name' => $_SESSION['user_name'],
             'allLeases' => $allLeases,
-            'pendingLeases' => $pendingLeases,
-            'validatedLeases' => $validatedLeases,
-            'rejectedLeases' => $rejectedLeases
+            'draftLeases' => $draftLeases,
+            'activeLeases' => $activeLeases,
+            'completedLeases' => $completedLeases,
+            'draftCount' => count($draftLeases),
+            'activeCount' => count($activeLeases),
+            'completedCount' => count($completedLeases),
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_leases', $data);
     }
@@ -203,8 +230,159 @@ class Manager extends Controller
             'title' => 'Service Providers',
             'page' => 'providers',
             'user_name' => $_SESSION['user_name'],
-            'providers' => $allProviders
+            'providers' => $allProviders,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_providers', $data);
+    }
+
+    public function bookings()
+    {
+        // Load booking model
+        $bookingModel = $this->model('M_Bookings');
+        $propertyModel = $this->model('M_ManagerProperties');
+
+        // Get manager's assigned properties
+        $manager_id = $_SESSION['user_id'];
+        $assignedProperties = $propertyModel->getAssignedProperties($manager_id);
+
+        // Get property IDs
+        $propertyIds = array_map(fn($p) => $p->id, $assignedProperties ?? []);
+
+        // Get all bookings for assigned properties
+        $allBookings = [];
+        if (!empty($propertyIds)) {
+            $allBookings = $bookingModel->getBookingsByProperties($propertyIds);
+        }
+
+        // Filter by status
+        $pendingBookings = array_filter($allBookings, fn($b) => $b->status === 'pending');
+        $approvedBookings = array_filter($allBookings, fn($b) => $b->status === 'approved');
+        $rejectedBookings = array_filter($allBookings, fn($b) => $b->status === 'rejected');
+
+        $data = [
+            'title' => 'Booking Management',
+            'page' => 'bookings',
+            'user_name' => $_SESSION['user_name'],
+            'allBookings' => $allBookings,
+            'pendingBookings' => $pendingBookings,
+            'approvedBookings' => $approvedBookings,
+            'rejectedBookings' => $rejectedBookings,
+            'pendingCount' => count($pendingBookings),
+            'approvedCount' => count($approvedBookings),
+            'rejectedCount' => count($rejectedBookings),
+            'unread_notifications' => $this->getUnreadNotificationCount()
+        ];
+        $this->view('manager/v_bookings', $data);
+    }
+
+    public function notifications()
+    {
+        // Get all notifications for the property manager
+        $notifications = $this->notificationModel->getNotificationsByUser($_SESSION['user_id']);
+        $unreadCount = $this->notificationModel->getUnreadCount($_SESSION['user_id']);
+
+        $data = [
+            'title' => 'Notifications',
+            'page' => 'notifications',
+            'user_name' => $_SESSION['user_name'],
+            'notifications' => $notifications,
+            'unreadCount' => $unreadCount
+        ];
+        $this->view('manager/v_notifications', $data);
+    }
+
+    // Mark notification as read
+    public function markNotificationRead($id)
+    {
+        if ($this->notificationModel->markAsRead($id)) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false]);
+        }
+    }
+
+    // Mark all notifications as read
+    public function markAllNotificationsRead()
+    {
+        if ($this->notificationModel->markAllAsRead($_SESSION['user_id'])) {
+            flash('notification_message', 'All notifications marked as read', 'alert alert-success');
+        } else {
+            flash('notification_message', 'Failed to mark notifications as read', 'alert alert-danger');
+        }
+
+        redirect('manager/notifications');
+    }
+
+    // Delete notification
+    public function deleteNotification($id)
+    {
+        if ($this->notificationModel->deleteNotification($id)) {
+            flash('notification_message', 'Notification deleted', 'alert alert-success');
+        } else {
+            flash('notification_message', 'Failed to delete notification', 'alert alert-danger');
+        }
+
+        redirect('manager/notifications');
+    }
+
+    // Payment tracking for assigned properties
+    public function payments()
+    {
+        $paymentModel = $this->model('M_Payments');
+        $propertyModel = $this->model('M_ManagerProperties');
+
+        $manager_id = $_SESSION['user_id'];
+
+        // Get assigned properties
+        $assignedProperties = $propertyModel->getAssignedProperties($manager_id);
+        $propertyIds = array_map(fn($p) => $p->id, $assignedProperties ?? []);
+
+        // Get all payments for assigned properties
+        $allPayments = [];
+        if (!empty($propertyIds)) {
+            foreach ($propertyIds as $propertyId) {
+                $propertyPayments = $paymentModel->getPaymentsByProperty($propertyId);
+                $allPayments = array_merge($allPayments, $propertyPayments);
+            }
+        }
+
+        // Sort payments by date (newest first)
+        usort($allPayments, function($a, $b) {
+            $dateA = $a->payment_date ?? $a->due_date;
+            $dateB = $b->payment_date ?? $b->due_date;
+            return strtotime($dateB) - strtotime($dateA);
+        });
+
+        // Calculate statistics
+        $totalIncome = 0;
+        $completedCount = 0;
+        $pendingCount = 0;
+        $pendingAmount = 0;
+
+        foreach ($allPayments as $payment) {
+            if ($payment->status === 'completed') {
+                $totalIncome += $payment->amount;
+                $completedCount++;
+            } else if ($payment->status === 'pending') {
+                $pendingCount++;
+                $pendingAmount += $payment->amount;
+            }
+        }
+
+        $data = [
+            'title' => 'Payment Tracking',
+            'page' => 'payments',
+            'user_name' => $_SESSION['user_name'],
+            'payments' => $allPayments,
+            'totalIncome' => $totalIncome,
+            'completedCount' => $completedCount,
+            'pendingCount' => $pendingCount,
+            'pendingAmount' => $pendingAmount,
+            'propertyCount' => count($assignedProperties),
+            'unread_notifications' => $this->getUnreadNotificationCount()
+        ];
+
+        $this->view('manager/v_payments', $data);
     }
 }

@@ -11,6 +11,39 @@
 
     <?php flash('lease_message'); ?>
 
+    <!-- Lease Statistics -->
+    <?php if (isset($data['leaseStats'])): ?>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-file-contract"></i>
+            </div>
+            <div class="stat-details">
+                <h4><?php echo $data['leaseStats']->total ?? 0; ?></h4>
+                <p>Total Agreements</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon active">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-details">
+                <h4><?php echo $data['leaseStats']->active ?? 0; ?></h4>
+                <p>Active Leases</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon completed">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="stat-details">
+                <h4><?php echo $data['leaseStats']->completed ?? 0; ?></h4>
+                <p>Completed</p>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Active Lease Summary -->
     <?php if (isset($data['activeLease']) && $data['activeLease']): ?>
     <div class="dashboard-section">
@@ -22,7 +55,7 @@
             <div class="lease-header">
                 <div class="lease-property">
                     <i class="fas fa-home"></i>
-                    <h4><?php echo htmlspecialchars($data['activeLease']->property_address ?? 'Property'); ?></h4>
+                    <h4><?php echo htmlspecialchars($data['activeLease']->address ?? 'Property'); ?></h4>
                 </div>
                 <span class="status-badge approved">Active</span>
             </div>
@@ -37,7 +70,7 @@
                 </div>
                 <div class="lease-detail">
                     <span class="label">Monthly Rent:</span>
-                    <span class="value">LKR <?php echo number_format($data['activeLease']->monthly_rent, 2); ?></span>
+                    <span class="value">LKR <?php echo number_format($data['activeLease']->monthly_rent * 1.10, 2); ?></span>
                 </div>
                 <div class="lease-detail">
                     <span class="label">Security Deposit:</span>
@@ -62,43 +95,6 @@
                    class="btn btn-secondary">
                     <i class="fas fa-eye"></i> View Full Agreement
                 </a>
-                <a href="<?php echo URLROOT; ?>/leaseagreements/download/<?php echo $data['activeLease']->id; ?>"
-                   class="btn btn-primary" target="_blank">
-                    <i class="fas fa-download"></i> Download PDF
-                </a>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-
-    <!-- Lease Statistics -->
-    <?php if (isset($data['leaseStats'])): ?>
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-file-contract"></i>
-            </div>
-            <div class="stat-details">
-                <h4><?php echo $data['leaseStats']->total_leases ?? 0; ?></h4>
-                <p>Total Agreements</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon active">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-details">
-                <h4><?php echo $data['leaseStats']->active_leases ?? 0; ?></h4>
-                <p>Active Leases</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon completed">
-                <i class="fas fa-history"></i>
-            </div>
-            <div class="stat-details">
-                <h4><?php echo $data['leaseStats']->completed_leases ?? 0; ?></h4>
-                <p>Completed</p>
             </div>
         </div>
     </div>
@@ -135,17 +131,17 @@
                                 break;
                         }
 
-                        $needsSignature = ($lease->status === 'pending_signatures' && !$lease->tenant_signed_at);
+                        $needsSignature = ($lease->status === 'pending_signatures' && !$lease->signed_by_tenant);
                     ?>
                     <div class="agreement-card">
                         <div class="agreement-icon">
                             <i class="fas fa-file-contract"></i>
                         </div>
                         <div class="agreement-details">
-                            <h4><?php echo htmlspecialchars($lease->property_address ?? 'Rental Agreement'); ?></h4>
+                            <h4><?php echo htmlspecialchars($lease->address ?? 'Rental Agreement'); ?></h4>
                             <p class="agreement-property">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <?php echo htmlspecialchars($lease->property_address ?? 'N/A'); ?>
+                                <?php echo htmlspecialchars($lease->address ?? 'N/A'); ?>
                             </p>
                             <div class="agreement-info">
                                 <span>
@@ -153,20 +149,8 @@
                                     <?php echo date('M d, Y', strtotime($lease->start_date)); ?> -
                                     <?php echo date('M d, Y', strtotime($lease->end_date)); ?>
                                 </span>
-                                <span><strong>Rent:</strong> LKR <?php echo number_format($lease->monthly_rent, 2); ?>/mo</span>
+                                <span><strong>Rent:</strong> LKR <?php echo number_format($lease->monthly_rent * 1.10, 2); ?>/mo</span>
                                 <span><strong>Deposit:</strong> LKR <?php echo number_format($lease->deposit_amount, 2); ?></span>
-                            </div>
-
-                            <!-- Signature Status -->
-                            <div class="signature-status">
-                                <span class="signature-item <?php echo $lease->tenant_signed_at ? 'signed' : 'pending'; ?>">
-                                    <i class="fas fa-<?php echo $lease->tenant_signed_at ? 'check-circle' : 'clock'; ?>"></i>
-                                    Tenant: <?php echo $lease->tenant_signed_at ? 'Signed' : 'Pending'; ?>
-                                </span>
-                                <span class="signature-item <?php echo $lease->landlord_signed_at ? 'signed' : 'pending'; ?>">
-                                    <i class="fas fa-<?php echo $lease->landlord_signed_at ? 'check-circle' : 'clock'; ?>"></i>
-                                    Landlord: <?php echo $lease->landlord_signed_at ? 'Signed' : 'Pending'; ?>
-                                </span>
                             </div>
                         </div>
                         <div class="agreement-status">
@@ -184,12 +168,6 @@
                                    class="btn btn-secondary btn-sm">
                                     <i class="fas fa-eye"></i> View
                                 </a>
-                                <?php if ($lease->status === 'active' || $lease->status === 'completed'): ?>
-                                    <a href="<?php echo URLROOT; ?>/leaseagreements/download/<?php echo $lease->id; ?>"
-                                       class="btn btn-primary btn-sm" target="_blank">
-                                        <i class="fas fa-download"></i> Download
-                                    </a>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -221,7 +199,7 @@
                 </div>
                 <div class="term-content">
                     <h4>Property</h4>
-                    <p><?php echo htmlspecialchars($data['activeLease']->property_address ?? 'N/A'); ?></p>
+                    <p><?php echo htmlspecialchars($data['activeLease']->address ?? 'N/A'); ?></p>
                 </div>
             </div>
 
@@ -311,7 +289,7 @@
 
 <style>
 .active-lease-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #45a9ea 0%, #3b8fd9 100%);
     color: white;
     padding: 25px;
     border-radius: 12px;
@@ -372,11 +350,11 @@
 }
 
 .stat-icon.active {
-    background: #2ecc71;
+    background: #45a9ea;
 }
 
 .stat-icon.completed {
-    background: #95a5a6;
+    background: #45a9ea;
 }
 
 .agreements-list {
@@ -403,7 +381,7 @@
     height: 60px;
     background: #f8f9fa;
     border-radius: 8px;
-    color: #667eea;
+    color: #45a9ea;
     font-size: 24px;
 }
 
@@ -421,27 +399,6 @@
     flex-direction: column;
     gap: 8px;
     margin-bottom: 12px;
-}
-
-.signature-status {
-    display: flex;
-    gap: 15px;
-    margin-top: 10px;
-}
-
-.signature-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 14px;
-}
-
-.signature-item.signed {
-    color: #2ecc71;
-}
-
-.signature-item.pending {
-    color: #f39c12;
 }
 
 .agreement-status {
@@ -480,7 +437,7 @@
     height: 50px;
     background: #f8f9fa;
     border-radius: 8px;
-    color: #667eea;
+    color: #45a9ea;
     font-size: 20px;
     flex-shrink: 0;
 }

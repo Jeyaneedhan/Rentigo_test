@@ -56,7 +56,7 @@
                             <img src="<?php echo !empty($property->primary_image) ? $property->primary_image : URLROOT . '/img/property-placeholder.jpg'; ?>"
                                 alt="<?php echo htmlspecialchars($property->address); ?>">
                             <div class="property-status">
-                                <?php if ($property->status === 'vacant'): ?>
+                                <?php if ($property->status === 'available'): ?>
                                     <span class="status-badge available">Available</span>
                                 <?php else: ?>
                                     <span class="status-badge reserved">Reserved</span>
@@ -92,17 +92,12 @@
                             <div class="property-actions">
                                 <a class="btn-property-action"
                                     href="<?php echo URLROOT . '/tenantproperties/details/' . $property->id; ?>">
-                                    View Details
+                                    <?php if ($property->status === 'available'): ?>
+                                        View Details & Reserve
+                                    <?php else: ?>
+                                        View Details
+                                    <?php endif; ?>
                                 </a>
-                                <?php if ($property->status === 'vacant'): ?>
-                                    <button class="btn-property-action" id="btn-reserve-property" onclick=" reserveProperty(<?php echo $property->id; ?>)">
-                                        Reserve Property
-                                    </button>
-                                <?php else: ?>
-                                    <button class="btn-property-action disabled" disabled>
-                                        Not Available
-                                    </button>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

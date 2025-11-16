@@ -35,23 +35,6 @@
             </div>
         </div>
 
-        <div class="stat-card warning">
-            <div class="stat-icon">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <div class="stat-content">
-                <h3 class="stat-label">Pending Bookings</h3>
-                <div class="stat-value"><?php echo $data['pendingBookings'] ?? 0; ?></div>
-                <div class="stat-change">
-                    <?php if (($data['pendingBookings'] ?? 0) > 0): ?>
-                        Requires attention
-                    <?php else: ?>
-                        All caught up
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
         <div class="stat-card info">
             <div class="stat-icon">
                 <i class="fas fa-dollar-sign"></i>
@@ -59,7 +42,7 @@
             <div class="stat-content">
                 <h3 class="stat-label">Total Income</h3>
                 <div class="stat-value">
-                    LKR <?php echo number_format($data['totalIncome'] ?? 0, 0); ?>
+                    LKR <?php echo number_format($data['totalIncome']->total_income ?? 0, 0); ?>
                 </div>
                 <div class="stat-change positive">All time earnings</div>
             </div>
@@ -73,17 +56,6 @@
                 <h3 class="stat-label">Maintenance</h3>
                 <div class="stat-value"><?php echo $data['pendingMaintenance'] ?? 0; ?></div>
                 <div class="stat-change">Pending requests</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-envelope"></i>
-            </div>
-            <div class="stat-content">
-                <h3 class="stat-label">Messages</h3>
-                <div class="stat-value"><?php echo $data['unreadMessages'] ?? 0; ?></div>
-                <div class="stat-change">Unread inquiries</div>
             </div>
         </div>
     </div>
