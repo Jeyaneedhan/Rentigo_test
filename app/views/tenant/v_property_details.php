@@ -285,32 +285,34 @@
                 <!-- Individual Reviews -->
                 <h4 style="margin-top: 2rem;">Tenant Reviews</h4>
                 <div style="margin-top: 1.5rem;">
-                    <?php foreach ($data['reviews'] as $review): ?>
-                        <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
-                                <div>
-                                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">
-                                        <?php echo htmlspecialchars($review->reviewer_name ?? 'Anonymous'); ?>
+                    <?php if (!empty($data['reviews'])): ?>
+                        <?php foreach ($data['reviews'] as $review): ?>
+                            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">
+                                            <?php echo htmlspecialchars($review->reviewer_name ?? 'Anonymous'); ?>
+                                        </div>
+                                        <div class="stars" style="color: #f59e0b; font-size: 1rem;">
+                                            <?php
+                                                for ($i = 1; $i <= 5; $i++) {
+                                                    echo $i <= $review->rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                                                }
+                                            ?>
+                                        </div>
                                     </div>
-                                    <div class="stars" style="color: #f59e0b; font-size: 1rem;">
-                                        <?php
-                                            for ($i = 1; $i <= 5; $i++) {
-                                                echo $i <= $review->rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-                                            }
-                                        ?>
+                                    <div style="color: #6b7280; font-size: 0.875rem;">
+                                        <?php echo date('M d, Y', strtotime($review->created_at)); ?>
                                     </div>
                                 </div>
-                                <div style="color: #6b7280; font-size: 0.875rem;">
-                                    <?php echo date('M d, Y', strtotime($review->created_at)); ?>
-                                </div>
+                                <?php if (!empty($review->review_text)): ?>
+                                    <p style="color: #4b5563; line-height: 1.6; margin-top: 0.75rem;">
+                                        <?php echo nl2br(htmlspecialchars($review->review_text)); ?>
+                                    </p>
+                                <?php endif; ?>
                             </div>
-                            <?php if (!empty($review->review_text)): ?>
-                                <p style="color: #4b5563; line-height: 1.6; margin-top: 0.75rem;">
-                                    <?php echo nl2br(htmlspecialchars($review->review_text)); ?>
-                                </p>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <div style="background: #f9fafb; padding: 2rem; border-radius: 10px; text-align: center; color: #6b7280;">

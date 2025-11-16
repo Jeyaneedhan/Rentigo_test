@@ -56,11 +56,19 @@ class TenantProperties extends Controller
         $reviews = $reviewModel->getReviewsByProperty($id, 'approved');
         $ratingData = $reviewModel->getPropertyAverageRating($id);
 
+        // Safely extract rating data
+        $averageRating = 0;
+        $reviewCount = 0;
+        if ($ratingData) {
+            $averageRating = $ratingData->avg_rating ?? 0;
+            $reviewCount = $ratingData->review_count ?? 0;
+        }
+
         $data = [
             'property' => $property,
-            'reviews' => $reviews,
-            'averageRating' => $ratingData->avg_rating ?? 0,
-            'reviewCount' => $ratingData->review_count ?? 0
+            'reviews' => $reviews ?? [],
+            'averageRating' => $averageRating,
+            'reviewCount' => $reviewCount
         ];
         $this->view('tenant/v_property_details', $data);
     }

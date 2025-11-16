@@ -53,6 +53,12 @@ class Reviews extends Controller
 
             $property = $this->propertyModel->getPropertyById($property_id);
 
+            if (!$property) {
+                flash('review_message', 'Property not found', 'alert alert-danger');
+                redirect('tenant/my_reviews');
+                return;
+            }
+
             $data = [
                 'reviewer_id' => $_SESSION['user_id'],
                 'reviewee_id' => $property->landlord_id,
@@ -126,11 +132,17 @@ class Reviews extends Controller
                 $notificationModel = $this->model('M_Notifications');
                 $property = $this->propertyModel->getPropertyById($property_id);
 
+                // Get property address safely
+                $propertyAddress = 'property';
+                if ($property && isset($property->address)) {
+                    $propertyAddress = substr($property->address, 0, 50) . '...';
+                }
+
                 $notificationModel->createNotification([
                     'user_id' => $tenant_id,
                     'type' => 'review',
                     'title' => 'New Landlord Review',
-                    'message' => 'Your landlord reviewed your tenancy at "' . substr($property->address ?? 'property', 0, 50) . '..." with a ' . $rating . '-star rating.',
+                    'message' => 'Your landlord reviewed your tenancy at "' . $propertyAddress . '" with a ' . $rating . '-star rating.',
                     'link' => 'tenant/feedback'
                 ]);
 
