@@ -1,5 +1,7 @@
 <?php require APPROOT . '/views/inc/landlord_header.php'; ?>
 
+</div> <!-- Close content-wrapper from header -->
+
 <div class="issue-details-content">
     <div class="page-header">
         <div class="header-left">
@@ -182,11 +184,13 @@
     </div>
 </div>
 
+<div> <!-- Reopen wrapper for footer structure -->
+
 <style>
 .issue-details-content {
-    padding: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
+    padding: 0;
+    max-width: 100%;
+    margin: 0;
 }
 
 .page-header {
