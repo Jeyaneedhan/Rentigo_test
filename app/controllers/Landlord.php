@@ -241,4 +241,67 @@ class Landlord extends Controller
 
         redirect('landlord/notifications');
     }
+
+    // View tenant issues
+    public function issues()
+    {
+        $issueModel = $this->model('Issue');
+        $landlord_id = $_SESSION['user_id'];
+
+        // Get all issues for this landlord's properties
+        $allIssues = $issueModel->getIssuesByLandlord($landlord_id);
+
+        // Filter by status
+        $pendingIssues = array_filter($allIssues, fn($issue) => $issue->status === 'pending');
+        $inProgressIssues = array_filter($allIssues, fn($issue) => $issue->status === 'in_progress');
+        $resolvedIssues = array_filter($allIssues, fn($issue) => $issue->status === 'resolved');
+
+        // Get issue statistics
+        $stats = $issueModel->getIssueStats($landlord_id, 'landlord');
+
+        $data = [
+            'title' => 'Tenant Issues',
+            'page' => 'issues',
+            'user_name' => $_SESSION['user_name'],
+            'allIssues' => $allIssues,
+            'pendingIssues' => $pendingIssues,
+            'inProgressIssues' => $inProgressIssues,
+            'resolvedIssues' => $resolvedIssues,
+            'issueStats' => $stats
+        ];
+
+        $this->view('landlord/v_issues', $data);
+    }
+
+    // View issue details
+    public function issueDetails($id = null)
+    {
+        if (!$id) {
+            flash('issue_error', 'Issue not found', 'alert alert-danger');
+            redirect('landlord/issues');
+        }
+
+        $issueModel = $this->model('Issue');
+        $issue = $issueModel->getIssueById($id);
+
+        if (!$issue) {
+            flash('issue_error', 'Issue not found', 'alert alert-danger');
+            redirect('landlord/issues');
+        }
+
+        // Verify this landlord owns the property
+        if ($issue->landlord_id != $_SESSION['user_id']) {
+            flash('issue_error', 'Unauthorized access', 'alert alert-danger');
+            redirect('landlord/issues');
+        }
+
+        $data = [
+            'title' => 'Issue Details',
+            'page' => 'issues',
+            'user_name' => $_SESSION['user_name'],
+            'issue' => $issue
+        ];
+
+        $this->view('landlord/v_issue_details', $data);
+    }
 }
