@@ -61,7 +61,7 @@
         <div class="dashboard-section">
             <div class="section-header">
                 <h2>Recent Payments</h2>
-                <a href="#" class="btn btn-sm btn-secondary">View All</a>
+                <a href="<?php echo URLROOT; ?>/manager/allPayments" class="btn btn-sm btn-secondary">View All</a>
             </div>
             <div class="table-container">
                 <table class="data-table">

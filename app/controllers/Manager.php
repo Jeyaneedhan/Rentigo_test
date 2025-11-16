@@ -410,4 +410,58 @@ class Manager extends Controller
 
         $this->view('manager/v_payments', $data);
     }
+
+    // View all payments (rental + maintenance)
+    public function allPayments()
+    {
+        $paymentModel = $this->model('M_Payments');
+        $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
+
+        // Get all rental payments
+        $allPayments = $paymentModel->getAllPayments();
+
+        // Get all maintenance payments
+        $maintenancePayments = $maintenanceQuotationModel->getAllMaintenancePayments();
+
+        // Combine and sort all payments by date
+        $combinedPayments = array_merge($allPayments, $maintenancePayments);
+        usort($combinedPayments, function($a, $b) {
+            $dateA = $a->payment_date ?? $a->due_date ?? $a->created_at;
+            $dateB = $b->payment_date ?? $b->due_date ?? $b->created_at;
+            return strtotime($dateB) - strtotime($dateA);
+        });
+
+        // Calculate statistics
+        $totalIncome = 0;
+        $completedCount = 0;
+        $pendingCount = 0;
+        $pendingAmount = 0;
+
+        foreach ($combinedPayments as $payment) {
+            $isMaintenance = isset($payment->payment_type) && $payment->payment_type === 'maintenance';
+            $platformFee = $isMaintenance ? $payment->amount : ($payment->amount * 0.10);
+
+            if ($payment->status === 'completed') {
+                $totalIncome += $platformFee;
+                $completedCount++;
+            } else if ($payment->status === 'pending') {
+                $pendingCount++;
+                $pendingAmount += $platformFee;
+            }
+        }
+
+        $data = [
+            'title' => 'All Payments',
+            'page' => 'payments',
+            'user_name' => $_SESSION['user_name'],
+            'allPayments' => $combinedPayments,
+            'totalIncome' => $totalIncome,
+            'completedCount' => $completedCount,
+            'pendingCount' => $pendingCount,
+            'pendingAmount' => $pendingAmount,
+            'unread_notifications' => $this->getUnreadNotificationCount()
+        ];
+
+        $this->view('manager/v_all_payments', $data);
+    }
 }
