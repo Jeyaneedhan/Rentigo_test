@@ -443,6 +443,7 @@ INSERT INTO `properties` (`id`, `landlord_id`, `manager_id`, `address`, `propert
 CREATE TABLE `property_manager` (
   `manager_id` int NOT NULL,
   `user_id` int NOT NULL,
+  `employee_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `employee_id_document` longblob,
   `employee_id_filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `employee_id_filetype` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
