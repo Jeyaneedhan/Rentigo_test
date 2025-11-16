@@ -109,23 +109,9 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
--- Step 2: Migrate existing data (convert property address to property_id)
--- Only if property column exists
-UPDATE inspections i
-LEFT JOIN properties p ON i.property = p.address
-SET i.property_id = p.id,
-    i.landlord_id = p.landlord_id
-WHERE p.id IS NOT NULL AND i.property_id IS NULL;
-
--- Step 3: Copy issues column to issue_id (only if issues column exists)
-UPDATE inspections
-SET issue_id = CASE WHEN issues > 0 THEN issues ELSE NULL END
-WHERE issue_id IS NULL AND issues IS NOT NULL;
-
--- Step 4: Drop old columns (only after verifying data migration)
--- IMPORTANT: Uncomment these ONLY after you verify the migration worked correctly
--- ALTER TABLE `inspections` DROP COLUMN IF EXISTS `property`;
--- ALTER TABLE `inspections` DROP COLUMN IF EXISTS `issues`;
+-- Step 2: Migrate existing data (SKIP - only needed if old 'property' column exists)
+-- Step 3: Copy issues column (SKIP - only needed if old 'issues' column exists)
+-- Step 4: Drop old columns (SKIP - not needed for fresh schema)
 
 -- Step 5: Add foreign key constraints (only if they don't exist)
 SET @fk_property = (SELECT COUNT(*) FROM information_schema.table_constraints
