@@ -120,9 +120,9 @@ class Admin extends Controller
         $pendingCount = 0;
         $overdueCount = 0;
 
-        // Calculate rental payment fees
+        // Calculate rental payment fees (10% service fee)
         foreach ($allPayments as $payment) {
-            // Platform earns 10% service fee from each payment
+            // Platform earns 10% service fee from each rental payment
             $totalRevenue += ($payment->amount * 0.10);
             if ($payment->status === 'completed') {
                 $collected += ($payment->amount * 0.10);
@@ -135,18 +135,18 @@ class Admin extends Controller
             }
         }
 
-        // Calculate maintenance payment fees
+        // Calculate maintenance payment income (100% goes to platform)
         foreach ($maintenancePayments as $payment) {
-            // Platform earns 10% service fee from each maintenance payment
-            $totalRevenue += ($payment->amount * 0.10);
+            // Platform receives full maintenance payment amount as income
+            $totalRevenue += $payment->amount;
             if ($payment->status === 'completed') {
-                $collected += ($payment->amount * 0.10);
+                $collected += $payment->amount;
             } elseif ($payment->status === 'pending') {
-                $pending += ($payment->amount * 0.10);
+                $pending += $payment->amount;
                 $pendingCount++;
             } elseif ($payment->status === 'failed') {
                 // Treat failed as overdue for maintenance
-                $overdue += ($payment->amount * 0.10);
+                $overdue += $payment->amount;
                 $overdueCount++;
             }
         }

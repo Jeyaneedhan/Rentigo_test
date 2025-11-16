@@ -18,7 +18,7 @@
             <div class="stat-info">
                 <h3 class="stat-number">LKR <?php echo number_format($data['totalRevenue'] ?? 0, 0); ?></h3>
                 <p class="stat-label">Platform Revenue</p>
-                <span class="stat-change">10% service fees from rental & maintenance payments</span>
+                <span class="stat-change">10% from rental + full maintenance payments</span>
             </div>
         </div>
 
@@ -116,12 +116,20 @@
                                 </td>
                                 <td>
                                     <div class="amount-display">
-                                        LKR <?php echo number_format($transaction->amount * 1.10, 0); ?>
+                                        <?php if ($isMaintenance): ?>
+                                            LKR <?php echo number_format($transaction->amount, 0); ?>
+                                        <?php else: ?>
+                                            LKR <?php echo number_format($transaction->amount * 1.10, 0); ?>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="amount-display income">
-                                        <strong>LKR <?php echo number_format($transaction->amount * 0.10, 0); ?></strong>
+                                        <?php if ($isMaintenance): ?>
+                                            <span>-</span>
+                                        <?php else: ?>
+                                            <strong>LKR <?php echo number_format($transaction->amount * 0.10, 0); ?></strong>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td><?php echo date('m/d/Y', strtotime($displayDate)); ?></td>
