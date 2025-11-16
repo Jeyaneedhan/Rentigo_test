@@ -180,7 +180,7 @@ class M_MaintenanceQuotations
             "maintenance" as payment_type
             FROM maintenance_payments mp
             LEFT JOIN maintenance_quotations mq ON mp.quotation_id = mq.id
-            LEFT JOIN maintenance_requests mr ON mq.maintenance_id = mr.id
+            LEFT JOIN maintenance_requests mr ON mq.request_id = mr.id
             LEFT JOIN properties p ON mr.property_id = p.id
             LEFT JOIN users u ON mr.landlord_id = u.id
             ORDER BY mp.payment_date DESC');
