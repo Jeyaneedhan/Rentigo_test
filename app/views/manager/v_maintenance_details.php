@@ -70,6 +70,7 @@
     </div>
 
     <!-- Service Provider Assignment -->
+    <!-- DEBUG: provider_id=<?php echo $m->provider_id ?? 'NULL'; ?>, status=<?php echo $m->status; ?>, providers count=<?php echo count($data['providers'] ?? []); ?> -->
     <?php if (!$m->provider_id && $m->status === 'pending'): ?>
     <div class="content-card">
         <div class="card-header">
@@ -139,6 +140,7 @@
                            (isset($data['quotations'][0]) && $data['quotations'][0]->status === 'rejected')) &&
                           (empty($data['payment']) || !is_object($data['payment']));
     ?>
+    <!-- DEBUG: provider_id=<?php echo $m->provider_id ?? 'NULL'; ?>, quotations count=<?php echo count($data['quotations'] ?? []); ?>, payment=<?php echo isset($data['payment']) && is_object($data['payment']) ? 'EXISTS' : 'NONE'; ?>, canUpload=<?php echo $canUploadQuotation ? 'YES' : 'NO'; ?> -->
     <?php if ($canUploadQuotation): ?>
     <div class="content-card">
         <div class="card-header">
