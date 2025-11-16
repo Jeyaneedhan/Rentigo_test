@@ -86,6 +86,10 @@ class Manager extends Controller
             $totalExpenses += $maintenance->actual_cost ?? $maintenance->estimated_cost ?? 0;
         }
 
+        // Get issue statistics
+        $issueModel = $this->model('Issue');
+        $issueStats = $issueModel->getIssueStats($manager_id, 'manager');
+
         $data = [
             'title' => 'Property Manager Dashboard',
             'page' => 'dashboard',
@@ -97,6 +101,7 @@ class Manager extends Controller
             'totalExpenses' => $totalExpenses,
             'recentPayments' => $recentPayments,
             'recentMaintenance' => $recentMaintenance,
+            'issueStats' => $issueStats,
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_dashboard', $data);

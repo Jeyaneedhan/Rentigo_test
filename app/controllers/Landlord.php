@@ -49,6 +49,10 @@ class Landlord extends Controller
         $unreadMessages = $this->messageModel->getUnreadCount($_SESSION['user_id']);
         $unreadNotifications = $this->notificationModel->getUnreadCount($_SESSION['user_id']);
 
+        // Get issue statistics
+        $issueModel = $this->model('Issue');
+        $issueStats = $issueModel->getIssueStats($_SESSION['user_id'], 'landlord');
+
         // Limit recent bookings to 5
         if (count($recentBookings) > 5) {
             $recentBookings = array_slice($recentBookings, 0, 5);
@@ -67,7 +71,8 @@ class Landlord extends Controller
             'recentBookings' => $recentBookings,
             'recentPayments' => $recentPayments,
             'unreadMessages' => $unreadMessages,
-            'unreadNotifications' => $unreadNotifications
+            'unreadNotifications' => $unreadNotifications,
+            'issueStats' => $issueStats
         ];
         $this->view('landlord/v_dashboard', $data);
     }
