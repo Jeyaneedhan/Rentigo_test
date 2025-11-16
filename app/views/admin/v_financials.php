@@ -18,7 +18,7 @@
             <div class="stat-info">
                 <h3 class="stat-number">LKR <?php echo number_format($data['totalRevenue'] ?? 0, 0); ?></h3>
                 <p class="stat-label">Platform Revenue</p>
-                <span class="stat-change">10% service fees from all payments</span>
+                <span class="stat-change">10% service fees from rental & maintenance payments</span>
             </div>
         </div>
 
@@ -81,19 +81,29 @@
                 <tbody>
                     <?php if (!empty($data['recentTransactions'])): ?>
                         <?php foreach ($data['recentTransactions'] as $transaction): ?>
-                            <tr data-type="income" data-status="<?php echo htmlspecialchars($transaction->status); ?>" data-date="<?php echo date('Y-m-d', strtotime($transaction->payment_date ?? $transaction->due_date)); ?>">
+                            <?php
+                                $isMaintenance = isset($transaction->payment_type) && $transaction->payment_type === 'maintenance';
+                                $displayDate = $transaction->payment_date ?? $transaction->due_date ?? $transaction->created_at;
+                            ?>
+                            <tr data-type="income" data-status="<?php echo htmlspecialchars($transaction->status); ?>" data-date="<?php echo date('Y-m-d', strtotime($displayDate)); ?>">
                                 <td>
                                     <div class="transaction-type">
                                         <div class="type-icon income">
-                                            <i class="fas fa-arrow-down"></i>
+                                            <i class="fas <?php echo $isMaintenance ? 'fa-tools' : 'fa-home'; ?>"></i>
                                         </div>
-                                        <span class="type-label">Payment</span>
+                                        <span class="type-label"><?php echo $isMaintenance ? 'Maintenance' : 'Rental'; ?></span>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="transaction-description">
                                         <div class="description-title">
-                                            <?php echo htmlspecialchars($transaction->payment_method ?? 'Rental payment'); ?>
+                                            <?php
+                                                if ($isMaintenance) {
+                                                    echo htmlspecialchars($transaction->maintenance_title ?? 'Maintenance payment');
+                                                } else {
+                                                    echo htmlspecialchars($transaction->payment_method ?? 'Rental payment');
+                                                }
+                                            ?>
                                         </div>
                                     </div>
                                 </td>
@@ -114,7 +124,7 @@
                                         <strong>LKR <?php echo number_format($transaction->amount * 0.10, 0); ?></strong>
                                     </div>
                                 </td>
-                                <td><?php echo date('m/d/Y', strtotime($transaction->payment_date ?? $transaction->due_date)); ?></td>
+                                <td><?php echo date('m/d/Y', strtotime($displayDate)); ?></td>
                                 <td>
                                     <span class="status-badge <?php
                                         echo $transaction->status === 'completed' ? 'approved' :
@@ -125,7 +135,7 @@
                                 </td>
                                 <td>
                                     <div class="transaction-actions">
-                                        <button class="action-btn view-btn" onclick="viewTransaction('TXN<?php echo $transaction->id; ?>')" title="View">
+                                        <button class="action-btn view-btn" onclick="viewTransaction('<?php echo $isMaintenance ? 'MAIN' : 'TXN'; ?><?php echo $transaction->id; ?>')" title="View">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
