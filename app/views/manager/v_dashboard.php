@@ -81,8 +81,8 @@
                                 <tr>
                                     <td class="font-medium"><?php echo htmlspecialchars($payment->tenant_name ?? 'N/A'); ?></td>
                                     <td><?php echo htmlspecialchars($payment->property_address ?? 'N/A'); ?></td>
-                                    <td>LKR <?php echo number_format($payment->amount * 1.10, 0); ?></td>
-                                    <td><strong>LKR <?php echo number_format($payment->amount * 0.10, 0); ?></strong></td>
+                                    <td>LKR <?php echo number_format($payment->amount, 2); ?></td>
+                                    <td><strong>LKR <?php echo number_format($payment->amount * 0.10, 2); ?></strong></td>
                                     <td><?php echo date('M d, Y', strtotime($payment->payment_date ?? $payment->due_date)); ?></td>
                                     <td>
                                         <span class="status-badge <?php echo $payment->status === 'completed' ? 'approved' : ($payment->status === 'pending' ? 'pending' : 'rejected'); ?>">

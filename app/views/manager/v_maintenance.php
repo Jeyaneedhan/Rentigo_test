@@ -170,7 +170,7 @@
 
 .page-header {
     margin-bottom: 2rem;
-    padding: 2rem 2rem 0 2rem;
+    padding: 0;
 }
 
 .page-title {
@@ -190,7 +190,7 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
     margin-bottom: 2rem;
-    padding: 0 2rem;
+    padding: 0;
 }
 
 .stat-card {
@@ -242,7 +242,7 @@
     border-radius: 0.75rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
-    margin: 0 2rem 1.5rem 2rem;
+    margin: 0 0 1.5rem 0;
 }
 
 .header-actions {
