@@ -335,4 +335,20 @@ class Admin extends Controller
             redirect('admin/managers');
         }
     }
+
+    // View all inspections from all PMs
+    public function inspections()
+    {
+        $inspectionModel = $this->model('M_Inspection');
+        $inspections = $inspectionModel->getAllInspections();
+
+        $data = [
+            'title' => 'All Inspections',
+            'page' => 'inspections',
+            'user_name' => $_SESSION['user_name'],
+            'inspections' => $inspections
+        ];
+
+        $this->view('admin/v_inspections', $data);
+    }
 }
