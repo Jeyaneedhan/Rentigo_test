@@ -143,7 +143,7 @@
                                 </td>
                                 <td>
                                     <div class="transaction-actions">
-                                        <button class="action-btn view-btn" onclick="viewTransaction('<?php echo $isMaintenance ? 'MAIN' : 'TXN'; ?><?php echo $transaction->id; ?>')" title="View">
+                                        <button class="action-btn view-btn" onclick="viewTransaction('<?php echo $isMaintenance ? 'MAIN' : 'TXN'; ?><?php echo $transaction->id; ?>', event)" title="View">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -180,12 +180,24 @@
 
 <script>
     // Transaction management functions - Global scope for onclick handlers
-    function viewTransaction(transactionId) {
-        console.log('Viewing transaction:', transactionId)
+    function viewTransaction(transactionId, event) {
         const modal = document.getElementById('transactionModal')
         const modalContent = document.getElementById('transactionModalContent')
 
-        // Simulate transaction details
+        // Get the row element from the clicked button
+        const row = event.target.closest('tr')
+
+        // Extract data from the row
+        const type = row.querySelector('.type-label').textContent
+        const description = row.querySelector('.description-title').textContent
+        const property = row.querySelector('.property-name').textContent
+        const totalAmount = row.querySelectorAll('.amount-display')[0].textContent.trim()
+        const platformFee = row.querySelectorAll('.amount-display')[1].textContent.trim()
+        const date = row.querySelectorAll('td')[5].textContent.trim()
+        const status = row.querySelector('.status-badge').textContent.trim()
+        const statusClass = row.querySelector('.status-badge').className.split(' ')[1] || 'pending'
+
+        // Build modal content with real data
         modalContent.innerHTML = `
             <div class="transaction-details">
                 <div class="detail-grid">
@@ -195,36 +207,32 @@
                     </div>
                     <div class="detail-item">
                         <label>Type</label>
-                        <span>Monthly Rent Payment</span>
+                        <span>${type}</span>
                     </div>
                     <div class="detail-item">
-                        <label>Amount</label>
-                        <span class="amount-large">$2,500.00</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Status</label>
-                        <span class="status-badge approved">Approved</span>
+                        <label>Description</label>
+                        <span>${description}</span>
                     </div>
                     <div class="detail-item">
                         <label>Property</label>
-                        <span>Luxury Apartment Downtown</span>
+                        <span>${property}</span>
                     </div>
                     <div class="detail-item">
-                        <label>Tenant</label>
-                        <span>John Doe</span>
+                        <label>Total Payment</label>
+                        <span class="amount-large">${totalAmount}</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Platform Fee (10%)</label>
+                        <span>${platformFee}</span>
                     </div>
                     <div class="detail-item">
                         <label>Date</label>
-                        <span>January 7, 2024</span>
+                        <span>${date}</span>
                     </div>
                     <div class="detail-item">
-                        <label>Payment Method</label>
-                        <span>Credit Card</span>
+                        <label>Status</label>
+                        <span class="status-badge ${statusClass}">${status}</span>
                     </div>
-                </div>
-                <div class="detail-notes">
-                    <label>Notes</label>
-                    <p>Regular monthly rent payment processed successfully.</p>
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-primary" onclick="closeTransactionModal()">Close</button>
@@ -254,7 +262,7 @@
 
             // Update actions - remove approve/reject, keep view only
             actionsCell.innerHTML = `
-                <button class="action-btn view-btn" onclick="viewTransaction('${transactionId}')" title="View">
+                <button class="action-btn view-btn" onclick="viewTransaction('${transactionId}', event)" title="View">
                     <i class="fas fa-eye"></i>
                 </button>
             `
