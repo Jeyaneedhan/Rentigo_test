@@ -2,7 +2,7 @@
 
 <div class="page-header">
     <div class="header-left">
-        <a href="<?php echo URLROOT; ?>/maintenance/index" class="btn btn-secondary" style="margin-bottom: 1rem;">
+        <a href="<?php echo URLROOT; ?>/manager/maintenance" class="btn btn-secondary" style="margin-bottom: 1rem;">
             <i class="fas fa-arrow-left"></i> Back to List
         </a>
         <h1 class="page-title">Maintenance Request Details</h1>
