@@ -65,6 +65,16 @@ class Reviews extends Controller
             ];
 
             if ($this->reviewModel->createReview($data)) {
+                // Send notification to landlord
+                $notificationModel = $this->model('M_Notifications');
+                $notificationModel->createNotification([
+                    'user_id' => $property->landlord_id,
+                    'type' => 'review',
+                    'title' => 'New Property Review',
+                    'message' => 'Your property at "' . substr($property->address, 0, 50) . '..." received a ' . $rating . '-star review from a tenant.',
+                    'link' => 'landlord/feedback'
+                ]);
+
                 flash('review_message', 'Review submitted successfully', 'alert alert-success');
             } else {
                 flash('review_message', 'Failed to submit review', 'alert alert-danger');
@@ -112,6 +122,18 @@ class Reviews extends Controller
             ];
 
             if ($this->reviewModel->createReview($data)) {
+                // Send notification to tenant
+                $notificationModel = $this->model('M_Notifications');
+                $property = $this->propertyModel->getPropertyById($property_id);
+
+                $notificationModel->createNotification([
+                    'user_id' => $tenant_id,
+                    'type' => 'review',
+                    'title' => 'New Landlord Review',
+                    'message' => 'Your landlord reviewed your tenancy at "' . substr($property->address ?? 'property', 0, 50) . '..." with a ' . $rating . '-star rating.',
+                    'link' => 'tenant/feedback'
+                ]);
+
                 flash('review_message', 'Tenant review submitted successfully', 'alert alert-success');
             } else {
                 flash('review_message', 'Failed to submit review', 'alert alert-danger');
