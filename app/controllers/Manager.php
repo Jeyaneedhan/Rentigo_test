@@ -42,9 +42,20 @@ class Manager extends Controller
         $allMaintenance = $maintenanceModel->getAllMaintenanceRequests();
         $recentMaintenance = array_slice($allMaintenance, 0, 5);
 
-        // Get recent payments
+        // Get recent rental payments
         $allPayments = $paymentModel->getAllPayments();
-        $recentPayments = array_slice($allPayments, 0, 10);
+
+        // Get recent maintenance payments
+        $maintenancePayments = $maintenanceQuotationModel->getAllMaintenancePayments();
+
+        // Combine and sort all payments by date
+        $combinedPayments = array_merge($allPayments, $maintenancePayments);
+        usort($combinedPayments, function($a, $b) {
+            $dateA = $a->payment_date ?? $a->due_date ?? $a->created_at;
+            $dateB = $b->payment_date ?? $b->due_date ?? $b->created_at;
+            return strtotime($dateB) - strtotime($dateA);
+        });
+        $recentPayments = array_slice($combinedPayments, 0, 10);
 
         // Calculate statistics
         $totalProperties = count($properties);
