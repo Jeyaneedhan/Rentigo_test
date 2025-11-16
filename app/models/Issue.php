@@ -160,8 +160,7 @@ class Issue
             LEFT JOIN properties p ON i.property_id = p.id
             LEFT JOIN users u ON i.tenant_id = u.id
             LEFT JOIN users l ON i.landlord_id = l.id
-            LEFT JOIN manager_properties mp ON p.id = mp.property_id
-            WHERE mp.manager_id = :manager_id
+            WHERE p.manager_id = :manager_id
             ORDER BY
                 CASE
                     WHEN i.priority = 'emergency' THEN 1
