@@ -30,6 +30,44 @@ class Reviews extends Controller
             redirect('users/login');
         }
 
+        // GET request - Show review form
+        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+            $booking_id = $_GET['booking_id'] ?? null;
+
+            if (!$booking_id) {
+                flash('review_message', 'Invalid booking', 'alert alert-danger');
+                redirect('tenant/my_reviews');
+                return;
+            }
+
+            // Get booking details
+            $bookingModel = $this->model('M_Bookings');
+            $booking = $bookingModel->getBookingById($booking_id);
+
+            if (!$booking || $booking->tenant_id != $_SESSION['user_id']) {
+                flash('review_message', 'Booking not found or unauthorized', 'alert alert-danger');
+                redirect('tenant/my_reviews');
+                return;
+            }
+
+            // Check if already reviewed
+            if ($this->reviewModel->hasUserReviewed($_SESSION['user_id'], $booking->property_id, null, 'property')) {
+                flash('review_message', 'You have already reviewed this property', 'alert alert-info');
+                redirect('tenant/my_reviews');
+                return;
+            }
+
+            $data = [
+                'title' => 'Write Review - TenantHub',
+                'page' => 'my_reviews',
+                'booking' => $booking
+            ];
+
+            $this->view('tenant/v_create_review', $data);
+            return;
+        }
+
+        // POST request - Submit review
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Sanitize POST data
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
