@@ -218,7 +218,7 @@
 
 <style>
 .issue-details-content {
-    padding: 2rem;
+    padding: 0;
     max-width: 1400px;
     margin: 0 auto;
 }
