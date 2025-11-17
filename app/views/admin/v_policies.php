@@ -433,23 +433,43 @@
     // Auto-submit filter form on change
     document.addEventListener('DOMContentLoaded', function() {
         const filterForm = document.getElementById('filterForm');
-        const selects = filterForm.querySelectorAll('select');
+
+        if (!filterForm) {
+            console.error('Filter form not found');
+            return;
+        }
+
+        const statusSelect = filterForm.querySelector('select[name="status"]');
+        const categorySelect = filterForm.querySelector('select[name="category"]');
         const searchInput = filterForm.querySelector('input[name="search"]');
 
-        selects.forEach(select => {
-            select.addEventListener('change', function() {
+        // Add change listener to status dropdown
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                console.log('Status changed to:', this.value);
                 filterForm.submit();
             });
-        });
+        }
+
+        // Add change listener to category dropdown
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+                console.log('Category changed to:', this.value);
+                filterForm.submit();
+            });
+        }
 
         // Debounce search input
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                filterForm.submit();
-            }, 500);
-        });
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    console.log('Search submitted:', this.value);
+                    filterForm.submit();
+                }, 500);
+            });
+        }
     });
 </script>
 

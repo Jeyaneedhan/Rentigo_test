@@ -417,18 +417,22 @@
             });
     }
 
-    // Filter managers by status
-    function filterManagersByStatus() {
+    // Combined filter function that handles both search and status filter
+    function applyFilters() {
+        const searchTerm = document.getElementById('searchManagers').value.toLowerCase();
         const filterValue = document.getElementById('filterManagers').value.toLowerCase();
         const rows = document.querySelectorAll('#managers-tbody tr');
 
-        console.log('Filter value:', filterValue); // Debug log
-
         rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
             const status = row.getAttribute('data-status');
-            console.log('Row status:', status); // Debug log
 
-            if (filterValue === '' || status === filterValue) {
+            // Check both conditions
+            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+            const matchesStatus = filterValue === '' || status === filterValue;
+
+            // Show row only if it matches both filters
+            if (matchesSearch && matchesStatus) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
@@ -436,17 +440,16 @@
         });
     }
 
+    // Filter managers by status
+    function filterManagersByStatus() {
+        applyFilters();
+    }
+
     // Search managers
     const searchInput = document.getElementById('searchManagers');
     if (searchInput) {
         searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#managers-tbody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
+            applyFilters();
         });
     }
 </script>
