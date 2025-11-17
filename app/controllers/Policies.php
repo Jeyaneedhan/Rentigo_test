@@ -39,9 +39,11 @@ class Policies extends Controller
             'page' => 'policies',
             'policies' => $policies,
             'stats' => $stats,
-            'search' => $searchTerm,
-            'category_filter' => $category,
-            'status_filter' => $status,
+            'filters' => [
+                'search' => $searchTerm,
+                'category' => $category,
+                'status' => $status
+            ],
             'categories' => $this->getCategories(),
             'statuses' => $this->getStatuses()
         ];
