@@ -67,28 +67,37 @@ class M_Policies
         $this->db->query("INSERT INTO policies (
             policy_name,
             policy_category,
+            policy_description,
             policy_content,
             policy_version,
             policy_status,
+            policy_type,
             effective_date,
+            expiry_date,
             created_by
         ) VALUES (
             :policy_name,
             :policy_category,
+            :policy_description,
             :policy_content,
             :policy_version,
             :policy_status,
+            :policy_type,
             :effective_date,
+            :expiry_date,
             :created_by
         )");
 
         // Bind values
         $this->db->bind(':policy_name', $data['policy_name']);
         $this->db->bind(':policy_category', $data['policy_category']);
+        $this->db->bind(':policy_description', $data['policy_description'] ?? '');
         $this->db->bind(':policy_content', $data['policy_content']);
         $this->db->bind(':policy_version', $data['policy_version'] ?? '1.0');
         $this->db->bind(':policy_status', $data['policy_status'] ?? 'draft');
+        $this->db->bind(':policy_type', $data['policy_type'] ?? 'standard');
         $this->db->bind(':effective_date', $data['effective_date'] ?? date('Y-m-d'));
+        $this->db->bind(':expiry_date', !empty($data['expiry_date']) ? $data['expiry_date'] : null);
         $this->db->bind(':created_by', $data['created_by']);
 
         if ($this->db->execute()) {
@@ -103,20 +112,26 @@ class M_Policies
         $this->db->query("UPDATE policies
                          SET policy_name = :policy_name,
                              policy_category = :policy_category,
+                             policy_description = :policy_description,
                              policy_content = :policy_content,
                              policy_version = :policy_version,
                              policy_status = :policy_status,
-                             effective_date = :effective_date
+                             policy_type = :policy_type,
+                             effective_date = :effective_date,
+                             expiry_date = :expiry_date
                          WHERE policy_id = :policy_id");
 
         // Bind values - policy_id comes from $data array
         $this->db->bind(':policy_id', $data['policy_id']);
         $this->db->bind(':policy_name', $data['policy_name']);
         $this->db->bind(':policy_category', $data['policy_category']);
+        $this->db->bind(':policy_description', $data['policy_description'] ?? '');
         $this->db->bind(':policy_content', $data['policy_content']);
         $this->db->bind(':policy_version', $data['policy_version']);
         $this->db->bind(':policy_status', $data['policy_status']);
+        $this->db->bind(':policy_type', $data['policy_type'] ?? 'standard');
         $this->db->bind(':effective_date', $data['effective_date']);
+        $this->db->bind(':expiry_date', !empty($data['expiry_date']) ? $data['expiry_date'] : null);
 
         return $this->db->execute();
     }
@@ -192,6 +207,18 @@ class M_Policies
     {
         $this->db->query("SELECT * FROM policies WHERE policy_status = 'active' ORDER BY policy_name ASC");
         return $this->db->resultSet();
+    }
+
+    // Get latest active policy by category (for public display)
+    public function getLatestActivePolicyByCategory($category)
+    {
+        $this->db->query("SELECT * FROM policies
+                         WHERE policy_category = :category
+                         AND policy_status = 'active'
+                         ORDER BY effective_date DESC, last_updated DESC
+                         LIMIT 1");
+        $this->db->bind(':category', $category);
+        return $this->db->single();
     }
 
     // Check if policy name exists (for validation)
