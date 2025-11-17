@@ -88,9 +88,9 @@
                     <table class="data-table notifications-table">
                         <thead>
                             <tr>
-                                <th>Notification Type</th>
-                                <th>Who Sent It</th>
-                                <th>To Whom</th>
+                                <th>Notification</th>
+                                <th>From</th>
+                                <th>To</th>
                                 <th>Date Sent</th>
                             </tr>
                         </thead>
@@ -148,9 +148,9 @@
                     <table class="data-table notifications-table">
                         <thead>
                             <tr>
-                                <th>Notification Type</th>
-                                <th>Who Sent It</th>
-                                <th>To Whom</th>
+                                <th>Notification</th>
+                                <th>From</th>
+                                <th>To</th>
                                 <th>Date Sent</th>
                             </tr>
                         </thead>
