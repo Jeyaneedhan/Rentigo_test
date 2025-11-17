@@ -51,14 +51,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="<?php echo URLROOT; ?>/admin/documents"
-                            class="nav-link <?php echo ($data['page'] ?? '') === 'documents' ? 'active' : ''; ?>"
-                            data-tooltip="Documents">
-                            <i class="fas fa-file-alt"></i>
-                            <span class="nav-text">Documents</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="<?php echo URLROOT; ?>/admin/financials"
                             class="nav-link <?php echo ($data['page'] ?? '') === 'financials' ? 'active' : ''; ?>"
                             data-tooltip="Financials">

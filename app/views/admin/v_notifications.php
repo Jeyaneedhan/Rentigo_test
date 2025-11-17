@@ -8,11 +8,13 @@
             <p>Manage and send notifications to users</p>
         </div>
         <div class="header-actions">
-            <button class="btn btn-primary" onclick="sendNotification()">
+            <a href="<?php echo URLROOT; ?>/admin/sendNotification" class="btn btn-primary">
                 <i class="fas fa-paper-plane"></i> Send Notification
-            </button>
+            </a>
         </div>
     </div>
+
+    <?php flash('notification_message'); ?>
 
     <!-- Stats Cards -->
     <div class="stats-grid">
@@ -21,31 +23,9 @@
                 <i class="fas fa-bell"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['totalSent'] ?? 0; ?></h3>
+                <h3 class="stat-number"><?php echo $data['stats']->total_sent ?? 0; ?></h3>
                 <p class="stat-label">Total Sent</p>
                 <span class="stat-change">All notifications</span>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['delivered'] ?? 0; ?></h3>
-                <p class="stat-label">Delivered</p>
-                <span class="stat-change positive">Successfully sent</span>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['draft'] ?? 0; ?></h3>
-                <p class="stat-label">Draft</p>
-                <span class="stat-change">Pending send</span>
             </div>
         </div>
 
@@ -54,305 +34,340 @@
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['totalRecipients'] ?? 0; ?></h3>
+                <h3 class="stat-number"><?php echo $data['stats']->total_recipients ?? 0; ?></h3>
                 <p class="stat-label">Recipients</p>
-                <span class="stat-change">Total reach</span>
+                <span class="stat-change">Unique users</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <h3 class="stat-number"><?php echo $data['stats']->read_count ?? 0; ?></h3>
+                <p class="stat-label">Read</p>
+                <span class="stat-change positive">Acknowledged</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stat-info">
+                <h3 class="stat-number"><?php echo $data['stats']->unread_count ?? 0; ?></h3>
+                <p class="stat-label">Unread</p>
+                <span class="stat-change">Pending</span>
             </div>
         </div>
     </div>
 
-    <!-- Search and Filter Section -->
-    <div class="search-filter-section">
-        <div class="search-filter-content">
-            <div class="search-input-wrapper">
-                <input type="text" class="form-input" placeholder="Search notifications..." id="searchNotifications">
-            </div>
-            <div class="filter-dropdown-wrapper">
-                <select class="form-select" id="filterNotifications">
-                    <option value="">All Notifications</option>
-                    <option value="sent">Sent</option>
-                    <option value="draft">Draft</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notification History -->
+    <!-- Notification History with Tabs -->
     <div class="dashboard-section">
         <div class="section-header">
-            <h3>Notification History (3)</h3>
+            <h3>Notification History</h3>
         </div>
 
-        <div class="table-container">
-            <table class="data-table notifications-table">
-                <thead>
-                    <tr>
-                        <th>Notification</th>
-                        <th>Type</th>
-                        <th>Audience</th>
-                        <th>Recipients</th>
-                        <th>Date Sent</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr data-status="sent">
-                        <td>
-                            <div class="notification-info">
-                                <div class="notification-icon system">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="notification-details">
-                                    <div class="notification-title">System Maintenance Notice</div>
-                                    <div class="notification-preview">The property management system will unde...</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="type-badge system">System</span>
-                        </td>
-                        <td>All</td>
-                        <td>245</td>
-                        <td>01/07/2024</td>
-                        <td><span class="status-badge sent">Sent</span></td>
-                        <td>
-                            <div class="notification-actions">
-                                <button class="action-btn view-btn" onclick="viewNotification('NOT001')" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="action-btn danger-btn" onclick="deleteNotification('NOT001')" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-button active" data-tab="admin-sent">
+                    <i class="fas fa-user-shield"></i>
+                    Admin Sent (<?php echo count($data['adminNotifications'] ?? []); ?>)
+                </button>
+                <button class="tab-button" data-tab="other-notifications">
+                    <i class="fas fa-bell"></i>
+                    Other Notifications (<?php echo count($data['otherNotifications'] ?? []); ?>)
+                </button>
+            </div>
 
-                    <tr data-status="sent">
-                        <td>
-                            <div class="notification-info">
-                                <div class="notification-icon payment">
-                                    <i class="fas fa-credit-card"></i>
-                                </div>
-                                <div class="notification-details">
-                                    <div class="notification-title">New Payment Policy</div>
-                                    <div class="notification-preview">Starting next month, all rent payments must...</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="type-badge payment">Payment</span>
-                        </td>
-                        <td>Tenants</td>
-                        <td>156</td>
-                        <td>28/06/2024</td>
-                        <td><span class="status-badge sent">Sent</span></td>
-                        <td>
-                            <div class="notification-actions">
-                                <button class="action-btn view-btn" onclick="viewNotification('NOT002')" title="View">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="action-btn danger-btn" onclick="deleteNotification('NOT002')" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+            <!-- Tab 1: Admin Sent Notifications -->
+            <div class="tab-content active" id="admin-sent">
+                <div class="table-container">
+                    <table class="data-table notifications-table">
+                        <thead>
+                            <tr>
+                                <th>Notification</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Date Sent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($data['adminNotifications'])): ?>
+                                <?php foreach ($data['adminNotifications'] as $notification): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="notification-type-cell">
+                                                <i class="fas fa-info-circle type-icon"></i>
+                                                <span><?php echo ucfirst(str_replace('_', ' ', $notification->type)); ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <i class="fas fa-user-shield"></i>
+                                                <span><?php echo htmlspecialchars($notification->sender_name); ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <?php
+                                                $recipientIcon = match($notification->recipient_type) {
+                                                    'tenant' => 'fas fa-user',
+                                                    'landlord' => 'fas fa-home-user',
+                                                    'property_manager' => 'fas fa-user-tie',
+                                                    'admin' => 'fas fa-user-shield',
+                                                    default => 'fas fa-user'
+                                                };
+                                                ?>
+                                                <i class="<?php echo $recipientIcon; ?>"></i>
+                                                <span><?php echo htmlspecialchars($notification->recipient_name); ?></span>
+                                                <small class="user-type">(<?php echo ucfirst(str_replace('_', ' ', $notification->recipient_type)); ?>)</small>
+                                            </div>
+                                        </td>
+                                        <td><?php echo date('d M Y, H:i', strtotime($notification->created_at)); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 2rem; color: #6b7280;">
+                                        <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 0.5rem;"></i>
+                                        No admin notifications sent yet. Click "Send Notification" to send one.
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                    <tr data-status="draft">
-                        <td>
-                            <div class="notification-info">
-                                <div class="notification-icon general">
-                                    <i class="fas fa-info-circle"></i>
-                                </div>
-                                <div class="notification-details">
-                                    <div class="notification-title">Holiday Schedule Update</div>
-                                    <div class="notification-preview">Please note the updated office hours during...</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="type-badge general">General</span>
-                        </td>
-                        <td>All</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td><span class="status-badge draft">Draft</span></td>
-                        <td>
-                            <div class="notification-actions">
-                                <button class="action-btn view-btn" onclick="editNotification('NOT003')" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="action-btn send-btn" onclick="sendDraftNotification('NOT003')" title="Send">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                                <button class="action-btn danger-btn" onclick="deleteNotification('NOT003')" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Tab 2: Other Notifications -->
+            <div class="tab-content" id="other-notifications">
+                <div class="table-container">
+                    <table class="data-table notifications-table">
+                        <thead>
+                            <tr>
+                                <th>Notification</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Date Sent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($data['otherNotifications'])): ?>
+                                <?php foreach ($data['otherNotifications'] as $notification): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="notification-type-cell">
+                                                <?php
+                                                // Determine icon based on type
+                                                $typeIcon = match ($notification->type) {
+                                                    'payment' => 'fas fa-dollar-sign',
+                                                    'booking' => 'fas fa-calendar-check',
+                                                    'lease' => 'fas fa-file-contract',
+                                                    'property' => 'fas fa-home',
+                                                    'issue', 'issue_reported', 'issue_update' => 'fas fa-exclamation-triangle',
+                                                    'inspection', 'inspection_scheduled' => 'fas fa-clipboard-check',
+                                                    'maintenance', 'maintenance_request' => 'fas fa-tools',
+                                                    'review' => 'fas fa-star',
+                                                    default => 'fas fa-bell'
+                                                };
+                                                ?>
+                                                <i class="<?php echo $typeIcon; ?> type-icon"></i>
+                                                <span><?php echo ucfirst(str_replace('_', ' ', $notification->type)); ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <?php
+                                                $senderIcon = match($notification->sender_type) {
+                                                    'tenant' => 'fas fa-user',
+                                                    'landlord' => 'fas fa-home-user',
+                                                    'property_manager' => 'fas fa-user-tie',
+                                                    'system' => 'fas fa-robot',
+                                                    default => 'fas fa-user'
+                                                };
+                                                ?>
+                                                <i class="<?php echo $senderIcon; ?>"></i>
+                                                <span><?php echo htmlspecialchars($notification->sender_name); ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <?php
+                                                $recipientIcon = match($notification->recipient_type) {
+                                                    'tenant' => 'fas fa-user',
+                                                    'landlord' => 'fas fa-home-user',
+                                                    'property_manager' => 'fas fa-user-tie',
+                                                    'admin' => 'fas fa-user-shield',
+                                                    default => 'fas fa-user'
+                                                };
+                                                ?>
+                                                <i class="<?php echo $recipientIcon; ?>"></i>
+                                                <span><?php echo htmlspecialchars($notification->recipient_name); ?></span>
+                                                <small class="user-type">(<?php echo ucfirst(str_replace('_', ' ', $notification->recipient_type)); ?>)</small>
+                                            </div>
+                                        </td>
+                                        <td><?php echo date('d M Y, H:i', strtotime($notification->created_at)); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 2rem; color: #6b7280;">
+                                        <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 0.5rem;"></i>
+                                        No other notifications in the system yet.
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<style>
+/* Tabs Styling */
+.tabs-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tabs-header {
+    display: flex;
+    border-bottom: 2px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tab-button:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.tab-button.active {
+    color: #45a9ea;
+    border-bottom-color: #45a9ea;
+    background: white;
+}
+
+.tab-button i {
+    font-size: 1.1rem;
+}
+
+.tab-content {
+    display: none;
+    padding: 1.5rem;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Simplified Table Styling */
+.notifications-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.notifications-table th {
+    background: #f9fafb;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.notifications-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #4b5563;
+}
+
+.notifications-table tr:hover {
+    background: #f9fafb;
+}
+
+.notification-type-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.type-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e0f2fe;
+    color: #45a9ea;
+    border-radius: 50%;
+    font-size: 0.875rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-info i {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+.user-info .user-type {
+    color: #9ca3af;
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+</style>
+
 <script>
-    // Notification Management Functions - Global scope for onclick handlers
-    function sendNotification() {
-        showNotification('Send Notification functionality to be implemented', 'info')
-        // Here you would open a compose notification modal or navigate to compose page
-    }
+// Tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-    function viewNotification(notificationId) {
-        console.log('Viewing notification:', notificationId)
-        showNotification('Opening notification details...', 'info')
-        // Here you would open a view modal with full notification details
-    }
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
 
-    function editNotification(notificationId) {
-        console.log('Editing notification:', notificationId)
-        showNotification('Opening notification editor...', 'info')
-        // Here you would open an edit modal or navigate to edit page
-    }
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
 
-    function sendDraftNotification(notificationId) {
-        if (confirm('Are you sure you want to send this notification?')) {
-            const row = event.target.closest('tr')
-            const statusCell = row.querySelector('.status-badge')
-            const actionsCell = row.querySelector('.notification-actions')
-            const recipientsCell = row.cells[3]
-            const dateSentCell = row.cells[4]
-
-            // Update status
-            statusCell.textContent = 'Sent'
-            statusCell.className = 'status-badge sent'
-
-            // Update data attribute
-            row.dataset.status = 'sent'
-
-            // Update recipients and date
-            recipientsCell.textContent = '245'
-            dateSentCell.textContent = new Date().toLocaleDateString('en-GB')
-
-            // Update actions - remove send and edit, keep view and delete
-            actionsCell.innerHTML = `
-            <button class="action-btn view-btn" onclick="viewNotification('${notificationId}')" title="View">
-                <i class="fas fa-eye"></i>
-            </button>
-            <button class="action-btn danger-btn" onclick="deleteNotification('${notificationId}')" title="Delete">
-                <i class="fas fa-trash"></i>
-            </button>
-        `
-
-            showNotification('Notification sent successfully!', 'success')
-            updateNotificationStats()
-        }
-    }
-
-    function deleteNotification(notificationId) {
-        if (confirm('Are you sure you want to delete this notification? This action cannot be undone.')) {
-            const row = event.target.closest('tr')
-            row.remove()
-
-            // Update count in section header
-            const sectionHeader = document.querySelector('.section-header h3')
-            if (sectionHeader) {
-                const currentCount = parseInt(sectionHeader.textContent.match(/\((\d+)\)/)?.[1] || 0)
-                sectionHeader.textContent = `Notification History (${Math.max(0, currentCount - 1)})`
-            }
-
-            showNotification('Notification deleted successfully!', 'success')
-            updateNotificationStats()
-        }
-    }
-
-    function updateNotificationStats() {
-        const rows = document.querySelectorAll('.notifications-table tbody tr')
-        const totalNotifications = rows.length
-
-        let sentCount = 0
-        let draftCount = 0
-        let totalRecipients = 0
-
-        rows.forEach(row => {
-            const status = row.dataset.status
-            if (status === 'sent') {
-                sentCount++
-                const recipients = parseInt(row.cells[3].textContent) || 0
-                totalRecipients += recipients
-            }
-            if (status === 'draft') draftCount++
-        })
-
-        // Update stat cards
-        const statCards = document.querySelectorAll('.stat-card')
-        if (statCards.length >= 4) {
-            // Total Notifications
-            const totalStatNumber = statCards[0].querySelector('.stat-number')
-            if (totalStatNumber) totalStatNumber.textContent = totalNotifications
-
-            // Sent Notifications
-            const sentStatNumber = statCards[1].querySelector('.stat-number')
-            if (sentStatNumber) sentStatNumber.textContent = sentCount
-
-            // Draft Notifications
-            const draftStatNumber = statCards[2].querySelector('.stat-number')
-            if (draftStatNumber) draftStatNumber.textContent = draftCount
-
-            // Total Recipients
-            const recipientsStatNumber = statCards[3].querySelector('.stat-number')
-            if (recipientsStatNumber) recipientsStatNumber.textContent = totalRecipients
-        }
-    }
-
-    // Search and filter functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchNotifications')
-        const filterDropdown = document.getElementById('filterNotifications')
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase()
-                filterNotifications(searchTerm, filterDropdown.value)
-            })
-        }
-
-        if (filterDropdown) {
-            filterDropdown.addEventListener('change', function() {
-                const searchTerm = searchInput.value.toLowerCase()
-                filterNotifications(searchTerm, this.value)
-            })
-        }
-    })
-
-    function filterNotifications(searchTerm, statusFilter) {
-        const rows = document.querySelectorAll('.notifications-table tbody tr')
-        let visibleCount = 0
-
-        rows.forEach(row => {
-            const rowText = row.textContent.toLowerCase()
-            const rowStatus = row.dataset.status
-
-            const matchesSearch = !searchTerm || rowText.includes(searchTerm)
-            const matchesStatus = !statusFilter || rowStatus === statusFilter
-
-            if (matchesSearch && matchesStatus) {
-                row.style.display = ''
-                visibleCount++
-            } else {
-                row.style.display = 'none'
-            }
-        })
-
-        // Update section header count
-        const sectionHeader = document.querySelector('.section-header h3')
-        if (sectionHeader) {
-            const baseText = sectionHeader.textContent.replace(/\(\d+\)/, '')
-            sectionHeader.textContent = `${baseText}(${visibleCount})`
-        }
-    }
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        });
+    });
+});
 </script>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>

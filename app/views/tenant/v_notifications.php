@@ -53,17 +53,25 @@
                             $indicatorClass = 'info';
                             break;
                         case 'issue':
+                        case 'issue_reported':
+                        case 'issue_update':
                         case 'maintenance':
+                        case 'maintenance_request':
                             $iconClass = 'fa-tools';
                             $indicatorClass = 'warning';
                             break;
                         case 'inspection':
+                        case 'inspection_scheduled':
                             $iconClass = 'fa-clipboard-check';
                             $indicatorClass = 'info';
                             break;
                         case 'property':
                             $iconClass = 'fa-home';
                             $indicatorClass = 'info';
+                            break;
+                        case 'review':
+                            $iconClass = 'fa-star';
+                            $indicatorClass = 'success';
                             break;
                         case 'alert':
                         case 'system':

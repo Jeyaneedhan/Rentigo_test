@@ -552,7 +552,11 @@ class Policies extends Controller
             'security' => 'Security',
             'maintenance' => 'Maintenance',
             'financial' => 'Financial',
-            'general' => 'General'
+            'general' => 'General',
+            'privacy' => 'Privacy',
+            'terms_of_service' => 'Terms of Service',
+            'refund' => 'Refund',
+            'data_protection' => 'Data Protection'
         ];
     }
 
@@ -561,7 +565,9 @@ class Policies extends Controller
         return [
             'draft' => 'Draft',
             'active' => 'Active',
-            'inactive' => 'Inactive'
+            'inactive' => 'Inactive',
+            'archived' => 'Archived',
+            'under_review' => 'Under Review'
         ];
     }
 

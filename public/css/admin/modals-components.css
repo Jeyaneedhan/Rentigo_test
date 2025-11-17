@@ -362,6 +362,42 @@
   border-color: #10b981;
 }
 
+.category-badge.financial {
+  background-color: #fce7f3;
+  color: #831843;
+  border-color: #ec4899;
+}
+
+.category-badge.general {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  border-color: #6366f1;
+}
+
+.category-badge.privacy {
+  background-color: #f3e8ff;
+  color: #5b21b6;
+  border-color: #a855f7;
+}
+
+.category-badge.terms {
+  background-color: #cffafe;
+  color: #155e75;
+  border-color: #06b6d4;
+}
+
+.category-badge.refund {
+  background-color: #ffe4e6;
+  color: #881337;
+  border-color: #f43f5e;
+}
+
+.category-badge.data-protection {
+  background-color: #fef9c3;
+  color: #713f12;
+  border-color: #eab308;
+}
+
 /* Type Badges */
 .type-badge {
   padding: 0.25rem 0.75rem;
