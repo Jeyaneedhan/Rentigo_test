@@ -14,6 +14,8 @@
         </div>
     </div>
 
+    <?php flash('notification_message'); ?>
+
     <!-- Stats Cards -->
     <div class="stats-grid">
         <div class="stat-card">

@@ -469,7 +469,8 @@ class Manager extends Controller
             'page' => 'notifications',
             'user_name' => $_SESSION['user_name'],
             'notifications' => $notifications,
-            'unreadCount' => $unreadCount
+            'unreadCount' => $unreadCount,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_notifications', $data);
     }

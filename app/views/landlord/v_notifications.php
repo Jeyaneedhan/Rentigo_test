@@ -81,12 +81,16 @@
                                 $bgColor = 'rgba(16, 185, 129, 0.1)';
                                 break;
                             case 'maintenance':
+                            case 'maintenance_request':
                             case 'issue':
+                            case 'issue_reported':
+                            case 'issue_update':
                                 $iconClass = 'fa-tools';
                                 $iconColor = 'var(--warning-color)';
                                 $bgColor = 'rgba(245, 158, 11, 0.1)';
                                 break;
                             case 'inspection':
+                            case 'inspection_scheduled':
                                 $iconClass = 'fa-clipboard-check';
                                 $iconColor = 'var(--info-color)';
                                 $bgColor = 'rgba(59, 130, 246, 0.1)';
@@ -100,6 +104,11 @@
                                 $iconClass = 'fa-home';
                                 $iconColor = 'var(--info-color)';
                                 $bgColor = 'rgba(59, 130, 246, 0.1)';
+                                break;
+                            case 'review':
+                                $iconClass = 'fa-star';
+                                $iconColor = '#f59e0b';
+                                $bgColor = 'rgba(245, 158, 11, 0.1)';
                                 break;
                             case 'system':
                             case 'alert':
@@ -139,7 +148,7 @@
                             <div class="notification-meta">
                                 <span class="notification-type">
                                     <i class="fas fa-tag"></i>
-                                    <?php echo ucfirst($notification->type); ?>
+                                    <?php echo ucfirst(str_replace('_', ' ', $notification->type)); ?>
                                 </span>
                                 <span class="notification-date">
                                     <i class="fas fa-clock"></i>
