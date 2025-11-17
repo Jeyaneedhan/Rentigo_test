@@ -89,16 +89,6 @@ class Admin extends Controller
         $this->view('admin/v_managers', $data);
     }
 
-    // Documents management page
-    public function documents()
-    {
-        $data = [
-            'title' => 'Documents - Rentigo Admin',
-            'page' => 'documents'
-        ];
-        $this->view('admin/v_documents', $data);
-    }
-
     // Financial management page
     public function financials()
     {
