@@ -89,6 +89,8 @@
                         <option value="active" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
                         <option value="draft" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'draft') ? 'selected' : ''; ?>>Draft</option>
                         <option value="inactive" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                        <option value="archived" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'archived') ? 'selected' : ''; ?>>Archived</option>
+                        <option value="under_review" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'under_review') ? 'selected' : ''; ?>>Under Review</option>
                     </select>
                 </div>
                 <div class="filter-dropdown-wrapper">
@@ -159,17 +161,23 @@
                                         'security' => 'category-badge security',
                                         'maintenance' => 'category-badge maintenance',
                                         'financial' => 'category-badge financial',
-                                        'general' => 'category-badge general'
+                                        'general' => 'category-badge general',
+                                        'privacy' => 'category-badge privacy',
+                                        'terms_of_service' => 'category-badge terms',
+                                        'refund' => 'category-badge refund',
+                                        'data_protection' => 'category-badge data-protection'
                                     ];
                                     $categoryClass = $categoryClasses[$policy->policy_category] ?? 'category-badge';
+                                    // Format display name
+                                    $displayCategory = str_replace('_', ' ', ucwords($policy->policy_category, '_'));
                                     ?>
-                                    <span class="<?php echo $categoryClass; ?>"><?php echo ucfirst($policy->policy_category); ?></span>
+                                    <span class="<?php echo $categoryClass; ?>"><?php echo $displayCategory; ?></span>
                                 </td>
                                 <td>
                                     <div class="policy-description"><?php echo htmlspecialchars($policy->policy_description); ?></div>
                                 </td>
                                 <td><?php echo htmlspecialchars($policy->policy_version); ?></td>
-                                <td><?php echo date('d/m/Y', strtotime($policy->updated_at)); ?></td>
+                                <td><?php echo date('d/m/Y', strtotime($policy->last_updated)); ?></td>
                                 <td>
                                     <span class="status-badge <?php echo $policy->policy_status; ?>">
                                         <?php echo ucfirst($policy->policy_status); ?>
@@ -282,7 +290,7 @@
                     <div class="detail-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                         <div class="detail-item">
                             <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Category</label>
-                            <span class="category-badge ${policy.policy_category}">${policy.policy_category.charAt(0).toUpperCase() + policy.policy_category.slice(1)}</span>
+                            <span class="category-badge ${policy.policy_category}">${policy.policy_category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
                         </div>
                         <div class="detail-item">
                             <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Version</label>
@@ -290,7 +298,7 @@
                         </div>
                         <div class="detail-item">
                             <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Status</label>
-                            <span class="status-badge ${policy.policy_status}">${policy.policy_status.charAt(0).toUpperCase() + policy.policy_status.slice(1)}</span>
+                            <span class="status-badge ${policy.policy_status}">${policy.policy_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
                         </div>
                         <div class="detail-item">
                             <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Effective Date</label>
