@@ -192,31 +192,22 @@ class Admin extends Controller
     // Notifications page
     public function notifications()
     {
-        // Load notification model if exists, otherwise use dummy data
+        // Load notification model
         $notificationModel = $this->model('M_Notifications');
 
-        // Get all notifications sent by admin
-        $allNotifications = $notificationModel->getAllAdminNotifications();
+        // Get admin-sent notifications and other notifications separately
+        $adminNotifications = $notificationModel->getAdminSentNotifications();
+        $otherNotifications = $notificationModel->getOtherNotifications();
 
-        // Calculate statistics
-        $totalSent = count($allNotifications);
-        $delivered = count(array_filter($allNotifications, fn($n) => $n->status === 'sent' || $n->status === 'delivered'));
-        $draft = count(array_filter($allNotifications, fn($n) => $n->status === 'draft'));
-
-        // Calculate total recipients
-        $totalRecipients = 0;
-        foreach ($allNotifications as $notification) {
-            $totalRecipients += $notification->recipient_count ?? 1;
-        }
+        // Get statistics
+        $stats = $notificationModel->getNotificationStats();
 
         $data = [
             'title' => 'Notifications - Rentigo Admin',
             'page' => 'notifications',
-            'totalSent' => $totalSent,
-            'delivered' => $delivered,
-            'draft' => $draft,
-            'totalRecipients' => $totalRecipients,
-            'notifications' => $allNotifications
+            'adminNotifications' => $adminNotifications,
+            'otherNotifications' => $otherNotifications,
+            'stats' => $stats
         ];
         $this->view('admin/v_notifications', $data);
     }

@@ -256,6 +256,68 @@ class M_Notifications
         return $this->db->resultSet();
     }
 
+    // Get admin-sent notifications (system type) with recipient details
+    public function getAdminSentNotifications()
+    {
+        $this->db->query("SELECT
+                            n.id,
+                            n.type,
+                            n.title,
+                            n.message,
+                            n.created_at,
+                            u.name as recipient_name,
+                            u.user_type as recipient_type,
+                            'Admin' as sender_name,
+                            'System' as sender_type
+                         FROM notifications n
+                         INNER JOIN users u ON n.user_id = u.id
+                         WHERE n.type = 'system' OR n.type = 'alert'
+                         ORDER BY n.created_at DESC");
+
+        return $this->db->resultSet();
+    }
+
+    // Get other notifications (non-admin sent) with sender and recipient details
+    public function getOtherNotifications()
+    {
+        $this->db->query("SELECT
+                            n.id,
+                            n.type,
+                            n.title,
+                            n.message,
+                            n.created_at,
+                            recipient.name as recipient_name,
+                            recipient.user_type as recipient_type,
+                            CASE
+                                WHEN n.type IN ('booking', 'issue', 'issue_reported', 'maintenance', 'maintenance_request')
+                                    THEN 'Tenant'
+                                WHEN n.type IN ('payment', 'review')
+                                    THEN 'Landlord'
+                                WHEN n.type IN ('property', 'inspection', 'inspection_scheduled')
+                                    THEN 'Property Manager'
+                                WHEN n.type = 'lease'
+                                    THEN 'System'
+                                ELSE 'System'
+                            END as sender_name,
+                            CASE
+                                WHEN n.type IN ('booking', 'issue', 'issue_reported', 'maintenance', 'maintenance_request')
+                                    THEN 'tenant'
+                                WHEN n.type IN ('payment', 'review')
+                                    THEN 'landlord'
+                                WHEN n.type IN ('property', 'inspection', 'inspection_scheduled')
+                                    THEN 'property_manager'
+                                WHEN n.type = 'lease'
+                                    THEN 'system'
+                                ELSE 'system'
+                            END as sender_type
+                         FROM notifications n
+                         INNER JOIN users recipient ON n.user_id = recipient.id
+                         WHERE n.type NOT IN ('system', 'alert')
+                         ORDER BY n.created_at DESC");
+
+        return $this->db->resultSet();
+    }
+
     // Get notification statistics for admin
     public function getNotificationStats()
     {
