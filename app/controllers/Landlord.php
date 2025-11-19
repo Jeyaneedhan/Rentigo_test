@@ -9,7 +9,6 @@ class Landlord extends Controller
     private $leaseModel;
     private $propertyModel;
     private $maintenanceModel;
-    private $messageModel;
     private $notificationModel;
     private $reviewModel;
 
@@ -25,7 +24,6 @@ class Landlord extends Controller
         $this->leaseModel = $this->model('M_LeaseAgreements');
         $this->propertyModel = $this->model('M_Properties');
         $this->maintenanceModel = $this->model('M_Maintenance');
-        $this->messageModel = $this->model('M_Messages');
         $this->notificationModel = $this->model('M_Notifications');
         $this->reviewModel = $this->model('M_Reviews');
     }
@@ -52,7 +50,6 @@ class Landlord extends Controller
         $pendingMaintenance = $this->maintenanceModel->getPendingMaintenanceCount($_SESSION['user_id']);
         $recentBookings = $this->bookingModel->getBookingsByLandlord($_SESSION['user_id']);
         $recentPayments = $this->paymentModel->getRecentPayments($_SESSION['user_id'], 'landlord', 5);
-        $unreadMessages = $this->messageModel->getUnreadCount($_SESSION['user_id']);
         $unreadNotifications = $this->notificationModel->getUnreadCount($_SESSION['user_id']);
 
         // Get issue statistics
@@ -76,7 +73,6 @@ class Landlord extends Controller
             'pendingMaintenance' => $pendingMaintenance,
             'recentBookings' => $recentBookings,
             'recentPayments' => $recentPayments,
-            'unreadMessages' => $unreadMessages,
             'unreadNotifications' => $unreadNotifications,
             'issueStats' => $issueStats,
             'unread_notifications' => $this->getUnreadNotificationCount()
