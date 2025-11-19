@@ -11,7 +11,7 @@ class Issues extends Controller
             redirect('users/login');
         }
 
-        $this->issueModel = $this->model('Issue');
+        $this->issueModel = $this->model('M_Issue');
     }
 
     public function report()

@@ -50,7 +50,7 @@ class Manager extends Controller
 
         // Combine and sort all payments by date
         $combinedPayments = array_merge($allPayments, $maintenancePayments);
-        usort($combinedPayments, function($a, $b) {
+        usort($combinedPayments, function ($a, $b) {
             $dateA = $a->payment_date ?? $a->due_date ?? $a->created_at;
             $dateB = $b->payment_date ?? $b->due_date ?? $b->created_at;
             return strtotime($dateB) - strtotime($dateA);
@@ -87,7 +87,7 @@ class Manager extends Controller
         }
 
         // Get issue statistics
-        $issueModel = $this->model('Issue');
+        $issueModel = $this->model('M_Issue');
         $issueStats = $issueModel->getIssueStats($manager_id, 'manager');
 
         $data = [
@@ -195,7 +195,7 @@ class Manager extends Controller
 
     public function issues()
     {
-        $issueModel = $this->model('Issue');
+        $issueModel = $this->model('M_Issue');
         $manager_id = $_SESSION['user_id'];
 
         // Get issues for properties assigned to this PM
@@ -233,7 +233,7 @@ class Manager extends Controller
             redirect('manager/issues');
         }
 
-        $issueModel = $this->model('Issue');
+        $issueModel = $this->model('M_Issue');
         $issue = $issueModel->getIssueById($id);
 
         if (!$issue) {
@@ -279,7 +279,7 @@ class Manager extends Controller
             exit();
         }
 
-        $issueModel = $this->model('Issue');
+        $issueModel = $this->model('M_Issue');
         $issue = $issueModel->getIssueById($issue_id);
 
         if (!$issue) {
@@ -333,7 +333,7 @@ class Manager extends Controller
             exit();
         }
 
-        $issueModel = $this->model('Issue');
+        $issueModel = $this->model('M_Issue');
         $issue = $issueModel->getIssueById($issue_id);
 
         if (!$issue) {
@@ -531,7 +531,7 @@ class Manager extends Controller
         }
 
         // Sort payments by date (newest first)
-        usort($allPayments, function($a, $b) {
+        usort($allPayments, function ($a, $b) {
             $dateA = $a->payment_date ?? $a->due_date;
             $dateB = $b->payment_date ?? $b->due_date;
             return strtotime($dateB) - strtotime($dateA);
@@ -583,7 +583,7 @@ class Manager extends Controller
 
         // Combine and sort all payments by date
         $combinedPayments = array_merge($allPayments, $maintenancePayments);
-        usort($combinedPayments, function($a, $b) {
+        usort($combinedPayments, function ($a, $b) {
             $dateA = $a->payment_date ?? $a->due_date ?? $a->created_at;
             $dateB = $b->payment_date ?? $b->due_date ?? $b->created_at;
             return strtotime($dateB) - strtotime($dateA);

@@ -21,7 +21,7 @@ class Tenant extends Controller
         $this->leaseModel = $this->model('M_LeaseAgreements');
         $this->reviewModel = $this->model('M_Reviews');
         $this->notificationModel = $this->model('M_Notifications');
-        $this->issueModel = $this->model('Issue');
+        $this->issueModel = $this->model('M_Issue');
     }
 
     // Helper method to get unread notification count

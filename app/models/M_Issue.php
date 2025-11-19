@@ -1,5 +1,5 @@
 <?php
-class Issue
+class M_Issue
 {
     private $db;
 

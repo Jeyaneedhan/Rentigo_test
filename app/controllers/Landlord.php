@@ -53,7 +53,7 @@ class Landlord extends Controller
         $unreadNotifications = $this->notificationModel->getUnreadCount($_SESSION['user_id']);
 
         // Get issue statistics
-        $issueModel = $this->model('Issue');
+        $issueModel = $this->model('M_Issue');
         $issueStats = $issueModel->getIssueStats($_SESSION['user_id'], 'landlord');
 
         // Limit recent bookings to 5
@@ -109,7 +109,7 @@ class Landlord extends Controller
 
     public function inquiries()
     {
-        $issueModel = $this->model('Issue');
+        $issueModel = $this->model('M_Issue');
         $landlord_id = $_SESSION['user_id'];
 
         // Get all issues for this landlord's properties
@@ -279,7 +279,7 @@ class Landlord extends Controller
             redirect('landlord/inquiries');
         }
 
-        $issueModel = $this->model('Issue');
+        $issueModel = $this->model('M_Issue');
         $issue = $issueModel->getIssueById($id);
 
         if (!$issue) {
