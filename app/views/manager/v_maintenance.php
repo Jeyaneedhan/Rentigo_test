@@ -143,7 +143,7 @@
                                 </td>
                                 <td>
                                     <a href="<?php echo URLROOT; ?>/maintenance/details/<?php echo $request->id; ?>"
-                                       class="btn btn-sm btn-primary">
+                                        class="btn btn-sm btn-primary">
                                         <i class="fas fa-eye"></i> View
                                     </a>
                                 </td>
@@ -164,269 +164,267 @@
 </div>
 
 <style>
-.maintenance-content {
-    padding: 0;
-}
+    .maintenance-content {
+        padding: 0;
+    }
 
-.page-header {
-    margin-bottom: 2rem;
-    padding: 0;
-}
+    .page-header {
+        margin-bottom: 2rem;
+        padding: 0;
+    }
 
-.page-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin: 0 0 0.5rem 0;
-}
+    .page-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 0.5rem 0;
+    }
 
-.page-subtitle {
-    color: #6b7280;
-    margin: 0;
-}
+    .page-subtitle {
+        color: #6b7280;
+        margin: 0;
+    }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    padding: 0;
-}
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding: 0;
+    }
 
-.stat-card {
-    background: white;
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    border: 1px solid #e5e7eb;
-}
+    .stat-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        border: 1px solid #e5e7eb;
+    }
 
-.stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 0.5rem;
-    background: #f3f4f6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: #45a9ea;
-}
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
 
-.stat-content {
-    flex: 1;
-}
+    .stat-content {
+        flex: 1;
+    }
 
-.stat-label {
-    font-size: 0.875rem;
-    color: #6b7280;
-    margin: 0 0 0.25rem 0;
-}
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0 0 0.25rem 0;
+    }
 
-.stat-value {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: #1f2937;
-}
+    .stat-value {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
 
-.stat-change {
-    font-size: 0.813rem;
-    color: #6b7280;
-}
+    .stat-change {
+        font-size: 0.813rem;
+        color: #6b7280;
+    }
 
-.dashboard-section {
-    background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    margin: 0 0 1.5rem 0;
-}
+    .dashboard-section {
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin: 0 0 1.5rem 0;
+    }
 
-.header-actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
 
-.form-control {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-}
+    .form-control {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+    }
 
-.table-container {
-    overflow-x: auto;
-}
+    .table-container {
+        overflow-x: auto;
+    }
 
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.data-table th {
-    background: #f9fafb;
-    padding: 0.75rem;
-    text-align: left;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #6b7280;
-    text-transform: uppercase;
-    border-bottom: 1px solid #e5e7eb;
-}
+    .data-table th {
+        background: #f9fafb;
+        padding: 0.75rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e5e7eb;
+    }
 
-.data-table td {
-    padding: 1rem 0.75rem;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 0.875rem;
-}
+    .data-table td {
+        padding: 1rem 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+    }
 
-.font-medium {
-    font-weight: 500;
-}
+    .font-medium {
+        font-weight: 500;
+    }
 
-.text-muted {
-    color: #6b7280;
-}
+    .text-muted {
+        color: #6b7280;
+    }
 
-.text-center {
-    text-align: center;
-}
+    .text-center {
+        text-align: center;
+    }
 
-.priority-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
+    .priority-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
 
-.priority-low {
-    background: #d1fae5;
-    color: #065f46;
-}
+    .priority-low {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-.priority-medium {
-    background: #fef3c7;
-    color: #92400e;
-}
+    .priority-medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
 
-.priority-high {
-    background: #fee2e2;
-    color: #991b1b;
-}
+    .priority-high {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-.priority-emergency {
-    background: #991b1b;
-    color: white;
-}
+    .priority-emergency {
+        background: #991b1b;
+        color: white;
+    }
 
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-}
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
 
-.badge-warning {
-    background: #fef3c7;
-    color: #92400e;
-}
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
 
-.badge-success {
-    background: #d1fae5;
-    color: #065f46;
-}
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-.badge-info {
-    background: #dbeafe;
-    color: #1e40af;
-}
+    .badge-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-.status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
 
-.status-pending {
-    background: #fef3c7;
-    color: #92400e;
-}
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
 
-.status-scheduled {
-    background: #dbeafe;
-    color: #1e40af;
-}
+    .status-scheduled {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-.status-in_progress {
-    background: #cffafe;
-    color: #155e75;
-}
+    .status-in_progress {
+        background: #cffafe;
+        color: #155e75;
+    }
 
-.status-completed {
-    background: #d1fae5;
-    color: #065f46;
-}
+    .status-completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-.status-cancelled {
-    background: #fee2e2;
-    color: #991b1b;
-}
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-.btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.813rem;
-    border: none;
-    border-radius: 0.375rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-}
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.813rem;
+        border: none;
+        border-radius: 0.375rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
 
-.btn-primary {
-    background: #45a9ea;
-    color: white;
-}
+    .btn-primary {
+        background: #45a9ea;
+        color: white;
+    }
 
-.btn-primary:hover {
-    background: #3b82f6;
-}
+    .btn-primary:hover {
+        background: #3b82f6;
+    }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
-    const statusFilter = document.getElementById('statusFilter');
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function() {
-            const selectedStatus = this.value.toLowerCase();
-            const rows = document.querySelectorAll('.data-table tbody tr[data-status]');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter functionality
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                const selectedStatus = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.data-table tbody tr[data-status]');
 
-            rows.forEach(row => {
-                if (selectedStatus === '') {
-                    row.style.display = '';
-                } else {
-                    const rowStatus = row.getAttribute('data-status');
-                    if (rowStatus === selectedStatus) {
+                rows.forEach(row => {
+                    if (selectedStatus === '') {
                         row.style.display = '';
                     } else {
-                        row.style.display = 'none';
+                        const rowStatus = row.getAttribute('data-status');
+                        if (rowStatus === selectedStatus) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
                     }
-                }
+                });
             });
-        });
-    }
-});
+        }
+    });
 </script>
 
 <?php require APPROOT . '/views/inc/manager_footer.php'; ?>

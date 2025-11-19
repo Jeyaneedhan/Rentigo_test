@@ -88,14 +88,14 @@
                             <label>Days Remaining:</label>
                             <span>
                                 <?php
-                                    $today = new DateTime();
-                                    $end = new DateTime($lease->end_date);
-                                    $diff = $today->diff($end);
-                                    if ($diff->invert) {
-                                        echo 'Expired';
-                                    } else {
-                                        echo $diff->days . ' days';
-                                    }
+                                $today = new DateTime();
+                                $end = new DateTime($lease->end_date);
+                                $diff = $today->diff($end);
+                                if ($diff->invert) {
+                                    echo 'Expired';
+                                } else {
+                                    echo $diff->days . ' days';
+                                }
                                 ?>
                             </span>
                         </div>
@@ -162,8 +162,8 @@
                     <?php if (!$lease->signed_by_tenant && $lease->status === 'pending_signatures'): ?>
                         <div style="margin-top: 1.5rem;">
                             <a href="<?php echo URLROOT; ?>/leaseagreements/signTenant/<?php echo $lease->id; ?>"
-                               class="btn btn-primary btn-lg"
-                               onclick="return confirm('Are you sure you want to sign this lease agreement? This action cannot be undone.');">
+                                class="btn btn-primary btn-lg"
+                                onclick="return confirm('Are you sure you want to sign this lease agreement? This action cannot be undone.');">
                                 <i class="fas fa-pen"></i> Sign Lease Agreement
                             </a>
                         </div>
@@ -188,39 +188,29 @@
                     </p>
                     <div class="payment-schedule">
                         <?php
-                            $start = new DateTime($lease->start_date);
-                            $end = new DateTime($lease->end_date);
-                            $months = $lease->lease_duration_months ?? 1;
-                            $monthlyPayment = $lease->monthly_rent * 1.10; // Include 10% service fee
+                        $start = new DateTime($lease->start_date);
+                        $end = new DateTime($lease->end_date);
+                        $months = $lease->lease_duration_months ?? 1;
+                        $monthlyPayment = $lease->monthly_rent * 1.10; // Include 10% service fee
 
-                            for ($i = 0; $i < $months; $i++) {
-                                $paymentDate = clone $start;
-                                $paymentDate->modify("+$i month");
+                        for ($i = 0; $i < $months; $i++) {
+                            $paymentDate = clone $start;
+                            $paymentDate->modify("+$i month");
 
-                                // Determine if this payment is in the past
-                                $today = new DateTime();
-                                $isPast = $paymentDate < $today;
-                                $isCurrent = $paymentDate->format('Y-m') === $today->format('Y-m');
+                            // Determine if this payment is in the past
+                            $today = new DateTime();
+                            $isPast = $paymentDate < $today;
+                            $isCurrent = $paymentDate->format('Y-m') === $today->format('Y-m');
 
-                                echo '<div class="payment-item' . ($isCurrent ? ' current-month' : '') . '">';
-                                echo '<span class="payment-month">Month ' . ($i + 1) . '</span>';
-                                echo '<span class="payment-date">' . $paymentDate->format('F Y') . '</span>';
-                                echo '<span class="payment-amount">LKR ' . number_format($monthlyPayment, 2) . '</span>';
-                                echo '</div>';
-                            }
+                            echo '<div class="payment-item' . ($isCurrent ? ' current-month' : '') . '">';
+                            echo '<span class="payment-month">Month ' . ($i + 1) . '</span>';
+                            echo '<span class="payment-date">' . $paymentDate->format('F Y') . '</span>';
+                            echo '<span class="payment-amount">LKR ' . number_format($monthlyPayment, 2) . '</span>';
+                            echo '</div>';
+                        }
                         ?>
                     </div>
                 </div>
-
-                <!-- Action Buttons -->
-                <?php if ($lease->status === 'active' || $lease->status === 'completed'): ?>
-                    <div class="action-buttons">
-                        <a href="<?php echo URLROOT; ?>/leaseagreements/download/<?php echo $lease->id; ?>"
-                           class="btn btn-primary" target="_blank">
-                            <i class="fas fa-download"></i> Download PDF
-                        </a>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     <?php else: ?>

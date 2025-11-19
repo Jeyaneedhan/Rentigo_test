@@ -139,7 +139,7 @@ class Landlord extends Controller
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
-        $this->view('landlord/v_issues', $data);
+        $this->view('landlord/v_inquiries', $data);
     }
 
     public function payment_history()

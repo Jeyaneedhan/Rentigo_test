@@ -11,7 +11,7 @@
     <!-- KPI Cards -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon" style="background-color: var(--primary-color);">
+            <div class="stat-icon">
                 <i class="fas fa-building"></i>
             </div>
             <div class="stat-info">
@@ -22,7 +22,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon" style="background-color: var(--success-color);">
+            <div class="stat-icon">
                 <i class="fas fa-home"></i>
             </div>
             <div class="stat-info">
@@ -33,7 +33,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon" style="background-color: var(--success-color);">
+            <div class="stat-icon">
                 <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="stat-info">
@@ -44,7 +44,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon" style="background-color: var(--warning-color);">
+            <div class="stat-icon">
                 <i class="fas fa-arrow-down"></i>
             </div>
             <div class="stat-info">
@@ -80,10 +80,10 @@
                         <?php if (!empty($data['recentPayments'])): ?>
                             <?php foreach ($data['recentPayments'] as $payment): ?>
                                 <?php
-                                    $isMaintenance = isset($payment->payment_type) && $payment->payment_type === 'maintenance';
-                                    $customerName = $isMaintenance ? ($payment->landlord_name ?? 'N/A') : ($payment->tenant_name ?? 'N/A');
-                                    $totalPayment = $isMaintenance ? $payment->amount : ($payment->amount * 1.10);
-                                    $platformFee = $isMaintenance ? $payment->amount : ($payment->amount * 0.10);
+                                $isMaintenance = isset($payment->payment_type) && $payment->payment_type === 'maintenance';
+                                $customerName = $isMaintenance ? ($payment->landlord_name ?? 'N/A') : ($payment->tenant_name ?? 'N/A');
+                                $totalPayment = $isMaintenance ? $payment->amount : ($payment->amount * 1.10);
+                                $platformFee = $isMaintenance ? $payment->amount : ($payment->amount * 0.10);
                                 ?>
                                 <tr>
                                     <td>
@@ -129,19 +129,17 @@
                             </div>
                             <div class="maintenance-status">
                                 <span class="status-badge <?php
-                                    echo $maintenance->status === 'completed' ? 'approved' :
-                                        ($maintenance->status === 'in_progress' || $maintenance->status === 'approved' ? 'pending' :
-                                        ($maintenance->status === 'urgent' ? 'rejected' : 'pending'));
-                                ?>">
+                                                            echo $maintenance->status === 'completed' ? 'approved' : ($maintenance->status === 'in_progress' || $maintenance->status === 'approved' ? 'pending' : ($maintenance->status === 'urgent' ? 'rejected' : 'pending'));
+                                                            ?>">
                                     <?php echo ucfirst(str_replace('_', ' ', $maintenance->status)); ?>
                                 </span>
                                 <small class="text-muted">
                                     <?php
-                                        if ($maintenance->status === 'completed' && !empty($maintenance->completed_at)) {
-                                            echo 'Completed: ' . date('M d', strtotime($maintenance->completed_at));
-                                        } else {
-                                            echo 'Reported: ' . date('M d', strtotime($maintenance->created_at));
-                                        }
+                                    if ($maintenance->status === 'completed' && !empty($maintenance->completed_at)) {
+                                        echo 'Completed: ' . date('M d', strtotime($maintenance->completed_at));
+                                    } else {
+                                        echo 'Reported: ' . date('M d', strtotime($maintenance->created_at));
+                                    }
                                     ?>
                                 </small>
                             </div>

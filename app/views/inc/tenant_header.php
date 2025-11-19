@@ -99,6 +99,15 @@
                         <div class="tooltip">My Reviews</div>
                     </li>
                     <li class="nav-item">
+                        <a href="<?php echo URLROOT; ?>/tenant/feedback"
+                            class="nav-link <?php echo ($data['page'] ?? '') === 'feedback' ? 'active' : ''; ?>"
+                            data-tooltip="Feedback">
+                            <i class="fas fa-comment"></i>
+                            <span class="nav-text">Feedback</span>
+                        </a>
+                        <div class="tooltip">Feedback</div>
+                    </li>
+                    <li class="nav-item">
                         <a href="<?php echo URLROOT; ?>/tenant/notifications"
                             class="nav-link <?php echo ($data['page'] ?? '') === 'notifications' ? 'active' : ''; ?>"
                             data-tooltip="Notifications">
@@ -113,15 +122,6 @@
                             ?>
                         </a>
                         <div class="tooltip">Notifications</div>
-                    </li>
-                    <li class="nav-item">
-                        <a href="<?php echo URLROOT; ?>/tenant/feedback"
-                            class="nav-link <?php echo ($data['page'] ?? '') === 'feedback' ? 'active' : ''; ?>"
-                            data-tooltip="Feedback">
-                            <i class="fas fa-comment"></i>
-                            <span class="nav-text">Feedback</span>
-                        </a>
-                        <div class="tooltip">Feedback</div>
                     </li>
                     <!-- <li class="nav-item">
                         <a href="<?php echo URLROOT; ?>/tenant/settings"

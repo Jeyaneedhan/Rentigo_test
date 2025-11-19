@@ -242,7 +242,7 @@
     }
 
     .section-title i {
-        color: #3b82f6;
+        color: #45a9ea;
     }
 
     .form-group {
@@ -371,7 +371,7 @@
     }
 
     .btn-primary {
-        background-color: #3b82f6;
+        background-color: #45a9ea;
         color: white;
     }
 

@@ -136,16 +136,15 @@
 
 .stat-card {
   background: white;
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid var(--primary-color);
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
-.stat-card.success {
+/* .stat-card.success {
   border-left-color: var(--success-color);
 }
 
@@ -159,7 +158,7 @@
 
 .stat-card.danger {
   border-left-color: var(--danger-color);
-}
+} */
 
 .stat-icon {
   width: 3rem;
@@ -179,7 +178,7 @@
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0.5rem 0;

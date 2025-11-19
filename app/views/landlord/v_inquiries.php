@@ -3,286 +3,546 @@
 <div class="page-header">
     <div class="header-left">
         <h1 class="page-title">Tenant Inquiries</h1>
-        <p class="page-subtitle">Manage messages from tenants and potential tenants</p>
+        <p class="page-subtitle">View and track inquiries reported by your tenants</p>
     </div>
 </div>
 
-<?php flash('message_flash'); ?>
+<?php flash('issue_message'); ?>
+<?php flash('issue_error'); ?>
 
-<!-- Stats -->
+<!-- Statistics Cards -->
 <div class="stats-grid">
-    <div class="stat-card info">
+    <div class="stat-card">
         <div class="stat-icon">
-            <i class="fas fa-envelope"></i>
+            <i class="fas fa-exclamation-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Total Messages</h3>
-            <div class="stat-value"><?php echo count($data['messages'] ?? []); ?></div>
+            <h3 class="stat-label">Total Inquiries</h3>
+            <div class="stat-value"><?php echo $data['issueStats']->total_issues ?? 0; ?></div>
             <div class="stat-change">All time</div>
         </div>
     </div>
-    <div class="stat-card warning">
+    <div class="stat-card">
         <div class="stat-icon">
-            <i class="fas fa-envelope-open"></i>
+            <i class=" fas fa-clock"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Unread Messages</h3>
-            <div class="stat-value"><?php echo $data['unreadCount'] ?? 0; ?></div>
-            <div class="stat-change">Requires attention</div>
+            <h3 class="stat-label">Pending</h3>
+            <div class="stat-value"><?php echo $data['issueStats']->pending_count ?? 0; ?></div>
+            <div class="stat-change">Awaiting action</div>
         </div>
     </div>
-    <div class="stat-card success">
+    <div class="stat-card">
         <div class="stat-icon">
-            <i class="fas fa-check"></i>
+            <i class="fas fa-spinner"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Read Messages</h3>
-            <div class="stat-value">
-                <?php echo count($data['messages'] ?? []) - ($data['unreadCount'] ?? 0); ?>
-            </div>
-            <div class="stat-change">Acknowledged</div>
+            <h3 class="stat-label">In Progress</h3>
+            <div class="stat-value"><?php echo $data['issueStats']->in_progress_count ?? 0; ?></div>
+            <div class="stat-change">Being worked on</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <h3 class="stat-label">Resolved</h3>
+            <div class="stat-value"><?php echo $data['issueStats']->resolved_count ?? 0; ?></div>
+            <div class="stat-change">Completed</div>
         </div>
     </div>
 </div>
 
-<!-- Messages List -->
-<div class="inquiries-container">
-    <?php if (!empty($data['messages'])): ?>
-        <?php foreach ($data['messages'] as $message): ?>
-            <div class="inquiry-card <?php echo $message->is_read ? 'read' : 'new'; ?>">
-                <div class="inquiry-header">
-                    <div class="inquiry-info">
-                        <h3><?php echo htmlspecialchars($message->sender_name ?? 'Tenant'); ?></h3>
-                        <p class="inquiry-property">
-                            <?php if ($message->property_address): ?>
-                                RE: <?php echo htmlspecialchars($message->property_address); ?>
-                            <?php endif; ?>
-                        </p>
-                        <p class="inquiry-date">
-                            <?php
-                                $time = strtotime($message->created_at);
-                                $diff = time() - $time;
+<!-- Issues Container -->
+<div class="issues-container">
+    <!-- Tabs -->
+    <div class="tabs-nav">
+        <button class="tab-button active" onclick="showTab('all')">
+            All (<?php echo count($data['allIssues'] ?? []); ?>)
+        </button>
+        <button class="tab-button" onclick="showTab('pending')">
+            Pending (<?php echo count($data['pendingIssues'] ?? []); ?>)
+        </button>
+        <button class="tab-button" onclick="showTab('in-progress')">
+            In Progress (<?php echo count($data['inProgressIssues'] ?? []); ?>)
+        </button>
+        <button class="tab-button" onclick="showTab('resolved')">
+            Resolved (<?php echo count($data['resolvedIssues'] ?? []); ?>)
+        </button>
+    </div>
 
-                                if ($diff < 3600) {
-                                    echo 'Received ' . floor($diff / 60) . ' minutes ago';
-                                } elseif ($diff < 86400) {
-                                    echo 'Received ' . floor($diff / 3600) . ' hours ago';
-                                } elseif ($diff < 604800) {
-                                    echo 'Received ' . floor($diff / 86400) . ' days ago';
-                                } else {
-                                    echo 'Received ' . date('M d, Y', $time);
-                                }
-                            ?>
-                        </p>
+    <!-- All Issues Tab -->
+    <div id="all-tab" class="tab-content active">
+        <?php if (!empty($data['allIssues'])): ?>
+            <div class="issues-grid">
+                <?php foreach ($data['allIssues'] as $issue): ?>
+                    <div class="issue-card" onclick="window.location.href='<?php echo URLROOT; ?>/landlord/issueDetails/<?php echo $issue->id; ?>'" style="cursor: pointer;">
+                        <div class="issue-header">
+                            <div class="issue-title-section">
+                                <h3><?php echo htmlspecialchars($issue->title); ?></h3>
+                                <span class="priority-badge <?php echo $issue->priority; ?>">
+                                    <?php echo strtoupper($issue->priority); ?>
+                                </span>
+                            </div>
+                            <span class="status-badge <?php echo $issue->status; ?>">
+                                <?php echo ucfirst(str_replace('_', ' ', $issue->status)); ?>
+                            </span>
+                        </div>
+                        <div class="issue-body">
+                            <p class="issue-property">
+                                <i class="fas fa-building"></i>
+                                <?php echo htmlspecialchars($issue->property_address); ?>
+                            </p>
+                            <p class="issue-tenant">
+                                <i class="fas fa-user"></i>
+                                Reported by: <?php echo htmlspecialchars($issue->tenant_name); ?>
+                            </p>
+                            <p class="issue-description">
+                                <?php echo htmlspecialchars(substr($issue->description, 0, 100)); ?>
+                                <?php echo strlen($issue->description) > 100 ? '...' : ''; ?>
+                            </p>
+                        </div>
+                        <div class="issue-footer">
+                            <span class="issue-category">
+                                <i class="fas fa-tag"></i>
+                                <?php echo ucfirst($issue->category); ?>
+                            </span>
+                            <span class="issue-date">
+                                <?php echo date('M d, Y', strtotime($issue->created_at)); ?>
+                            </span>
+                        </div>
                     </div>
-                    <div class="inquiry-status">
-                        <?php if (!$message->is_read): ?>
-                            <span class="badge badge-info">New</span>
-                        <?php else: ?>
-                            <span class="badge badge-success">Read</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="inquiry-body">
-                    <div class="inquiry-details">
-                        <p><strong>From:</strong> <?php echo htmlspecialchars($message->sender_email ?? 'N/A'); ?></p>
-                        <p><strong>Subject:</strong> <?php echo htmlspecialchars($message->subject); ?></p>
-                        <p><strong>Date:</strong> <?php echo date('M d, Y - H:i', strtotime($message->created_at)); ?></p>
-                    </div>
-                    <div class="inquiry-message">
-                        <p><strong>Message:</strong></p>
-                        <p><?php echo nl2br(htmlspecialchars($message->message)); ?></p>
-                    </div>
-                    <div class="inquiry-actions">
-                        <a href="<?php echo URLROOT; ?>/messages/reply/<?php echo $message->id; ?>"
-                           class="btn btn-primary btn-sm">
-                            <i class="fas fa-reply"></i> Reply
-                        </a>
-                        <a href="<?php echo URLROOT; ?>/messages/thread/<?php echo $message->id; ?>"
-                           class="btn btn-secondary btn-sm">
-                            <i class="fas fa-eye"></i> View Full Thread
-                        </a>
-                        <?php if (!$message->is_read): ?>
-                            <button onclick="markAsRead(<?php echo $message->id; ?>)"
-                                    class="btn btn-outline btn-sm">
-                                <i class="fas fa-check"></i> Mark as Read
-                            </button>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>No messages yet</p>
-            <span>Messages and inquiries from tenants will appear here.</span>
-        </div>
-    <?php endif; ?>
-</div>
+        <?php else: ?>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No issues reported yet</p>
+            </div>
+        <?php endif; ?>
+    </div>
 
-<script>
-function markAsRead(messageId) {
-    fetch('<?php echo URLROOT; ?>/messages/markAsRead/' + messageId, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to mark message as read');
-    });
-}
-</script>
+    <!-- Pending Issues Tab -->
+    <div id="pending-tab" class="tab-content">
+        <?php if (!empty($data['pendingIssues'])): ?>
+            <div class="issues-grid">
+                <?php foreach ($data['pendingIssues'] as $issue): ?>
+                    <div class="issue-card" onclick="window.location.href='<?php echo URLROOT; ?>/landlord/issueDetails/<?php echo $issue->id; ?>'" style="cursor: pointer;">
+                        <div class="issue-header">
+                            <div class="issue-title-section">
+                                <h3><?php echo htmlspecialchars($issue->title); ?></h3>
+                                <span class="priority-badge <?php echo $issue->priority; ?>">
+                                    <?php echo strtoupper($issue->priority); ?>
+                                </span>
+                            </div>
+                            <span class="status-badge <?php echo $issue->status; ?>">
+                                <?php echo ucfirst(str_replace('_', ' ', $issue->status)); ?>
+                            </span>
+                        </div>
+                        <div class="issue-body">
+                            <p class="issue-property">
+                                <i class="fas fa-building"></i>
+                                <?php echo htmlspecialchars($issue->property_address); ?>
+                            </p>
+                            <p class="issue-tenant">
+                                <i class="fas fa-user"></i>
+                                Reported by: <?php echo htmlspecialchars($issue->tenant_name); ?>
+                            </p>
+                            <p class="issue-description">
+                                <?php echo htmlspecialchars(substr($issue->description, 0, 100)); ?>
+                                <?php echo strlen($issue->description) > 100 ? '...' : ''; ?>
+                            </p>
+                        </div>
+                        <div class="issue-footer">
+                            <span class="issue-category">
+                                <i class="fas fa-tag"></i>
+                                <?php echo ucfirst($issue->category); ?>
+                            </span>
+                            <span class="issue-date">
+                                <?php echo date('M d, Y', strtotime($issue->created_at)); ?>
+                            </span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No pending issues</p>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- In Progress Issues Tab -->
+    <div id="in-progress-tab" class="tab-content">
+        <?php if (!empty($data['inProgressIssues'])): ?>
+            <div class="issues-grid">
+                <?php foreach ($data['inProgressIssues'] as $issue): ?>
+                    <div class="issue-card" onclick="window.location.href='<?php echo URLROOT; ?>/landlord/issueDetails/<?php echo $issue->id; ?>'" style="cursor: pointer;">
+                        <div class="issue-header">
+                            <div class="issue-title-section">
+                                <h3><?php echo htmlspecialchars($issue->title); ?></h3>
+                                <span class="priority-badge <?php echo $issue->priority; ?>">
+                                    <?php echo strtoupper($issue->priority); ?>
+                                </span>
+                            </div>
+                            <span class="status-badge <?php echo $issue->status; ?>">
+                                <?php echo ucfirst(str_replace('_', ' ', $issue->status)); ?>
+                            </span>
+                        </div>
+                        <div class="issue-body">
+                            <p class="issue-property">
+                                <i class="fas fa-building"></i>
+                                <?php echo htmlspecialchars($issue->property_address); ?>
+                            </p>
+                            <p class="issue-tenant">
+                                <i class="fas fa-user"></i>
+                                Reported by: <?php echo htmlspecialchars($issue->tenant_name); ?>
+                            </p>
+                            <p class="issue-description">
+                                <?php echo htmlspecialchars(substr($issue->description, 0, 100)); ?>
+                                <?php echo strlen($issue->description) > 100 ? '...' : ''; ?>
+                            </p>
+                        </div>
+                        <div class="issue-footer">
+                            <span class="issue-category">
+                                <i class="fas fa-tag"></i>
+                                <?php echo ucfirst($issue->category); ?>
+                            </span>
+                            <span class="issue-date">
+                                <?php echo date('M d, Y', strtotime($issue->created_at)); ?>
+                            </span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No issues in progress</p>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Resolved Issues Tab -->
+    <div id="resolved-tab" class="tab-content">
+        <?php if (!empty($data['resolvedIssues'])): ?>
+            <div class="issues-grid">
+                <?php foreach ($data['resolvedIssues'] as $issue): ?>
+                    <div class="issue-card" onclick="window.location.href='<?php echo URLROOT; ?>/landlord/issueDetails/<?php echo $issue->id; ?>'" style="cursor: pointer;">
+                        <div class="issue-header">
+                            <div class="issue-title-section">
+                                <h3><?php echo htmlspecialchars($issue->title); ?></h3>
+                                <span class="priority-badge <?php echo $issue->priority; ?>">
+                                    <?php echo strtoupper($issue->priority); ?>
+                                </span>
+                            </div>
+                            <span class="status-badge <?php echo $issue->status; ?>">
+                                <?php echo ucfirst(str_replace('_', ' ', $issue->status)); ?>
+                            </span>
+                        </div>
+                        <div class="issue-body">
+                            <p class="issue-property">
+                                <i class="fas fa-building"></i>
+                                <?php echo htmlspecialchars($issue->property_address); ?>
+                            </p>
+                            <p class="issue-tenant">
+                                <i class="fas fa-user"></i>
+                                Reported by: <?php echo htmlspecialchars($issue->tenant_name); ?>
+                            </p>
+                            <p class="issue-description">
+                                <?php echo htmlspecialchars(substr($issue->description, 0, 100)); ?>
+                                <?php echo strlen($issue->description) > 100 ? '...' : ''; ?>
+                            </p>
+                        </div>
+                        <div class="issue-footer">
+                            <span class="issue-category">
+                                <i class="fas fa-tag"></i>
+                                <?php echo ucfirst($issue->category); ?>
+                            </span>
+                            <span class="issue-date">
+                                Resolved: <?php echo date('M d, Y', strtotime($issue->resolved_at ?? $issue->updated_at)); ?>
+                            </span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No resolved issues</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
 
 <style>
-.inquiries-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
 
-.inquiry-card {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-}
+    .stat-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
 
-.inquiry-card.new {
-    border-left: 4px solid #3b82f6;
-    background: #f8f9ff;
-}
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
 
-.inquiry-card.read {
-    opacity: 0.9;
-}
+    .stat-content {
+        flex: 1;
+    }
 
-.inquiry-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 20px;
-    border-bottom: 1px solid #e0e0e0;
-    background: #f8f9fa;
-}
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0 0 0.25rem 0;
+    }
 
-.inquiry-info h3 {
-    margin: 0 0 8px 0;
-    font-size: 18px;
-    color: #333;
-}
+    .stat-value {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
 
-.inquiry-property {
-    color: #667eea;
-    font-size: 14px;
-    margin: 0 0 5px 0;
-}
+    .stat-change {
+        font-size: 0.813rem;
+        color: #6b7280;
+    }
 
-.inquiry-date {
-    color: #999;
-    font-size: 13px;
-    margin: 0;
-}
+    .issues-container {
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+    }
 
-.inquiry-status {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-end;
-}
+    .tabs-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
 
-.priority-badge {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 600;
-}
+    .tab-button {
+        padding: 0.75rem 1.5rem;
+        background: none;
+        border: none;
+        font-weight: 600;
+        color: #6b7280;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+    }
 
-.priority-high {
-    background: #fee;
-    color: #e74c3c;
-}
+    .tab-button.active {
+        color: #45a9ea;
+        border-bottom-color: #45a9ea;
+    }
 
-.inquiry-body {
-    padding: 20px;
-}
+    .tab-button:hover {
+        color: #45a9ea;
+    }
 
-.inquiry-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 6px;
-}
+    .tab-content {
+        display: none;
+    }
 
-.inquiry-details p {
-    margin: 0;
-    font-size: 14px;
-    color: #666;
-}
+    .tab-content.active {
+        display: block;
+    }
 
-.inquiry-details strong {
-    color: #333;
-}
+    .issues-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
 
-.inquiry-message {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 6px;
-}
+    .issue-card {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        transition: all 0.2s;
+    }
 
-.inquiry-message p:first-child {
-    margin-bottom: 10px;
-    color: #333;
-}
+    .issue-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
 
-.inquiry-message p:last-child {
-    color: #444;
-    line-height: 1.6;
-}
+    .issue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
 
-.inquiry-actions {
-    display: flex;
-    gap: 10px;
-    padding-top: 15px;
-    border-top: 1px solid #e0e0e0;
-}
+    .issue-title-section {
+        flex: 1;
+    }
 
-.empty-state {
-    text-align: center;
-    padding: 80px 20px;
-    background: white;
-    border-radius: 8px;
-}
+    .issue-title-section h3 {
+        font-size: 1.125rem;
+        color: #1f2937;
+        margin: 0 0 0.5rem 0;
+    }
 
-.empty-state i {
-    font-size: 64px;
-    color: #ddd;
-    margin-bottom: 20px;
-}
+    .priority-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.688rem;
+        font-weight: 700;
+    }
 
-.empty-state p {
-    font-size: 20px;
-    font-weight: 600;
-    color: #666;
-    margin-bottom: 10px;
-}
+    .priority-badge.emergency {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-.empty-state span {
-    font-size: 14px;
-    color: #999;
-}
+    .priority-badge.high {
+        background: #fed7aa;
+        color: #9a3412;
+    }
+
+    .priority-badge.medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .priority-badge.low {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-badge.in_progress {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-badge.resolved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .issue-body {
+        margin-bottom: 1rem;
+    }
+
+    .issue-property,
+    .issue-tenant {
+        font-size: 0.875rem;
+        color: #4b5563;
+        margin: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .issue-property i,
+    .issue-tenant i {
+        color: #9ca3af;
+        width: 16px;
+    }
+
+    .issue-description {
+        font-size: 0.875rem;
+        color: #6b7280;
+        line-height: 1.5;
+        margin: 0.75rem 0 0 0;
+    }
+
+    .issue-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e5e7eb;
+        font-size: 0.813rem;
+        color: #6b7280;
+    }
+
+    .issue-category {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-state p {
+        font-size: 1.125rem;
+        margin: 0;
+    }
 </style>
+
+<script>
+    function showTab(tabName) {
+        // Hide all tabs
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => tab.classList.remove('active'));
+
+        // Remove active class from all buttons
+        const buttons = document.querySelectorAll('.tab-button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // Show selected tab
+        const selectedTab = document.getElementById(tabName + '-tab');
+        if (selectedTab) {
+            selectedTab.classList.add('active');
+        }
+
+        // Activate button
+        event.target.classList.add('active');
+    }
+</script>
 
 <?php require APPROOT . '/views/inc/landlord_footer.php'; ?>
