@@ -182,10 +182,11 @@ class Maintenance extends Controller
     public function assignProvider($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             $provider_id = trim($_POST['provider_id']);
-            $scheduled_date = trim($_POST['scheduled_date']);
+            $scheduled_date_input = trim($_POST['scheduled_date']);
+            $scheduled_date = $scheduled_date_input !== '' ? $scheduled_date_input : null;
 
             if ($this->maintenanceModel->assignProvider($id, $provider_id, $scheduled_date)) {
                 flash('maintenance_message', 'Service provider assigned successfully', 'alert alert-success');
