@@ -389,27 +389,69 @@ class Manager extends Controller
     {
         // Load lease agreement model
         $leaseModel = $this->model('M_LeaseAgreements');
+        $propertyModel = $this->model('M_ManagerProperties');
 
         // Get manager's assigned property leases
         $manager_id = $_SESSION['user_id'];
         $allLeases = $leaseModel->getLeasesByManager($manager_id);
 
-        // Filter by status
+        // Get assigned properties for filter dropdown
+        $assignedProperties = $propertyModel->getAssignedProperties($manager_id);
+
+        // Get filter parameters from GET request
+        $statusFilter = $_GET['status'] ?? 'all';
+        $propertyFilter = $_GET['property_id'] ?? 'all';
+        $dateFromFilter = $_GET['date_from'] ?? '';
+        $dateToFilter = $_GET['date_to'] ?? '';
+
+        // Calculate stats for all leases (for stats cards - always show totals)
         $draftLeases = array_filter($allLeases, fn($l) => $l->status === 'draft');
         $activeLeases = array_filter($allLeases, fn($l) => $l->status === 'active');
         $completedLeases = array_filter($allLeases, fn($l) => $l->status === 'completed');
+
+        // Apply filters to leases
+        $filteredLeases = $allLeases;
+
+        // Filter by status
+        if ($statusFilter !== 'all') {
+            $filteredLeases = array_filter($filteredLeases, fn($l) => $l->status === $statusFilter);
+        }
+
+        // Filter by property
+        if ($propertyFilter !== 'all' && is_numeric($propertyFilter)) {
+            $filteredLeases = array_filter($filteredLeases, fn($l) => $l->property_id == $propertyFilter);
+        }
+
+        // Filter by date range (start date)
+        if (!empty($dateFromFilter)) {
+            $filteredLeases = array_filter($filteredLeases, function($l) use ($dateFromFilter) {
+                return strtotime($l->start_date) >= strtotime($dateFromFilter);
+            });
+        }
+
+        if (!empty($dateToFilter)) {
+            $filteredLeases = array_filter($filteredLeases, function($l) use ($dateToFilter) {
+                return strtotime($l->start_date) <= strtotime($dateToFilter);
+            });
+        }
+
+        // Re-index array after filtering
+        $filteredLeases = array_values($filteredLeases);
 
         $data = [
             'title' => 'Lease Agreements',
             'page' => 'leases',
             'user_name' => $_SESSION['user_name'],
-            'allLeases' => $allLeases,
-            'draftLeases' => $draftLeases,
-            'activeLeases' => $activeLeases,
-            'completedLeases' => $completedLeases,
-            'draftCount' => count($draftLeases),
-            'activeCount' => count($activeLeases),
-            'completedCount' => count($completedLeases),
+            'allLeases' => $filteredLeases, // Filtered leases for display
+            'assignedProperties' => $assignedProperties, // For property filter dropdown
+            'draftCount' => count($draftLeases), // Total stats
+            'activeCount' => count($activeLeases), // Total stats
+            'completedCount' => count($completedLeases), // Total stats
+            // Current filter values (for maintaining form state)
+            'currentStatusFilter' => $statusFilter,
+            'currentPropertyFilter' => $propertyFilter,
+            'currentDateFromFilter' => $dateFromFilter,
+            'currentDateToFilter' => $dateToFilter,
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_leases', $data);

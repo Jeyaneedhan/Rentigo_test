@@ -43,212 +43,135 @@
     </div>
 </div>
 
-    <!-- Tabs Container -->
-    <div class="tabs-container">
-        <div class="tabs-nav">
-            <button class="tab-btn active" data-tab="all">
-                <i class="fas fa-list"></i> All (<?php echo count($data['allLeases'] ?? []); ?>)
-            </button>
-            <button class="tab-btn" data-tab="draft">
-                <i class="fas fa-file-alt"></i> Draft (<?php echo $data['draftCount'] ?? 0; ?>)
-            </button>
-            <button class="tab-btn" data-tab="active">
-                <i class="fas fa-check-circle"></i> Active (<?php echo $data['activeCount'] ?? 0; ?>)
-            </button>
-            <button class="tab-btn" data-tab="completed">
-                <i class="fas fa-archive"></i> Completed (<?php echo $data['completedCount'] ?? 0; ?>)
-            </button>
-        </div>
+<!-- Filter Section -->
+<div class="filter-container">
+    <form method="GET" action="<?php echo URLROOT; ?>/manager/leases" class="filter-form">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="status">Status</label>
+                <select name="status" id="status" class="form-control">
+                    <option value="all" <?php echo ($data['currentStatusFilter'] ?? 'all') === 'all' ? 'selected' : ''; ?>>All Statuses</option>
+                    <option value="draft" <?php echo ($data['currentStatusFilter'] ?? '') === 'draft' ? 'selected' : ''; ?>>Draft</option>
+                    <option value="pending_signatures" <?php echo ($data['currentStatusFilter'] ?? '') === 'pending_signatures' ? 'selected' : ''; ?>>Pending</option>
+                    <option value="active" <?php echo ($data['currentStatusFilter'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
+                    <option value="completed" <?php echo ($data['currentStatusFilter'] ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                    <option value="terminated" <?php echo ($data['currentStatusFilter'] ?? '') === 'terminated' ? 'selected' : ''; ?>>Terminated</option>
+                </select>
+            </div>
 
-        <!-- All Leases Tab -->
-        <div id="all" class="tab-content active">
-            <?php if (!empty($data['allLeases'])): ?>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Property</th>
-                                <th>Tenant</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Monthly Rent</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($data['allLeases'] as $lease): ?>
-                                <tr>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($lease->address ?? 'N/A'); ?></strong><br>
-                                        <small><?php echo ucfirst($lease->property_type ?? ''); ?></small>
-                                    </td>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($lease->tenant_name ?? 'N/A'); ?></strong><br>
-                                        <small><?php echo htmlspecialchars($lease->tenant_email ?? ''); ?></small>
-                                    </td>
-                                    <td><?php echo date('M d, Y', strtotime($lease->start_date)); ?></td>
-                                    <td><?php echo date('M d, Y', strtotime($lease->end_date)); ?></td>
-                                    <td>Rs <?php echo number_format($lease->monthly_rent * 1.10); ?></td>
-                                    <td>
-                                        <span class="badge badge-<?php echo strtolower($lease->status); ?>">
-                                            <?php echo ucfirst($lease->status); ?>
-                                        </span>
-                                    </td>
-                                    <td class="actions">
-                                        <a href="<?php echo URLROOT; ?>/leaseagreements/details/<?php echo $lease->id; ?>" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php else: ?>
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <p>No lease agreements found</p>
-                </div>
-            <?php endif; ?>
-        </div>
+            <div class="filter-group">
+                <label for="property_id">Property</label>
+                <select name="property_id" id="property_id" class="form-control">
+                    <option value="all" <?php echo ($data['currentPropertyFilter'] ?? 'all') === 'all' ? 'selected' : ''; ?>>All Properties</option>
+                    <?php if (!empty($data['assignedProperties'])): ?>
+                        <?php foreach ($data['assignedProperties'] as $property): ?>
+                            <option value="<?php echo $property->id; ?>" <?php echo ($data['currentPropertyFilter'] ?? '') == $property->id ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($property->address); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
 
-        <!-- Draft Leases Tab -->
-        <div id="draft" class="tab-content">
-            <?php if (!empty($data['draftLeases'])): ?>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Property</th>
-                                <th>Tenant</th>
-                                <th>Start Date</th>
-                                <th>Monthly Rent</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($data['draftLeases'] as $lease): ?>
-                                <tr>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($lease->address ?? 'N/A'); ?></strong><br>
-                                        <small><?php echo ucfirst($lease->property_type ?? ''); ?></small>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($lease->tenant_name ?? 'N/A'); ?></td>
-                                    <td><?php echo date('M d, Y', strtotime($lease->start_date)); ?></td>
-                                    <td>Rs <?php echo number_format($lease->monthly_rent * 1.10); ?></td>
-                                    <td><?php echo date('M d, Y', strtotime($lease->created_at)); ?></td>
-                                    <td class="actions">
-                                        <a href="<?php echo URLROOT; ?>/leaseagreements/details/<?php echo $lease->id; ?>" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php else: ?>
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <p>No draft leases</p>
-                </div>
-            <?php endif; ?>
-        </div>
+            <div class="filter-group">
+                <label for="date_from">From Date</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" value="<?php echo htmlspecialchars($data['currentDateFromFilter'] ?? ''); ?>">
+            </div>
 
-        <!-- Active Leases Tab -->
-        <div id="active" class="tab-content">
-            <?php if (!empty($data['activeLeases'])): ?>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Property</th>
-                                <th>Tenant</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Monthly Rent</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($data['activeLeases'] as $lease): ?>
-                                <tr class="active-row">
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($lease->address ?? 'N/A'); ?></strong><br>
-                                        <small><?php echo ucfirst($lease->property_type ?? ''); ?></small>
-                                    </td>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($lease->tenant_name ?? 'N/A'); ?></strong><br>
-                                        <small><?php echo htmlspecialchars($lease->tenant_email ?? ''); ?></small>
-                                    </td>
-                                    <td><?php echo date('M d, Y', strtotime($lease->start_date)); ?></td>
-                                    <td><?php echo date('M d, Y', strtotime($lease->end_date)); ?></td>
-                                    <td>Rs <?php echo number_format($lease->monthly_rent * 1.10); ?></td>
-                                    <td class="actions">
-                                        <a href="<?php echo URLROOT; ?>/leaseagreements/details/<?php echo $lease->id; ?>" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php else: ?>
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <p>No active leases</p>
-                </div>
-            <?php endif; ?>
-        </div>
+            <div class="filter-group">
+                <label for="date_to">To Date</label>
+                <input type="date" name="date_to" id="date_to" class="form-control" value="<?php echo htmlspecialchars($data['currentDateToFilter'] ?? ''); ?>">
+            </div>
 
-        <!-- Completed Leases Tab -->
-        <div id="completed" class="tab-content">
-            <?php if (!empty($data['completedLeases'])): ?>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Property</th>
-                                <th>Tenant</th>
-                                <th>Period</th>
-                                <th>Total Rent</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($data['completedLeases'] as $lease): ?>
-                                <tr>
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($lease->address ?? 'N/A'); ?></strong><br>
-                                        <small><?php echo ucfirst($lease->property_type ?? ''); ?></small>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($lease->tenant_name ?? 'N/A'); ?></td>
-                                    <td>
-                                        <?php echo date('M d, Y', strtotime($lease->start_date)); ?> -
-                                        <?php echo date('M d, Y', strtotime($lease->end_date)); ?>
-                                    </td>
-                                    <td>Rs <?php echo number_format(($lease->monthly_rent * 1.10) * ($lease->lease_duration_months ?? 1)); ?></td>
-                                    <td class="actions">
-                                        <a href="<?php echo URLROOT; ?>/leaseagreements/details/<?php echo $lease->id; ?>" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php else: ?>
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <p>No completed leases</p>
-                </div>
-            <?php endif; ?>
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+                <a href="<?php echo URLROOT; ?>/manager/leases" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Clear
+                </a>
+            </div>
         </div>
-    </div>
+    </form>
+</div>
+
+<!-- Leases Table -->
+<div class="table-container-wrapper">
+    <?php if (!empty($data['allLeases'])): ?>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Tenant</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Monthly Rent</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($data['allLeases'] as $lease): ?>
+                        <tr class="<?php echo $lease->status === 'active' ? 'active-row' : ''; ?>">
+                            <td>
+                                <strong><?php echo htmlspecialchars($lease->address ?? 'N/A'); ?></strong><br>
+                                <small><?php echo ucfirst($lease->property_type ?? ''); ?></small>
+                            </td>
+                            <td>
+                                <strong><?php echo htmlspecialchars($lease->tenant_name ?? 'N/A'); ?></strong><br>
+                                <small><?php echo htmlspecialchars($lease->tenant_email ?? ''); ?></small>
+                            </td>
+                            <td><?php echo date('M d, Y', strtotime($lease->start_date)); ?></td>
+                            <td><?php echo date('M d, Y', strtotime($lease->end_date)); ?></td>
+                            <td>Rs <?php echo number_format($lease->monthly_rent * 1.10); ?></td>
+                            <td><?php echo ($lease->lease_duration_months ?? 0); ?> months</td>
+                            <td>
+                                <?php
+                                $statusClass = '';
+                                $statusText = ucfirst(str_replace('_', ' ', $lease->status));
+                                switch($lease->status) {
+                                    case 'draft':
+                                        $statusClass = 'badge-draft';
+                                        break;
+                                    case 'active':
+                                        $statusClass = 'badge-active';
+                                        break;
+                                    case 'completed':
+                                        $statusClass = 'badge-completed';
+                                        break;
+                                    case 'pending_signatures':
+                                        $statusClass = 'badge-warning';
+                                        break;
+                                    case 'terminated':
+                                        $statusClass = 'badge-danger';
+                                        break;
+                                    default:
+                                        $statusClass = 'badge-secondary';
+                                }
+                                ?>
+                                <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
+                            </td>
+                            <td><?php echo date('M d, Y', strtotime($lease->created_at)); ?></td>
+                            <td class="actions">
+                                <a href="<?php echo URLROOT; ?>/leaseagreements/details/<?php echo $lease->id; ?>" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php else: ?>
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No lease agreements found<?php echo (isset($data['currentStatusFilter']) && $data['currentStatusFilter'] !== 'all') || (isset($data['currentPropertyFilter']) && $data['currentPropertyFilter'] !== 'all') ? ' matching your filters' : ''; ?></p>
+        </div>
+    <?php endif; ?>
+</div>
 
 <style>
     .stats-grid {
@@ -303,54 +226,53 @@
         color: #999;
     }
 
-    .tabs-container {
+    .filter-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        margin-bottom: 30px;
+    }
+
+    .filter-form {
+        width: 100%;
+    }
+
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-group label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-end;
+    }
+
+    .table-container-wrapper {
         background: white;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         overflow: hidden;
     }
 
-    .tabs-nav {
-        display: flex;
-        border-bottom: 2px solid #e5e7eb;
-        background: #f9fafb;
-    }
-
-    .tab-btn {
-        flex: 1;
-        padding: 1rem 1.5rem;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 500;
-        color: #6b7280;
-        transition: all 0.3s;
-        border-bottom: 3px solid transparent;
-    }
-
-    .tab-btn:hover {
-        background: #f3f4f6;
-        color: #1f2937;
-    }
-
-    .tab-btn.active {
-        color: #45a9ea;
-        border-bottom-color: #45a9ea;
-        background: white;
-    }
-
-    .tab-content {
-        display: none;
-        padding: 1.5rem;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-
     .table-container {
         overflow-x: auto;
+        padding: 1.5rem;
     }
 
     .data-table {
@@ -408,6 +330,21 @@
         color: #1e40af;
     }
 
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-secondary {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
     .actions {
         display: flex;
         gap: 0.5rem;
@@ -425,25 +362,69 @@
         margin-bottom: 1rem;
         opacity: 0.3;
     }
+
+    .btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background: #45a9ea;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #3a8bc7;
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #45a9ea;
+        box-shadow: 0 0 0 3px rgba(69, 169, 234, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            width: 100%;
+        }
+
+        .filter-actions .btn {
+            flex: 1;
+        }
+    }
 </style>
-
-<script>
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetTab = btn.dataset.tab;
-
-            // Update button states
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Update content visibility
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(targetTab).classList.add('active');
-        });
-    });
-</script>
 
 <?php require APPROOT . '/views/inc/manager_footer.php'; ?>
