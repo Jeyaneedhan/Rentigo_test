@@ -532,7 +532,24 @@ class Policies extends Controller
             }
 
             if (!$validator->hasErrors()) {
+                // Get policy details before update to check if status changed
+                $policy = $this->policyModel->getPolicyById($id);
+                
+                if (!$policy) {
+                    echo json_encode(['success' => false, 'message' => 'Policy not found']);
+                    exit();
+                }
+
+                $oldStatus = $policy->policy_status;
+                $statusChanged = ($oldStatus !== $status);
+
+                // Update policy status
                 if ($this->policyModel->updatePolicyStatus($id, $status)) {
+                    // Send notifications only if status changed to 'active' or 'inactive'
+                    if ($statusChanged && ($status === 'active' || $status === 'inactive')) {
+                        $this->sendPolicyStatusNotifications($id, $status, $policy);
+                    }
+
                     echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
                 } else {
                     echo json_encode(['success' => false, 'message' => 'Failed to update status']);
@@ -545,6 +562,58 @@ class Policies extends Controller
         } else {
             redirect('policies/index');
         }
+    }
+
+    // Send notifications to all non-admin users when policy status changes
+    private function sendPolicyStatusNotifications($policyId, $newStatus, $policy)
+    {
+        // Load required models
+        $userModel = $this->model('M_Users');
+        $notificationModel = $this->model('M_Notifications');
+
+        // Get all non-admin users (tenant, landlord, property_manager)
+        $allUsers = array_merge(
+            $userModel->getAllUsersByType('tenant'),
+            $userModel->getAllUsersByType('landlord'),
+            $userModel->getAllUsersByType('property_manager')
+        );
+
+        // Determine action text
+        $action = ($newStatus === 'active') ? 'activated' : 'deactivated';
+        $actionCapitalized = ($newStatus === 'active') ? 'Activated' : 'Deactivated';
+
+        // Get current date and time
+        $dateTime = date('F j, Y \a\t g:i A');
+
+        // Get admin name who made the change
+        $adminName = $_SESSION['user_name'] ?? 'Administrator';
+
+        // Create notification message
+        $notificationMessage = sprintf(
+            'The policy "%s" (ID: #%d) has been %s on %s by %s.',
+            $policy->policy_name,
+            $policy->policy_id,
+            $action,
+            $dateTime,
+            $adminName
+        );
+
+        // Send notification to each user
+        $sentCount = 0;
+        foreach ($allUsers as $user) {
+            $notificationModel->createNotification([
+                'user_id' => $user->id,
+                'type' => 'policy_update',
+                'title' => 'Policy ' . $actionCapitalized,
+                'message' => $notificationMessage,
+                'link' => ''
+            ]);
+            $sentCount++;
+        }
+
+        // Log notification count (optional - for debugging)
+        // You can remove this or add it to a log file
+        return $sentCount;
     }
     // Helper methods to get dropdown options
     private function getCategories()
