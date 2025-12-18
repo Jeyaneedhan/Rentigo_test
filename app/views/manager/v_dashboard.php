@@ -26,7 +26,7 @@
                 <i class="fas fa-home"></i>
             </div>
             <div class="stat-info">
-                <div class="stat-label">Total Units</div>
+                <div class="stat-label">Occupied Properties</div>
                 <h3><?php echo $data['totalUnits'] ?? 0; ?></h3>
                 <div class="stat-change"><?php echo $data['occupiedUnits'] ?? 0; ?> occupied</div>
             </div>

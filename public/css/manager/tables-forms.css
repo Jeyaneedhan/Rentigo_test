@@ -190,6 +190,10 @@
   background-color: #d1fae5;
   color: #065f46;
 }
+.status-badge.occupied {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
 
 /* Priority Badges */
 .priority-badge {

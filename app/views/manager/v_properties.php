@@ -63,9 +63,10 @@ AutoPaginate::init($data, 10);
                                     // Show status badge (approved, pending, maintenance, etc)
                                     $status = strtolower($property->status ?? 'unknown');
                                     $badgeClass = 'status-badge ';
-                                    if ($status === 'approved' || $status === 'active') $badgeClass .= 'approved';
-                                    elseif ($status === 'pending') $badgeClass .= 'pending';
+                                    if ($status === 'approved' || $status === 'active' || $status === 'available') $badgeClass .= 'approved';
+                                    elseif ($status === 'pending' || $status === 'pending') $badgeClass .= 'pending';
                                     elseif ($status === 'maintenance') $badgeClass .= 'pending';
+                                    elseif ($status === 'occupied') $badgeClass .= 'occupied';
                                     else $badgeClass .= 'default';
                                     ?>
                                     <span class="<?php echo $badgeClass; ?>">
@@ -76,9 +77,7 @@ AutoPaginate::init($data, 10);
                                     <div class="action-buttons">
                                         <a class="btn-icon" title="View Details"
                                             href="<?php echo URLROOT . '/managerproperties/details/' . $property->id; ?>">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <!-- Only view button! -->
+                                            <i class="fa-solid fa-eye"></i> </a>
                                     </div>
                                 </td>
                             </tr>
