@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/manager_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="providers-content">
     <div class="page-header">
         <div class="header-left">
@@ -34,14 +40,14 @@
                             <div class="provider-rating">
                                 <div class="stars">
                                     <?php
-                                        $rating = $provider->rating ?? 0;
-                                        for ($i = 1; $i <= 5; $i++) {
-                                            if ($i <= $rating) {
-                                                echo '<i class="fas fa-star"></i>';
-                                            } else {
-                                                echo '<i class="far fa-star"></i>';
-                                            }
+                                    $rating = $provider->rating ?? 0;
+                                    for ($i = 1; $i <= 5; $i++) {
+                                        if ($i <= $rating) {
+                                            echo '<i class="fas fa-star"></i>';
+                                        } else {
+                                            echo '<i class="far fa-star"></i>';
                                         }
+                                    }
                                     ?>
                                 </div>
                                 <span class="rating-text"><?php echo $rating > 0 ? number_format($rating, 1) . '/5.0' : 'Not rated'; ?></span>
@@ -80,5 +86,8 @@
         <?php endif; ?>
     </div>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <?php require APPROOT . '/views/inc/manager_footer.php'; ?>

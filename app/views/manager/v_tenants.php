@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/manager_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="tenants-content">
     <div class="page-header">
         <div class="header-left">
@@ -143,7 +149,7 @@
                                         <?php
                                         $statusClass = '';
                                         $statusText = ucfirst($booking->status);
-                                        switch($booking->status) {
+                                        switch ($booking->status) {
                                             case 'active':
                                             case 'approved':
                                                 $statusClass = 'status-badge approved';
@@ -175,6 +181,9 @@
         </div>
     <?php endif; ?>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <style>
     .stats-grid {

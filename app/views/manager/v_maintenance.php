@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/manager_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="maintenance-content">
     <div class="page-header">
         <div class="header-left">
@@ -162,6 +168,9 @@
         </div>
     </div>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <style>
     .maintenance-content {

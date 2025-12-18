@@ -30,6 +30,12 @@ $categoryFilter = $_POST['categoryFilter'] ?? '';
 $averageDaysToResolve = calculateAverageDaysToResolve($data['issues']);
 ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="page-content">
     <!-- Page Header -->
     <div class="page-header">
@@ -188,7 +194,7 @@ $averageDaysToResolve = calculateAverageDaysToResolve($data['issues']);
                             <td class="actions-cell">
                                 <div class="action-buttons">
                                     <a href="<?= URLROOT; ?>/issues/details/<?= $issue->id; ?>"
-                                        class="btn btn-icon btn-primary" 
+                                        class="btn btn-icon btn-primary"
                                         title="View Issue Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
@@ -199,9 +205,9 @@ $averageDaysToResolve = calculateAverageDaysToResolve($data['issues']);
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     <?php else: ?>
-                                        <button class="btn btn-icon btn-secondary" 
-                                                disabled 
-                                                title="Can only edit within 1 minute of creation">
+                                        <button class="btn btn-icon btn-secondary"
+                                            disabled
+                                            title="Can only edit within 1 minute of creation">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                     <?php endif; ?>
@@ -213,9 +219,9 @@ $averageDaysToResolve = calculateAverageDaysToResolve($data['issues']);
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     <?php else: ?>
-                                        <button class="btn btn-icon btn-danger" 
-                                                disabled 
-                                                title="Can only delete within 1 minute of creation">
+                                        <button class="btn btn-icon btn-danger"
+                                            disabled
+                                            title="Can only delete within 1 minute of creation">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     <?php endif; ?>
@@ -243,6 +249,9 @@ $averageDaysToResolve = calculateAverageDaysToResolve($data['issues']);
         </div>
     </div>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <style>
     .actions-cell {

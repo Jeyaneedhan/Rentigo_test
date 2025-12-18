@@ -1,9 +1,9 @@
-<?php require APPROOT . '/views/inc/manager_header.php' ?>;
+<?php require APPROOT . '/views/inc/manager_header.php' ?>
 
 <?php
 // ADD PAGINATION
 require_once APPROOT . '/../app/helpers/AutoPaginate.php';
-AutoPaginate::init($data, 10); // 10  per page
+AutoPaginate::init($data, 10);
 ?>
 
 <div class="properties-content">

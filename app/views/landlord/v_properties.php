@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/landlord_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 6);
+?>
+
 <!-- Page Header -->
 <div class="page-header">
     <div class="header-left">
@@ -260,6 +266,9 @@
         </div>
     </div>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <!-- Styles -->
 <style>

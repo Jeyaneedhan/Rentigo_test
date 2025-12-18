@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/manager_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="page-header">
     <div class="header-left">
         <h1 class="page-title">Booking Management</h1>
@@ -130,7 +136,7 @@
                                 <?php
                                 $statusClass = '';
                                 $statusText = ucfirst($booking->status);
-                                switch($booking->status) {
+                                switch ($booking->status) {
                                     case 'pending':
                                         $statusClass = 'badge-warning';
                                         break;
@@ -150,7 +156,7 @@
                             <td class="actions">
                                 <?php if ($booking->status === 'pending'): ?>
                                     <form method="POST" action="<?php echo URLROOT; ?>/bookings/approve/<?php echo $booking->id; ?>" style="display:inline;"
-                                          onsubmit="return confirm('Approve this booking request?');">
+                                        onsubmit="return confirm('Approve this booking request?');">
                                         <button type="submit" class="btn btn-sm btn-success">
                                             <i class="fas fa-check"></i> Approve
                                         </button>
@@ -190,7 +196,7 @@
                 <div class="form-group">
                     <label for="rejection_reason">Rejection Reason <span style="color: red;">*</span></label>
                     <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="4" required
-                              placeholder="Please provide a reason for rejecting this booking..."></textarea>
+                        placeholder="Please provide a reason for rejecting this booking..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -202,6 +208,9 @@
         </form>
     </div>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <style>
     .stats-grid {

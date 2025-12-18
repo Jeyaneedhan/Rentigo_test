@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/admin_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 10);
+?>
+
 <div class="page-content">
     <!-- Page Header -->
     <div class="page-header">
@@ -82,8 +88,8 @@
                     <?php if (!empty($data['recentTransactions'])): ?>
                         <?php foreach ($data['recentTransactions'] as $transaction): ?>
                             <?php
-                                $isMaintenance = isset($transaction->payment_type) && $transaction->payment_type === 'maintenance';
-                                $displayDate = $transaction->payment_date ?? $transaction->due_date ?? $transaction->created_at;
+                            $isMaintenance = isset($transaction->payment_type) && $transaction->payment_type === 'maintenance';
+                            $displayDate = $transaction->payment_date ?? $transaction->due_date ?? $transaction->created_at;
                             ?>
                             <tr data-type="income" data-status="<?php echo htmlspecialchars($transaction->status); ?>" data-date="<?php echo date('Y-m-d', strtotime($displayDate)); ?>">
                                 <td>
@@ -98,11 +104,11 @@
                                     <div class="transaction-description">
                                         <div class="description-title">
                                             <?php
-                                                if ($isMaintenance) {
-                                                    echo htmlspecialchars($transaction->maintenance_title ?? 'Maintenance payment');
-                                                } else {
-                                                    echo htmlspecialchars($transaction->payment_method ?? 'Rental payment');
-                                                }
+                                            if ($isMaintenance) {
+                                                echo htmlspecialchars($transaction->maintenance_title ?? 'Maintenance payment');
+                                            } else {
+                                                echo htmlspecialchars($transaction->payment_method ?? 'Rental payment');
+                                            }
                                             ?>
                                         </div>
                                     </div>
@@ -135,9 +141,8 @@
                                 <td><?php echo date('m/d/Y', strtotime($displayDate)); ?></td>
                                 <td>
                                     <span class="status-badge <?php
-                                        echo $transaction->status === 'completed' ? 'approved' :
-                                            ($transaction->status === 'pending' ? 'pending' : 'rejected');
-                                    ?>">
+                                                                echo $transaction->status === 'completed' ? 'approved' : ($transaction->status === 'pending' ? 'pending' : 'rejected');
+                                                                ?>">
                                         <?php echo ucfirst($transaction->status); ?>
                                     </span>
                                 </td>
@@ -159,9 +164,10 @@
             </table>
         </div>
     </div>
-
-
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <!-- Transaction Details Modal -->
 <div id="transactionModal" class="modal-overlay hidden">

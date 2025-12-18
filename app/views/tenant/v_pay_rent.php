@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/tenant_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="page-content">
     <!-- Page Header -->
     <div class="page-header">
@@ -13,44 +19,44 @@
 
     <!-- Payment Statistics -->
     <?php if (isset($data['totalPayments'])): ?>
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-money-bill-wave"></i>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stat-details">
+                    <h4>LKR <?php echo number_format(($data['totalPayments']->total_paid ?? 0) * 1.10, 2); ?></h4>
+                    <p>Total Paid</p>
+                </div>
             </div>
-            <div class="stat-details">
-                <h4>LKR <?php echo number_format(($data['totalPayments']->total_paid ?? 0) * 1.10, 2); ?></h4>
-                <p>Total Paid</p>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div class="stat-details">
+                    <h4><?php echo $data['totalPayments']->total_payments ?? 0; ?></h4>
+                    <p>Payments Made</p>
+                </div>
+            </div>
+            <div class="stat-card <?php echo !empty($data['pendingPayments']) ? 'warning' : ''; ?>">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-details">
+                    <h4><?php echo count($data['pendingPayments'] ?? []); ?></h4>
+                    <p>Pending Payments</p>
+                </div>
+            </div>
+            <div class="stat-card <?php echo !empty($data['overduePayments']) ? 'danger' : ''; ?>">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-details">
+                    <h4><?php echo count($data['overduePayments'] ?? []); ?></h4>
+                    <p>Overdue</p>
+                </div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-receipt"></i>
-            </div>
-            <div class="stat-details">
-                <h4><?php echo $data['totalPayments']->total_payments ?? 0; ?></h4>
-                <p>Payments Made</p>
-            </div>
-        </div>
-        <div class="stat-card <?php echo !empty($data['pendingPayments']) ? 'warning' : ''; ?>">
-            <div class="stat-icon">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-details">
-                <h4><?php echo count($data['pendingPayments'] ?? []); ?></h4>
-                <p>Pending Payments</p>
-            </div>
-        </div>
-        <div class="stat-card <?php echo !empty($data['overduePayments']) ? 'danger' : ''; ?>">
-            <div class="stat-icon">
-                <i class="fas fa-exclamation-circle"></i>
-            </div>
-            <div class="stat-details">
-                <h4><?php echo count($data['overduePayments'] ?? []); ?></h4>
-                <p>Overdue</p>
-            </div>
-        </div>
-    </div>
     <?php endif; ?>
 
     <!-- Current Rent Due -->
@@ -65,10 +71,10 @@
         <?php if (!empty($data['pendingPayments'])): ?>
             <?php foreach ($data['pendingPayments'] as $payment): ?>
                 <?php
-                    // Check if overdue
-                    $isOverdue = strtotime($payment->due_date) < time() && $payment->status !== 'completed';
-                    $statusClass = $isOverdue ? 'rejected' : 'pending';
-                    $statusText = $isOverdue ? 'Overdue' : 'Payment Due';
+                // Check if overdue
+                $isOverdue = strtotime($payment->due_date) < time() && $payment->status !== 'completed';
+                $statusClass = $isOverdue ? 'rejected' : 'pending';
+                $statusText = $isOverdue ? 'Overdue' : 'Payment Due';
                 ?>
                 <div class="rent-payment-card <?php echo $isOverdue ? 'overdue' : ''; ?>">
                     <div class="rent-details">
@@ -124,28 +130,28 @@
                     <tbody>
                         <?php foreach ($data['paymentHistory'] as $payment): ?>
                             <?php
-                                $statusClass = '';
-                                switch($payment->status) {
-                                    case 'completed':
-                                        $statusClass = 'approved';
-                                        break;
-                                    case 'pending':
-                                        $statusClass = 'pending';
-                                        break;
-                                    case 'failed':
-                                        $statusClass = 'rejected';
-                                        break;
-                                    case 'refunded':
-                                        $statusClass = 'info';
-                                        break;
-                                }
+                            $statusClass = '';
+                            switch ($payment->status) {
+                                case 'completed':
+                                    $statusClass = 'approved';
+                                    break;
+                                case 'pending':
+                                    $statusClass = 'pending';
+                                    break;
+                                case 'failed':
+                                    $statusClass = 'rejected';
+                                    break;
+                                case 'refunded':
+                                    $statusClass = 'info';
+                                    break;
+                            }
                             ?>
                             <tr>
                                 <td>
                                     <?php
-                                        echo $payment->payment_date
-                                            ? date('M d, Y', strtotime($payment->payment_date))
-                                            : date('M d, Y', strtotime($payment->due_date));
+                                    echo $payment->payment_date
+                                        ? date('M d, Y', strtotime($payment->payment_date))
+                                        : date('M d, Y', strtotime($payment->due_date));
                                     ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($payment->property_address ?? 'N/A'); ?></td>
@@ -166,12 +172,12 @@
                                 <td>
                                     <?php if ($payment->status === 'completed'): ?>
                                         <a href="<?php echo URLROOT; ?>/payments/receipt/<?php echo $payment->id; ?>"
-                                           class="btn btn-secondary btn-sm" target="_blank">
+                                            class="btn btn-secondary btn-sm" target="_blank">
                                             <i class="fas fa-download"></i> Receipt
                                         </a>
                                     <?php elseif ($payment->status === 'pending'): ?>
                                         <button onclick="openPaymentModal(<?php echo $payment->id; ?>, <?php echo $payment->amount * 1.10; ?>, '<?php echo htmlspecialchars($payment->property_address ?? 'Property'); ?>')"
-                                                class="btn btn-primary btn-sm">
+                                            class="btn btn-primary btn-sm">
                                             <i class="fas fa-credit-card"></i> Pay
                                         </button>
                                     <?php else: ?>
@@ -261,150 +267,156 @@
     </div>
 </div>
 
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
+
 <script>
-function openPaymentModal(paymentId, amount, propertyName) {
-    document.getElementById('payment_id').value = paymentId;
-    document.getElementById('modal_amount').textContent = 'LKR ' + parseFloat(amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    document.getElementById('modal_property_name').textContent = propertyName;
-    document.getElementById('paymentModal').style.display = 'flex';
-}
-
-function closePaymentModal() {
-    document.getElementById('paymentModal').style.display = 'none';
-    document.getElementById('paymentForm').reset();
-}
-
-// Show/hide card fields based on payment method
-document.addEventListener('DOMContentLoaded', function() {
-    const paymentMethodSelect = document.getElementById('payment_method');
-    const cardFields = document.getElementById('cardFields');
-
-    if (paymentMethodSelect) {
-        paymentMethodSelect.addEventListener('change', function() {
-            if (this.value === 'credit_card' || this.value === 'debit_card') {
-                cardFields.style.display = 'block';
-                cardFields.querySelectorAll('input').forEach(input => input.required = true);
-            } else {
-                cardFields.style.display = 'none';
-                cardFields.querySelectorAll('input').forEach(input => input.required = false);
-            }
+    function openPaymentModal(paymentId, amount, propertyName) {
+        document.getElementById('payment_id').value = paymentId;
+        document.getElementById('modal_amount').textContent = 'LKR ' + parseFloat(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
+        document.getElementById('modal_property_name').textContent = propertyName;
+        document.getElementById('paymentModal').style.display = 'flex';
     }
-});
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('paymentModal');
-    if (event.target == modal) {
-        closePaymentModal();
+    function closePaymentModal() {
+        document.getElementById('paymentModal').style.display = 'none';
+        document.getElementById('paymentForm').reset();
     }
-}
+
+    // Show/hide card fields based on payment method
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentMethodSelect = document.getElementById('payment_method');
+        const cardFields = document.getElementById('cardFields');
+
+        if (paymentMethodSelect) {
+            paymentMethodSelect.addEventListener('change', function() {
+                if (this.value === 'credit_card' || this.value === 'debit_card') {
+                    cardFields.style.display = 'block';
+                    cardFields.querySelectorAll('input').forEach(input => input.required = true);
+                } else {
+                    cardFields.style.display = 'none';
+                    cardFields.querySelectorAll('input').forEach(input => input.required = false);
+                }
+            });
+        }
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('paymentModal');
+        if (event.target == modal) {
+            closePaymentModal();
+        }
+    }
 </script>
 
 <style>
-.rent-payment-card.overdue {
-    border-left: 4px solid #e74c3c;
-    background: #fee;
-}
+    .rent-payment-card.overdue {
+        border-left: 4px solid #e74c3c;
+        background: #fee;
+    }
 
-.overdue-notice {
-    color: #e74c3c;
-    font-weight: 600;
-    margin: 10px 0;
-}
+    .overdue-notice {
+        color: #e74c3c;
+        font-weight: 600;
+        margin: 10px 0;
+    }
 
-.overdue-notice i {
-    margin-right: 5px;
-}
+    .overdue-notice i {
+        margin-right: 5px;
+    }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
 
-.stat-card.danger {
-    border-left: 4px solid #e74c3c;
-}
+    .stat-card.danger {
+        border-left: 4px solid #e74c3c;
+    }
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    align-items: center;
-    justify-content: center;
-}
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+    }
 
-.modal-content {
-    background-color: #fff;
-    border-radius: 8px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-}
+    .modal-content {
+        background-color: #fff;
+        border-radius: 8px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #e0e0e0;
-}
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #e0e0e0;
+    }
 
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    color: #666;
-}
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #666;
+    }
 
-.modal-body {
-    padding: 20px;
-}
+    .modal-body {
+        padding: 20px;
+    }
 
-.payment-summary {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
+    .payment-summary {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
 
-.amount-display {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 18px;
-}
+    .amount-display {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 18px;
+    }
 
-.amount-display strong {
-    color: #2ecc71;
-}
+    .amount-display strong {
+        color: #2ecc71;
+    }
 
-.modal-footer {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
 
-code {
-    background: #f4f4f4;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 12px;
-}
+    code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+    }
 
-.text-muted {
-    color: #999;
-}
+    .text-muted {
+        color: #999;
+    }
 </style>
 
 <?php require APPROOT . '/views/inc/tenant_footer.php'; ?>

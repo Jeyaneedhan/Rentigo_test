@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/landlord_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="page-header">
     <div class="header-left">
         <h1 class="page-title">Property Bookings</h1>
@@ -77,25 +83,25 @@
                     <tbody>
                         <?php foreach ($data['bookings'] as $booking): ?>
                             <?php
-                                $statusClass = '';
-                                switch($booking->status) {
-                                    case 'pending':
-                                        $statusClass = 'warning';
-                                        break;
-                                    case 'approved':
-                                        $statusClass = 'success';
-                                        break;
-                                    case 'active':
-                                        $statusClass = 'info';
-                                        break;
-                                    case 'rejected':
-                                    case 'cancelled':
-                                        $statusClass = 'danger';
-                                        break;
-                                    case 'completed':
-                                        $statusClass = 'secondary';
-                                        break;
-                                }
+                            $statusClass = '';
+                            switch ($booking->status) {
+                                case 'pending':
+                                    $statusClass = 'warning';
+                                    break;
+                                case 'approved':
+                                    $statusClass = 'success';
+                                    break;
+                                case 'active':
+                                    $statusClass = 'info';
+                                    break;
+                                case 'rejected':
+                                case 'cancelled':
+                                    $statusClass = 'danger';
+                                    break;
+                                case 'completed':
+                                    $statusClass = 'secondary';
+                                    break;
+                            }
                             ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($booking->address ?? 'N/A'); ?></td>
@@ -109,9 +115,9 @@
                                 <td><?php echo date('M d, Y', strtotime($booking->move_in_date)); ?></td>
                                 <td>
                                     <?php
-                                        echo $booking->move_out_date
-                                            ? date('M d, Y', strtotime($booking->move_out_date))
-                                            : 'Ongoing';
+                                    echo $booking->move_out_date
+                                        ? date('M d, Y', strtotime($booking->move_out_date))
+                                        : 'Ongoing';
                                     ?>
                                 </td>
                                 <td>LKR <?php echo number_format($booking->monthly_rent, 2); ?></td>
@@ -124,18 +130,18 @@
                                 <td>
                                     <div class="btn-group">
                                         <a href="<?php echo URLROOT; ?>/bookings/details/<?php echo $booking->id; ?>"
-                                           class="btn btn-sm btn-outline">
+                                            class="btn btn-sm btn-outline">
                                             <i class="fas fa-eye"></i> View
                                         </a>
                                         <?php if ($booking->status === 'pending'): ?>
                                             <a href="<?php echo URLROOT; ?>/bookings/approve/<?php echo $booking->id; ?>"
-                                               class="btn btn-sm btn-success"
-                                               onclick="return confirm('Approve this booking request?')">
+                                                class="btn btn-sm btn-success"
+                                                onclick="return confirm('Approve this booking request?')">
                                                 <i class="fas fa-check"></i> Approve
                                             </a>
                                             <a href="<?php echo URLROOT; ?>/bookings/reject/<?php echo $booking->id; ?>"
-                                               class="btn btn-sm btn-danger"
-                                               onclick="return confirm('Reject this booking request?')">
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Reject this booking request?')">
                                                 <i class="fas fa-times"></i> Reject
                                             </a>
                                         <?php endif; ?>
@@ -156,34 +162,37 @@
     </div>
 </div>
 
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
+
 <style>
-.btn-group {
-    display: flex;
-    gap: 5px;
-}
+    .btn-group {
+        display: flex;
+        gap: 5px;
+    }
 
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-}
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
 
-.empty-state i {
-    font-size: 64px;
-    color: #ddd;
-    margin-bottom: 20px;
-}
+    .empty-state i {
+        font-size: 64px;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
 
-.empty-state p {
-    font-size: 20px;
-    font-weight: 600;
-    color: #666;
-    margin-bottom: 10px;
-}
+    .empty-state p {
+        font-size: 20px;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 10px;
+    }
 
-.empty-state span {
-    font-size: 14px;
-    color: #999;
-}
+    .empty-state span {
+        font-size: 14px;
+        color: #999;
+    }
 </style>
 
 <?php require APPROOT . '/views/inc/landlord_footer.php'; ?>

@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/manager_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="page-header">
     <div class="header-left">
         <h1 class="page-title">Lease Agreements</h1>
@@ -132,7 +138,7 @@
                                 <?php
                                 $statusClass = '';
                                 $statusText = ucfirst(str_replace('_', ' ', $lease->status));
-                                switch($lease->status) {
+                                switch ($lease->status) {
                                     case 'draft':
                                         $statusClass = 'badge-draft';
                                         break;
@@ -172,6 +178,9 @@
         </div>
     <?php endif; ?>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <style>
     .stats-grid {

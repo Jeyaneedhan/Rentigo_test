@@ -1,4 +1,11 @@
 <?php require APPROOT . '/views/inc/manager_header.php'; ?>
+
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <?php
 
 // Read filters from query string (no JS needed)
@@ -162,6 +169,9 @@ if (!empty($data['inspections']) && is_iterable($data['inspections'])) {
 <form id="deleteForm" method="POST" style="display: none;">
     <input type="hidden" name="inspection_id" id="deleteInspectionId">
 </form>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <script>
     function confirmDelete(inspectionId) {

@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/manager_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 10);
+?>
+
 <!-- Page Header -->
 <div class="page-header">
     <div class="header-left">
@@ -9,7 +15,7 @@
     <div class="header-actions">
         <?php if (($data['unreadCount'] ?? 0) > 0): ?>
             <a href="<?php echo URLROOT; ?>/manager/markAllNotificationsRead"
-               class="btn btn-secondary">
+                class="btn btn-secondary">
                 <i class="fas fa-check-double"></i> Mark All Read
             </a>
         <?php endif; ?>
@@ -64,64 +70,64 @@
             <div class="notifications-container">
                 <?php foreach ($data['notifications'] as $notification): ?>
                     <?php
-                        // Determine icon and color based on type
-                        $iconClass = 'fa-bell';
-                        $iconColor = 'var(--primary-color)';
-                        $bgColor = 'rgba(37, 99, 235, 0.1)';
+                    // Determine icon and color based on type
+                    $iconClass = 'fa-bell';
+                    $iconColor = 'var(--primary-color)';
+                    $bgColor = 'rgba(37, 99, 235, 0.1)';
 
-                        switch($notification->type) {
-                            case 'booking':
-                                $iconClass = 'fa-calendar-check';
-                                $iconColor = 'var(--success-color)';
-                                $bgColor = 'rgba(16, 185, 129, 0.1)';
-                                break;
-                            case 'payment':
-                                $iconClass = 'fa-dollar-sign';
-                                $iconColor = 'var(--success-color)';
-                                $bgColor = 'rgba(16, 185, 129, 0.1)';
-                                break;
-                            case 'maintenance':
-                            case 'maintenance_request':
-                            case 'issue':
-                            case 'issue_reported':
-                            case 'issue_update':
-                                $iconClass = 'fa-tools';
-                                $iconColor = 'var(--warning-color)';
-                                $bgColor = 'rgba(245, 158, 11, 0.1)';
-                                break;
-                            case 'inspection':
-                            case 'inspection_scheduled':
-                                $iconClass = 'fa-clipboard-check';
-                                $iconColor = 'var(--info-color)';
-                                $bgColor = 'rgba(59, 130, 246, 0.1)';
-                                break;
-                            case 'lease':
-                                $iconClass = 'fa-file-contract';
-                                $iconColor = 'var(--primary-color)';
-                                $bgColor = 'rgba(37, 99, 235, 0.1)';
-                                break;
-                            case 'property':
-                                $iconClass = 'fa-home';
-                                $iconColor = 'var(--info-color)';
-                                $bgColor = 'rgba(59, 130, 246, 0.1)';
-                                break;
-                            case 'review':
-                                $iconClass = 'fa-star';
-                                $iconColor = '#f59e0b';
-                                $bgColor = 'rgba(245, 158, 11, 0.1)';
-                                break;
-                            case 'system':
-                            case 'alert':
-                                $iconClass = 'fa-exclamation-triangle';
-                                $iconColor = 'var(--danger-color)';
-                                $bgColor = 'rgba(239, 68, 68, 0.1)';
-                                break;
-                        }
+                    switch ($notification->type) {
+                        case 'booking':
+                            $iconClass = 'fa-calendar-check';
+                            $iconColor = 'var(--success-color)';
+                            $bgColor = 'rgba(16, 185, 129, 0.1)';
+                            break;
+                        case 'payment':
+                            $iconClass = 'fa-dollar-sign';
+                            $iconColor = 'var(--success-color)';
+                            $bgColor = 'rgba(16, 185, 129, 0.1)';
+                            break;
+                        case 'maintenance':
+                        case 'maintenance_request':
+                        case 'issue':
+                        case 'issue_reported':
+                        case 'issue_update':
+                            $iconClass = 'fa-tools';
+                            $iconColor = 'var(--warning-color)';
+                            $bgColor = 'rgba(245, 158, 11, 0.1)';
+                            break;
+                        case 'inspection':
+                        case 'inspection_scheduled':
+                            $iconClass = 'fa-clipboard-check';
+                            $iconColor = 'var(--info-color)';
+                            $bgColor = 'rgba(59, 130, 246, 0.1)';
+                            break;
+                        case 'lease':
+                            $iconClass = 'fa-file-contract';
+                            $iconColor = 'var(--primary-color)';
+                            $bgColor = 'rgba(37, 99, 235, 0.1)';
+                            break;
+                        case 'property':
+                            $iconClass = 'fa-home';
+                            $iconColor = 'var(--info-color)';
+                            $bgColor = 'rgba(59, 130, 246, 0.1)';
+                            break;
+                        case 'review':
+                            $iconClass = 'fa-star';
+                            $iconColor = '#f59e0b';
+                            $bgColor = 'rgba(245, 158, 11, 0.1)';
+                            break;
+                        case 'system':
+                        case 'alert':
+                            $iconClass = 'fa-exclamation-triangle';
+                            $iconColor = 'var(--danger-color)';
+                            $bgColor = 'rgba(239, 68, 68, 0.1)';
+                            break;
+                    }
                     ?>
                     <div class="notification-item <?php echo $notification->is_read ? 'read' : 'unread'; ?>"
-                         data-notification-id="<?php echo $notification->id; ?>">
+                        data-notification-id="<?php echo $notification->id; ?>">
                         <div class="notification-icon"
-                             style="width: 48px; height: 48px; border-radius: 50%; background-color: <?php echo $bgColor; ?>; color: <?php echo $iconColor; ?>; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            style="width: 48px; height: 48px; border-radius: 50%; background-color: <?php echo $bgColor; ?>; color: <?php echo $iconColor; ?>; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <i class="fas <?php echo $iconClass; ?>"></i>
                         </div>
                         <div class="notification-content">
@@ -129,18 +135,18 @@
                                 <h4><?php echo htmlspecialchars($notification->title); ?></h4>
                                 <span class="notification-time">
                                     <?php
-                                        $time = strtotime($notification->created_at);
-                                        $diff = time() - $time;
+                                    $time = strtotime($notification->created_at);
+                                    $diff = time() - $time;
 
-                                        if ($diff < 3600) {
-                                            echo floor($diff / 60) . ' minutes ago';
-                                        } elseif ($diff < 86400) {
-                                            echo floor($diff / 3600) . ' hours ago';
-                                        } elseif ($diff < 604800) {
-                                            echo floor($diff / 86400) . ' days ago';
-                                        } else {
-                                            echo date('M d, Y', $time);
-                                        }
+                                    if ($diff < 3600) {
+                                        echo floor($diff / 60) . ' minutes ago';
+                                    } elseif ($diff < 86400) {
+                                        echo floor($diff / 3600) . ' hours ago';
+                                    } elseif ($diff < 604800) {
+                                        echo floor($diff / 86400) . ' days ago';
+                                    } else {
+                                        echo date('M d, Y', $time);
+                                    }
                                     ?>
                                 </span>
                             </div>
@@ -159,18 +165,18 @@
                         <div class="notification-actions">
                             <?php if (!$notification->is_read): ?>
                                 <button class="btn btn-secondary btn-sm"
-                                        onclick="markAsRead(<?php echo $notification->id; ?>)">
+                                    onclick="markAsRead(<?php echo $notification->id; ?>)">
                                     <i class="fas fa-check"></i> Mark Read
                                 </button>
                             <?php endif; ?>
                             <?php if ($notification->link): ?>
                                 <a href="<?php echo URLROOT . '/' . $notification->link; ?>"
-                                   class="btn btn-primary btn-sm">
+                                    class="btn btn-primary btn-sm">
                                     <i class="fas fa-arrow-right"></i> View Details
                                 </a>
                             <?php endif; ?>
                             <button class="btn btn-outline btn-sm"
-                                    onclick="deleteNotification(<?php echo $notification->id; ?>)">
+                                onclick="deleteNotification(<?php echo $notification->id; ?>)">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -187,145 +193,148 @@
     </div>
 </div>
 
-<script>
-function markAsRead(notificationId) {
-    fetch('<?php echo URLROOT; ?>/manager/markNotificationRead/' + notificationId, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
-            if (notifElement) {
-                notifElement.classList.remove('unread');
-                notifElement.classList.add('read');
-                const button = notifElement.querySelector('.btn-secondary');
-                if (button) button.remove();
-            }
-            // Reload to update counts
-            location.reload();
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to mark notification as read');
-    });
-}
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
-function deleteNotification(notificationId) {
-    if (confirm('Are you sure you want to delete this notification?')) {
-        window.location.href = '<?php echo URLROOT; ?>/manager/deleteNotification/' + notificationId;
+<script>
+    function markAsRead(notificationId) {
+        fetch('<?php echo URLROOT; ?>/manager/markNotificationRead/' + notificationId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                    if (notifElement) {
+                        notifElement.classList.remove('unread');
+                        notifElement.classList.add('read');
+                        const button = notifElement.querySelector('.btn-secondary');
+                        if (button) button.remove();
+                    }
+                    // Reload to update counts
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to mark notification as read');
+            });
     }
-}
+
+    function deleteNotification(notificationId) {
+        if (confirm('Are you sure you want to delete this notification?')) {
+            window.location.href = '<?php echo URLROOT; ?>/manager/deleteNotification/' + notificationId;
+        }
+    }
 </script>
 
 <style>
-.notifications-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
+    .notifications-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
 
-.notification-item {
-    display: flex;
-    gap: 15px;
-    padding: 20px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background: white;
-    align-items: flex-start;
-    transition: all 0.3s ease;
-}
+    .notification-item {
+        display: flex;
+        gap: 15px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+        align-items: flex-start;
+        transition: all 0.3s ease;
+    }
 
-.notification-item.unread {
-    background: #f8f9ff;
-    border-left: 4px solid #667eea;
-}
+    .notification-item.unread {
+        background: #f8f9ff;
+        border-left: 4px solid #667eea;
+    }
 
-.notification-item.read {
-    opacity: 0.8;
-}
+    .notification-item.read {
+        opacity: 0.8;
+    }
 
-.notification-item:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
+    .notification-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
 
-.notification-content {
-    flex: 1;
-}
+    .notification-content {
+        flex: 1;
+    }
 
-.notification-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-}
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+    }
 
-.notification-header h4 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-}
+    .notification-header h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
 
-.notification-time {
-    font-size: 12px;
-    color: #999;
-    white-space: nowrap;
-}
+    .notification-time {
+        font-size: 12px;
+        color: #999;
+        white-space: nowrap;
+    }
 
-.notification-content > p {
-    margin: 0 0 12px 0;
-    color: #666;
-    font-size: 14px;
-    line-height: 1.5;
-}
+    .notification-content>p {
+        margin: 0 0 12px 0;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+    }
 
-.notification-meta {
-    display: flex;
-    gap: 20px;
-    font-size: 12px;
-    color: #999;
-}
+    .notification-meta {
+        display: flex;
+        gap: 20px;
+        font-size: 12px;
+        color: #999;
+    }
 
-.notification-meta span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
+    .notification-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
 
-.notification-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
+    .notification-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
 
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #999;
-}
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
 
-.empty-state i {
-    font-size: 64px;
-    margin-bottom: 20px;
-    color: #ddd;
-}
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        color: #ddd;
+    }
 
-.empty-state p {
-    font-size: 20px;
-    margin-bottom: 10px;
-    color: #666;
-    font-weight: 600;
-}
+    .empty-state p {
+        font-size: 20px;
+        margin-bottom: 10px;
+        color: #666;
+        font-weight: 600;
+    }
 
-.empty-state span {
-    font-size: 14px;
-    color: #999;
-}
+    .empty-state span {
+        font-size: 14px;
+        color: #999;
+    }
 </style>
 
 <?php require APPROOT . '/views/inc/manager_footer.php'; ?>

@@ -113,7 +113,7 @@
                                         <td>
                                             <div class="user-info">
                                                 <?php
-                                                $recipientIcon = match($notification->recipient_type) {
+                                                $recipientIcon = match ($notification->recipient_type) {
                                                     'tenant' => 'fas fa-user',
                                                     'landlord' => 'fas fa-home-user',
                                                     'property_manager' => 'fas fa-user-tie',
@@ -181,7 +181,7 @@
                                         <td>
                                             <div class="user-info">
                                                 <?php
-                                                $senderIcon = match($notification->sender_type) {
+                                                $senderIcon = match ($notification->sender_type) {
                                                     'tenant' => 'fas fa-user',
                                                     'landlord' => 'fas fa-home-user',
                                                     'property_manager' => 'fas fa-user-tie',
@@ -196,7 +196,7 @@
                                         <td>
                                             <div class="user-info">
                                                 <?php
-                                                $recipientIcon = match($notification->recipient_type) {
+                                                $recipientIcon = match ($notification->recipient_type) {
                                                     'tenant' => 'fas fa-user',
                                                     'landlord' => 'fas fa-home-user',
                                                     'property_manager' => 'fas fa-user-tie',
@@ -229,145 +229,145 @@
 </div>
 
 <style>
-/* Tabs Styling */
-.tabs-container {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-}
+    /* Tabs Styling */
+    .tabs-container {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
 
-.tabs-header {
-    display: flex;
-    border-bottom: 2px solid #e5e7eb;
-    background: #f9fafb;
-}
+    .tabs-header {
+        display: flex;
+        border-bottom: 2px solid #e5e7eb;
+        background: #f9fafb;
+    }
 
-.tab-button {
-    flex: 1;
-    padding: 1rem 1.5rem;
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #6b7280;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
+    .tab-button {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #6b7280;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
 
-.tab-button:hover {
-    background: #f3f4f6;
-    color: #374151;
-}
+    .tab-button:hover {
+        background: #f3f4f6;
+        color: #374151;
+    }
 
-.tab-button.active {
-    color: #45a9ea;
-    border-bottom-color: #45a9ea;
-    background: white;
-}
+    .tab-button.active {
+        color: #45a9ea;
+        border-bottom-color: #45a9ea;
+        background: white;
+    }
 
-.tab-button i {
-    font-size: 1.1rem;
-}
+    .tab-button i {
+        font-size: 1.1rem;
+    }
 
-.tab-content {
-    display: none;
-    padding: 1.5rem;
-}
+    .tab-content {
+        display: none;
+        padding: 1.5rem;
+    }
 
-.tab-content.active {
-    display: block;
-}
+    .tab-content.active {
+        display: block;
+    }
 
-/* Simplified Table Styling */
-.notifications-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+    /* Simplified Table Styling */
+    .notifications-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.notifications-table th {
-    background: #f9fafb;
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    color: #374151;
-    border-bottom: 2px solid #e5e7eb;
-}
+    .notifications-table th {
+        background: #f9fafb;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+    }
 
-.notifications-table td {
-    padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    color: #4b5563;
-}
+    .notifications-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        color: #4b5563;
+    }
 
-.notifications-table tr:hover {
-    background: #f9fafb;
-}
+    .notifications-table tr:hover {
+        background: #f9fafb;
+    }
 
-.notification-type-cell {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
+    .notification-type-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
-.type-icon {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #e0f2fe;
-    color: #45a9ea;
-    border-radius: 50%;
-    font-size: 0.875rem;
-}
+    .type-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e0f2fe;
+        color: #45a9ea;
+        border-radius: 50%;
+        font-size: 0.875rem;
+    }
 
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-.user-info i {
-    color: #6b7280;
-    font-size: 1rem;
-}
+    .user-info i {
+        color: #6b7280;
+        font-size: 1rem;
+    }
 
-.user-info .user-type {
-    color: #9ca3af;
-    font-size: 0.75rem;
-    margin-left: 0.25rem;
-}
+    .user-info .user-type {
+        color: #9ca3af;
+        font-size: 0.75rem;
+        margin-left: 0.25rem;
+    }
 
-.table-container {
-    overflow-x: auto;
-}
+    .table-container {
+        overflow-x: auto;
+    }
 </style>
 
 <script>
-// Tab functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
+    // Tab functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
 
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const tabName = this.getAttribute('data-tab');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
 
-            // Remove active class from all buttons and contents
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
 
-            // Add active class to clicked button and corresponding content
-            this.classList.add('active');
-            document.getElementById(tabName).classList.add('active');
+                // Add active class to clicked button and corresponding content
+                this.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
         });
     });
-});
 </script>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>

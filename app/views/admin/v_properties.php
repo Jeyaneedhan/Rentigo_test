@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/admin_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 10);
+?>
+
 <div class="page-content">
     <div class="page-header">
         <div class="header-content">
@@ -109,6 +115,10 @@
         </div>
     </div>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchProperties');

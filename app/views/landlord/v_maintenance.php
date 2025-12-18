@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/landlord_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <!-- Page Header -->
 <div class="page-header">
     <div class="header-left">
@@ -73,18 +79,18 @@
 <?php if (!empty($data['maintenanceRequests'])): ?>
     <?php foreach ($data['maintenanceRequests'] as $request): ?>
         <?php
-            // Determine priority class
-            $priorityClass = '';
-            switch($request->priority) {
-                case 'emergency':
-                    $priorityClass = 'urgent';
-                    break;
-                case 'high':
-                    $priorityClass = 'high';
-                    break;
-                default:
-                    $priorityClass = '';
-            }
+        // Determine priority class
+        $priorityClass = '';
+        switch ($request->priority) {
+            case 'emergency':
+                $priorityClass = 'urgent';
+                break;
+            case 'high':
+                $priorityClass = 'high';
+                break;
+            default:
+                $priorityClass = '';
+        }
         ?>
         <div class="request-card <?php echo $priorityClass; ?>" data-status="<?php echo $request->status; ?>">
             <div class="request-header">
@@ -145,7 +151,7 @@
 
                 <div style="margin-top: 1rem;">
                     <a href="<?php echo URLROOT; ?>/maintenance/details/<?php echo $request->id; ?>"
-                       class="btn btn-primary btn-sm">
+                        class="btn btn-primary btn-sm">
                         <i class="fas fa-eye"></i> View Details
                     </a>
 
@@ -188,7 +194,7 @@
                 <div class="form-group">
                     <label for="cancellation_reason">Reason for Cancellation <span class="required">*</span></label>
                     <textarea name="cancellation_reason" id="cancellation_reason" class="form-control" rows="4" required
-                              placeholder="Please explain why you are cancelling this request..."></textarea>
+                        placeholder="Please explain why you are cancelling this request..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -201,99 +207,102 @@
     </div>
 </div>
 
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
+
 <style>
-.quotation-status {
-    margin: 10px 0;
-}
+    .quotation-status {
+        margin: 10px 0;
+    }
 
-.quotation-status .badge {
-    padding: 6px 12px;
-    font-size: 13px;
-}
+    .quotation-status .badge {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
 
-.badge-warning {
-    background: #fef3c7;
-    color: #92400e;
-}
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
 
-.badge-info {
-    background: #dbeafe;
-    color: #1e40af;
-}
+    .badge-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-.badge-success {
-    background: #d1fae5;
-    color: #065f46;
-}
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-.badge-danger {
-    background: #fee2e2;
-    color: #991b1b;
-}
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-.required {
-    color: #ef4444;
-}
+    .required {
+        color: #ef4444;
+    }
 
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
-}
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 10% auto;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+    .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-.modal-header {
-    padding: 20px;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.modal-header h3 {
-    margin: 0;
-    color: #333;
-}
+    .modal-header h3 {
+        margin: 0;
+        color: #333;
+    }
 
-.close {
-    color: #aaa;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 1;
-}
+    .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+    }
 
-.close:hover,
-.close:focus {
-    color: #000;
-}
+    .close:hover,
+    .close:focus {
+        color: #000;
+    }
 
-.modal-body {
-    padding: 20px;
-}
+    .modal-body {
+        padding: 20px;
+    }
 
-.modal-footer {
-    padding: 20px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
 </style>
 
 <script>
@@ -349,8 +358,9 @@
 
 <?php
 // Helper functions
-function getStatusBadgeClass($status) {
-    switch($status) {
+function getStatusBadgeClass($status)
+{
+    switch ($status) {
         case 'pending':
             return 'warning';
         case 'scheduled':
@@ -365,7 +375,8 @@ function getStatusBadgeClass($status) {
     }
 }
 
-function timeAgo($datetime) {
+function timeAgo($datetime)
+{
     $time = strtotime($datetime);
     $diff = time() - $time;
 

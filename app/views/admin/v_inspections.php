@@ -1,5 +1,11 @@
 <?php require APPROOT . '/views/inc/admin_header.php'; ?>
 
+<?php
+// ADD PAGINATION
+require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+AutoPaginate::init($data, 5);
+?>
+
 <div class="page-content">
     <div class="page-header">
         <div class="header-content">
@@ -45,7 +51,7 @@
                                 <td>
                                     <?php
                                     $statusClass = '';
-                                    switch($inspection->status) {
+                                    switch ($inspection->status) {
                                         case 'scheduled':
                                             $statusClass = 'badge-primary';
                                             break;
@@ -81,5 +87,8 @@
         </div>
     </div>
 </div>
+
+<!-- ADD PAGINATION HERE - Render at bottom -->
+<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>
