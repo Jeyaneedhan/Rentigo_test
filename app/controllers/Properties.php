@@ -30,6 +30,7 @@ class Properties extends Controller
         }
 
         $data = [
+            'title' => 'Properties',
             'properties' => $properties,
             'page' => 'properties'
         ];

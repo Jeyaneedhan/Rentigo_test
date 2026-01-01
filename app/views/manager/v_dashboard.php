@@ -63,54 +63,6 @@
                 <h2>Recent Payments</h2>
                 <a href="<?php echo URLROOT; ?>/manager/allPayments" class="btn btn-sm btn-secondary">View All</a>
             </div>
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Customer</th>
-                            <th>Property</th>
-                            <th>Total Payment</th>
-                            <th>Platform Fee</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($data['recentPayments'])): ?>
-                            <?php foreach ($data['recentPayments'] as $payment): ?>
-                                <?php
-                                $isMaintenance = isset($payment->payment_type) && $payment->payment_type === 'maintenance';
-                                $customerName = $isMaintenance ? ($payment->landlord_name ?? 'N/A') : ($payment->tenant_name ?? 'N/A');
-                                $totalPayment = $isMaintenance ? $payment->amount : ($payment->amount * 1.10);
-                                $platformFee = $isMaintenance ? $payment->amount : ($payment->amount * 0.10);
-                                ?>
-                                <tr>
-                                    <td>
-                                        <span class="badge <?php echo $isMaintenance ? 'badge-info' : 'badge-success'; ?>">
-                                            <?php echo $isMaintenance ? 'Maintenance' : 'Rental'; ?>
-                                        </span>
-                                    </td>
-                                    <td class="font-medium"><?php echo htmlspecialchars($customerName); ?></td>
-                                    <td><?php echo htmlspecialchars($payment->property_address ?? 'N/A'); ?></td>
-                                    <td>LKR <?php echo number_format($totalPayment, 0); ?></td>
-                                    <td><strong>LKR <?php echo number_format($platformFee, 0); ?></strong></td>
-                                    <td><?php echo date('M d, Y', strtotime($payment->payment_date ?? $payment->due_date ?? $payment->created_at)); ?></td>
-                                    <td>
-                                        <span class="status-badge <?php echo $payment->status === 'completed' ? 'approved' : ($payment->status === 'pending' ? 'pending' : 'rejected'); ?>">
-                                            <?php echo ucfirst($payment->status); ?>
-                                        </span>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="7" class="text-center text-muted">No payment records</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
         </div>
 
         <!-- Maintenance Status -->
@@ -119,41 +71,11 @@
                 <h2>Maintenance Status</h2>
                 <a href="<?php echo URLROOT; ?>/manager/maintenance" class="btn btn-sm btn-secondary">View All</a>
             </div>
-            <div class="maintenance-list">
-                <?php if (!empty($data['recentMaintenance'])): ?>
-                    <?php foreach ($data['recentMaintenance'] as $maintenance): ?>
-                        <div class="maintenance-item">
-                            <div class="maintenance-info">
-                                <h4><?php echo htmlspecialchars($maintenance->title ?? 'Maintenance Request'); ?></h4>
-                                <p class="text-muted"><?php echo htmlspecialchars($maintenance->property_address ?? 'N/A'); ?></p>
-                            </div>
-                            <div class="maintenance-status">
-                                <span class="status-badge <?php
-                                                            echo $maintenance->status === 'completed' ? 'approved' : ($maintenance->status === 'in_progress' || $maintenance->status === 'approved' ? 'pending' : ($maintenance->status === 'urgent' ? 'rejected' : 'pending'));
-                                                            ?>">
-                                    <?php echo ucfirst(str_replace('_', ' ', $maintenance->status)); ?>
-                                </span>
-                                <small class="text-muted">
-                                    <?php
-                                    if ($maintenance->status === 'completed' && !empty($maintenance->completed_at)) {
-                                        echo 'Completed: ' . date('M d', strtotime($maintenance->completed_at));
-                                    } else {
-                                        echo 'Reported: ' . date('M d', strtotime($maintenance->created_at));
-                                    }
-                                    ?>
-                                </small>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p class="text-muted" style="text-align: center; padding: 2rem;">No maintenance requests</p>
-                <?php endif; ?>
-            </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="dashboard-section" style="margin-top: 2rem;">
+    <div class="dashboard-section" style="margin-top: 0.5rem;">
         <div class="section-header">
             <h2>Quick Actions</h2>
         </div>
