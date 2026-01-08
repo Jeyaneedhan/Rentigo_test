@@ -67,54 +67,42 @@ AutoPaginate::init($data, 5);
     </div>
 </div>
 
-<!-- Filter Section -->
-<div class="content-card" style="margin-bottom: 2rem;">
-    <div class="card-body">
-        <form method="GET" action="<?php echo URLROOT; ?>/maintenance/index" id="filterForm">
-            <div class="filter-grid">
-                <div class="filter-group">
-                    <label for="filter_status">Status</label>
-                    <select name="filter_status" id="filter_status" class="form-control">
-                        <option value="" <?php echo empty($data['filter_status']) ? 'selected' : ''; ?>>All Statuses</option>
-                        <option value="pending" <?php echo $data['filter_status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                        <option value="scheduled" <?php echo $data['filter_status'] === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
-                        <option value="in_progress" <?php echo $data['filter_status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                        <option value="completed" <?php echo $data['filter_status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                        <option value="cancelled" <?php echo $data['filter_status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter_priority">Priority</label>
-                    <select name="filter_priority" id="filter_priority" class="form-control">
-                        <option value="" <?php echo empty($data['filter_priority']) ? 'selected' : ''; ?>>All Priorities</option>
-                        <option value="low" <?php echo $data['filter_priority'] === 'low' ? 'selected' : ''; ?>>Low</option>
-                        <option value="medium" <?php echo $data['filter_priority'] === 'medium' ? 'selected' : ''; ?>>Medium</option>
-                        <option value="high" <?php echo $data['filter_priority'] === 'high' ? 'selected' : ''; ?>>High</option>
-                        <option value="emergency" <?php echo $data['filter_priority'] === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter_date_from">Created Date From</label>
-                    <input type="date" name="filter_date_from" id="filter_date_from" class="form-control" 
-                           value="<?php echo htmlspecialchars($data['filter_date_from'] ?? ''); ?>">
-                </div>
-                <div class="filter-group">
-                    <label for="filter_date_to">Created Date To</label>
-                    <input type="date" name="filter_date_to" id="filter_date_to" class="form-control" 
-                           value="<?php echo htmlspecialchars($data['filter_date_to'] ?? ''); ?>">
-                </div>
-                <div class="filter-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter"></i> Apply Filters
-                    </button>
-                    <a href="<?php echo URLROOT; ?>/maintenance/index" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Clear Filters
-                    </a>
-                </div>
-            </div>
-        </form>
+<!-- Search and Filter Section -->
+<form method="GET" action="<?php echo URLROOT; ?>/maintenance/index">
+    <div class="search-filter-content">
+        <div class="filter-dropdown-wrapper">
+            <select name="filter_status" class="form-select">
+                <option value="" <?php echo empty($data['filter_status']) ? 'selected' : ''; ?>>All Statuses</option>
+                <option value="pending" <?php echo $data['filter_status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                <option value="scheduled" <?php echo $data['filter_status'] === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
+                <option value="in_progress" <?php echo $data['filter_status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                <option value="completed" <?php echo $data['filter_status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                <option value="cancelled" <?php echo $data['filter_status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+            </select>
+        </div>
+        <div class="filter-dropdown-wrapper">
+            <select name="filter_priority" class="form-select">
+                <option value="" <?php echo empty($data['filter_priority']) ? 'selected' : ''; ?>>All Priorities</option>
+                <option value="low" <?php echo $data['filter_priority'] === 'low' ? 'selected' : ''; ?>>Low</option>
+                <option value="medium" <?php echo $data['filter_priority'] === 'medium' ? 'selected' : ''; ?>>Medium</option>
+                <option value="high" <?php echo $data['filter_priority'] === 'high' ? 'selected' : ''; ?>>High</option>
+                <option value="emergency" <?php echo $data['filter_priority'] === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
+            </select>
+        </div>
+        <div class="filter-dropdown-wrapper">
+            <input type="date" name="filter_date_from" class="form-input" placeholder="From Date" value="<?php echo htmlspecialchars($data['filter_date_from'] ?? ''); ?>">
+        </div>
+        <div class="filter-dropdown-wrapper">
+            <input type="date" name="filter_date_to" class="form-input" placeholder="To Date" value="<?php echo htmlspecialchars($data['filter_date_to'] ?? ''); ?>">
+        </div>
+        <button type="submit" class="btn btn-secondary">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        <a href="<?php echo URLROOT; ?>/maintenance/index" class="btn btn-outline">
+            <i class="fas fa-times"></i> Clear
+        </a>
     </div>
-</div>
+</form>
 
 <!-- Maintenance Requests -->
 <?php if (!empty($data['maintenanceRequests'])): ?>

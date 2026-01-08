@@ -19,27 +19,21 @@ AutoPaginate::init($data, 6);
     </div>
 </div>
 
-<!-- Filters -->
-<div class="filters">
-    <div class="filter-row">
-        <div class="filter-group">
-            <label class="form-label">Search Properties</label>
-            <input type="text" class="form-control" placeholder="Search by address..." id="propertySearch">
+<!-- Search and Filter Section -->
+<form method="GET" action="<?php echo URLROOT; ?>/properties">
+    <div class="search-filter-content">
+        <div class="search-input-wrapper">
+            <input type="text" class="form-input" placeholder="Search by address..." id="propertySearch">
         </div>
-
-        <!-- NEW: Listing Type Filter -->
-        <div class="filter-group">
-            <label class="form-label">Listing Type</label>
-            <select class="form-control" id="listingTypeFilter">
+        <div class="filter-dropdown-wrapper">
+            <select class="form-select" id="listingTypeFilter">
                 <option value="">All Properties</option>
                 <option value="rent">For Rent</option>
                 <option value="maintenance">Maintenance Only</option>
             </select>
         </div>
-
-        <div class="filter-group">
-            <label class="form-label">Status</label>
-            <select class="form-control" id="statusFilter">
+        <div class="filter-dropdown-wrapper">
+            <select class="form-select" id="statusFilter">
                 <option value="">All Status</option>
                 <option value="occupied">Occupied</option>
                 <option value="vacant">Vacant</option>
@@ -47,10 +41,8 @@ AutoPaginate::init($data, 6);
                 <option value="maintenance_only">Maintenance Only</option>
             </select>
         </div>
-
-        <div class="filter-group">
-            <label class="form-label">Property Type</label>
-            <select class="form-control" id="typeFilter">
+        <div class="filter-dropdown-wrapper">
+            <select class="form-select" id="typeFilter">
                 <option value="">All Types</option>
                 <option value="apartment">Apartment</option>
                 <option value="house">House</option>
@@ -61,12 +53,11 @@ AutoPaginate::init($data, 6);
                 <option value="other">Other</option>
             </select>
         </div>
-
-        <div class="filter-group">
-            <button class="btn btn-secondary" onclick="resetFilters()">Reset Filters</button>
-        </div>
+        <button type="button" class="btn btn-secondary" onclick="resetFilters()">
+            <i class="fas fa-times"></i> Reset
+        </button>
     </div>
-</div>
+</form>
 
 <!-- Properties Grid -->
 <div class="property-grid">

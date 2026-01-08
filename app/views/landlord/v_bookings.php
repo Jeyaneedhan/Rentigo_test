@@ -59,45 +59,34 @@ AutoPaginate::init($data, 5);
     </div>
 </div>
 
-<!-- Filter Section -->
-<div class="content-card" style="margin-bottom: 2rem;">
-    <div class="card-body">
-        <form method="GET" action="<?php echo URLROOT; ?>/landlord/bookings" id="filterForm">
-            <div class="filter-grid">
-                <div class="filter-group">
-                    <label for="filter_status">Status</label>
-                    <select name="filter_status" id="filter_status" class="form-control">
-                        <option value="" <?php echo empty($data['filter_status']) ? 'selected' : ''; ?>>All Statuses</option>
-                        <option value="pending" <?php echo $data['filter_status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                        <option value="approved" <?php echo $data['filter_status'] === 'approved' ? 'selected' : ''; ?>>Approved</option>
-                        <option value="active" <?php echo $data['filter_status'] === 'active' ? 'selected' : ''; ?>>Active</option>
-                        <option value="rejected" <?php echo $data['filter_status'] === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
-                        <option value="cancelled" <?php echo $data['filter_status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
-                        <option value="completed" <?php echo $data['filter_status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter_date_from">Move-in Date From</label>
-                    <input type="date" name="filter_date_from" id="filter_date_from" class="form-control" 
-                           value="<?php echo htmlspecialchars($data['filter_date_from'] ?? ''); ?>">
-                </div>
-                <div class="filter-group">
-                    <label for="filter_date_to">Move-in Date To</label>
-                    <input type="date" name="filter_date_to" id="filter_date_to" class="form-control" 
-                           value="<?php echo htmlspecialchars($data['filter_date_to'] ?? ''); ?>">
-                </div>
-                <div class="filter-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter"></i> Apply Filters
-                    </button>
-                    <a href="<?php echo URLROOT; ?>/landlord/bookings" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Clear Filters
-                    </a>
-                </div>
-            </div>
-        </form>
+<!-- Search and Filter Section -->
+<form method="GET" action="<?php echo URLROOT; ?>/landlord/bookings">
+    <div class="search-filter-content">
+        <div class="filter-dropdown-wrapper">
+            <select name="filter_status" class="form-select">
+                <option value="" <?php echo empty($data['filter_status']) ? 'selected' : ''; ?>>All Statuses</option>
+                <option value="pending" <?php echo $data['filter_status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                <option value="approved" <?php echo $data['filter_status'] === 'approved' ? 'selected' : ''; ?>>Approved</option>
+                <option value="active" <?php echo $data['filter_status'] === 'active' ? 'selected' : ''; ?>>Active</option>
+                <option value="rejected" <?php echo $data['filter_status'] === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+                <option value="cancelled" <?php echo $data['filter_status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                <option value="completed" <?php echo $data['filter_status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
+            </select>
+        </div>
+        <div class="filter-dropdown-wrapper">
+            <input type="date" name="filter_date_from" class="form-input" placeholder="From Date" value="<?php echo htmlspecialchars($data['filter_date_from'] ?? ''); ?>">
+        </div>
+        <div class="filter-dropdown-wrapper">
+            <input type="date" name="filter_date_to" class="form-input" placeholder="To Date" value="<?php echo htmlspecialchars($data['filter_date_to'] ?? ''); ?>">
+        </div>
+        <button type="submit" class="btn btn-secondary">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+        <a href="<?php echo URLROOT; ?>/landlord/bookings" class="btn btn-outline">
+            <i class="fas fa-times"></i> Clear
+        </a>
     </div>
-</div>
+</form>
 
 <!-- Bookings List -->
 <div class="content-card">
