@@ -62,58 +62,35 @@ if (!empty($data['inspections']) && is_iterable($data['inspections'])) {
     <div class="tabs-container">
         <!-- All Inspections Tab -->
         <div id="all-inspections-tab" class="tab-content active">
-            <!-- Search and Filters -->
-            <div class="dashboard-section"
-                style="padding: 1rem 1rem 0 1rem; background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
-                <!-- Replace static div with a GET form -->
-                <form method="get" action="<?php echo htmlspecialchars(strtok($_SERVER['REQUEST_URI'], '?')); ?>"
-                    class="filters-grid"
-                    style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
-                    <!-- Search box -->
-                    <div class="search-container"
-                        style="flex: 1 1 250px; display: flex; align-items: center; background: #f5f6fa; border-radius: 6px; padding: 0.5rem 0.75rem;">
-                        <i class="fas fa-search search-icon" style="color: #888; margin-right: 0.5rem;"></i>
-                        <input type="text" class="search-input" placeholder="Search inspections..."
-                            id="inspectionSearch" name="q" value="<?php echo htmlspecialchars($searchQuery); ?>"
-                            style="border: none; background: transparent; width: 100%; outline: none; font-size: 0.95rem;">
+            <!-- Search and Filter Section -->
+            <form method="GET" action="<?php echo htmlspecialchars(strtok($_SERVER['REQUEST_URI'], '?')); ?>">
+                <div class="search-filter-content">
+                    <div class="search-input-wrapper">
+                        <input type="text" class="form-input" placeholder="Search inspections..." name="q" value="<?php echo htmlspecialchars($searchQuery); ?>">
                     </div>
-
-                    <!-- Type filter -->
-                    <select class="filter-select" id="typeFilter" name="type"
-                        style="flex: 0 1 160px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; background: #fff; font-size: 0.9rem;">
-                        <option value="all" <?php echo ($typeFilter === 'all') ? 'selected' : ''; ?>>All Types</option>
-                        <option value="Issue" <?php echo ($typeFilter === 'Issue') ? 'selected' : ''; ?>>Issue</option>
-                        <option value="Maintanace" <?php echo ($typeFilter === 'Maintanace') ? 'selected' : ''; ?>>
-                            Maintanace</option>
-                    </select>
-
-                    <!-- Status filter -->
-                    <select class="filter-select" id="statusFilter" name="status"
-                        style="flex: 0 1 160px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; background: #fff; font-size: 0.9rem;">
-                        <option value="all" <?php echo ($statusFilter === 'all') ? 'selected' : ''; ?>>All Status</option>
-                        <option value="scheduled" <?php echo ($statusFilter === 'scheduled') ? 'selected' : ''; ?>>
-                            Scheduled</option>
-                        <option value="in-progress" <?php echo ($statusFilter === 'in-progress') ? 'selected' : ''; ?>>In
-                            Progress</option>
-                        <option value="completed" <?php echo ($statusFilter === 'completed') ? 'selected' : ''; ?>>
-                            Completed</option>
-                    </select>
-
-                    <!-- Buttons -->
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button type="submit" class="btn btn-secondary"
-                            style="padding: 0.5rem 1rem; background: #007bff; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
-                            Apply Filters
-                        </button>
-                        <a class="btn btn-outline"
-                            href="<?php echo htmlspecialchars(strtok($_SERVER['REQUEST_URI'], '?')); ?>"
-                            style="padding: 0.5rem 1rem; border: 1px solid #ccc; border-radius: 6px; color: #333; text-decoration: none; background: #f8f8f8;">
-                            Reset
-                        </a>
+                    <div class="filter-dropdown-wrapper">
+                        <select class="form-select" name="type">
+                            <option value="all" <?php echo ($typeFilter === 'all') ? 'selected' : ''; ?>>All Types</option>
+                            <option value="Issue" <?php echo ($typeFilter === 'Issue') ? 'selected' : ''; ?>>Issue</option>
+                            <option value="Maintanace" <?php echo ($typeFilter === 'Maintanace') ? 'selected' : ''; ?>>Maintanace</option>
+                        </select>
                     </div>
-                </form>
-            </div>
-
+                    <div class="filter-dropdown-wrapper">
+                        <select class="form-select" name="status">
+                            <option value="all" <?php echo ($statusFilter === 'all') ? 'selected' : ''; ?>>All Status</option>
+                            <option value="scheduled" <?php echo ($statusFilter === 'scheduled') ? 'selected' : ''; ?>>Scheduled</option>
+                            <option value="in-progress" <?php echo ($statusFilter === 'in-progress') ? 'selected' : ''; ?>>In Progress</option>
+                            <option value="completed" <?php echo ($statusFilter === 'completed') ? 'selected' : ''; ?>>Completed</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <a href="<?php echo htmlspecialchars(strtok($_SERVER['REQUEST_URI'], '?')); ?>" class="btn btn-outline">
+                        <i class="fas fa-times"></i> Clear
+                    </a>
+                </div>
+            </form>
 
             <!-- Inspections Table -->
             <div class="dashboard-section">
