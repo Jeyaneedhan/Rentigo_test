@@ -141,7 +141,7 @@ AutoPaginate::init($data, 5);
                                 <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
                             </td>
                             <td><?php echo date('M d, Y', strtotime($booking->created_at)); ?></td>
-                            <td class="actions">
+                            <td class="actions" style="justify-content: center; align-items: center;">
                                 <?php if ($booking->status === 'pending'): ?>
                                     <form method="POST" action="<?php echo URLROOT; ?>/bookings/approve/<?php echo $booking->id; ?>" style="display:inline;"
                                         onsubmit="return confirm('Approve this booking request?');">
