@@ -183,6 +183,26 @@ class M_Payments
         return $this->db->resultSet();
     }
 
+    // Get overdue payments by manager
+    public function getOverduePaymentsByManager($manager_id)
+    {
+        $this->db->query('SELECT p.*,
+                          pr.address as property_address,
+                          t.name as tenant_name, t.email as tenant_email,
+                          l.name as landlord_name
+                          FROM payments p
+                          JOIN properties pr ON p.property_id = pr.id
+                          LEFT JOIN users t ON p.tenant_id = t.id
+                          LEFT JOIN users l ON p.landlord_id = l.id
+                          WHERE pr.manager_id = :manager_id 
+                          AND p.status = "pending" 
+                          AND p.due_date < CURDATE()
+                          ORDER BY p.due_date ASC');
+                          
+        $this->db->bind(':manager_id', $manager_id);
+        return $this->db->resultSet();
+    }
+
     // Calculate total payments for a tenant (support for date filtering)
     public function getTotalPaymentsByTenant($tenant_id, $days = null)
     {

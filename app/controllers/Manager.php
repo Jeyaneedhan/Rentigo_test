@@ -98,6 +98,9 @@ class Manager extends Controller
         $issueModel = $this->model('M_Issue');
         $issueStats = $issueModel->getIssueStats($manager_id, 'manager');
 
+        // Get unpaid tenants (overdue payments)
+        $unpaidTenants = $paymentModel->getOverduePaymentsByManager($manager_id);
+
         $data = [
             'title' => 'Property Manager Dashboard',
             'page' => 'dashboard',
@@ -110,6 +113,7 @@ class Manager extends Controller
             'recentPayments' => $recentPayments,
             'recentMaintenance' => $recentMaintenance,
             'issueStats' => $issueStats,
+            'unpaidTenants' => $unpaidTenants,
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('manager/v_dashboard', $data);
