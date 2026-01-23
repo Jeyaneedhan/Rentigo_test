@@ -1,5 +1,8 @@
-<?php
-
+/**
+ * M_Policies Model
+ * This manages the "Boring Legal Stuff"—Terms of Service, Privacy Policies, etc.
+ * It lets Admins update the legal text of the platform without touching the code.
+ */
 class M_Policies
 {
     private $db;
@@ -9,7 +12,10 @@ class M_Policies
         $this->db = new Database();
     }
 
-    // Get all policies with optional filters
+    /**
+     * Fetch all the different legal documents we have.
+     * We can filter by status (like 'active' or 'draft') or category.
+     */
     public function getAllPolicies($filters = [])
     {
         $sql = "SELECT p.*, u.name as created_by_name 
@@ -61,7 +67,9 @@ class M_Policies
         return $this->db->single();
     }
 
-    // Create new policy
+    /**
+     * Create a new legal document draft.
+     */
     public function createPolicy($data)
     {
         $this->db->query("INSERT INTO policies (
@@ -157,7 +165,9 @@ class M_Policies
         return $this->db->execute();
     }
 
-    // Get policy statistics
+    /**
+     * Get a quick summary of how many active documents we have.
+     */
     public function getPolicyStats()
     {
         // Total policies
@@ -209,7 +219,9 @@ class M_Policies
         return $this->db->resultSet();
     }
 
-    // Get latest active policy by category (for public display)
+    /**
+     * Public View: Get the most recent active version of a policy (e.g., for the footer links).
+     */
     public function getLatestActivePolicyByCategory($category)
     {
         $this->db->query("SELECT * FROM policies

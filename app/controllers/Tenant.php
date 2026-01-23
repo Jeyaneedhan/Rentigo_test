@@ -1,8 +1,11 @@
 <?php
 require_once '../app/helpers/helper.php';
 
+// Tenant controller - handles all tenant-specific pages and actions
+// Only logged-in tenants can access these methods
 class Tenant extends Controller
 {
+    // Store all the models we'll need throughout this controller
     private $bookingModel;
     private $paymentModel;
     private $leaseModel;
@@ -12,10 +15,12 @@ class Tenant extends Controller
 
     public function __construct()
     {
+        // Security check - only tenants can access this controller
         if (!isLoggedIn() || $_SESSION['user_type'] !== 'tenant') {
             redirect('users/login');
         }
 
+        // Load all the models we'll need
         $this->bookingModel = $this->model('M_Bookings');
         $this->paymentModel = $this->model('M_Payments');
         $this->leaseModel = $this->model('M_LeaseAgreements');
@@ -24,26 +29,27 @@ class Tenant extends Controller
         $this->issueModel = $this->model('M_Issue');
     }
 
-    // Helper method to get unread notification count
+    // Helper method to get how many unread notifications this tenant has
+    // We use this in every page to show the notification badge
     private function getUnreadNotificationCount()
     {
         return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
     }
 
-    // Main dashboard page
+    // Main dashboard page - shows overview of tenant's current status
     public function index()
     {
-        // Get dashboard data - Filtered by 30 days where applicable
+        // Get dashboard data - we're filtering most things by last 30 days
         $activeBooking = $this->bookingModel->getActiveBookingByTenant($_SESSION['user_id']);
         $activeLease = $this->leaseModel->getActiveLeaseByTenant($_SESSION['user_id']);
         
-        // Filter pending payments by last 30 days
+        // Get pending payments, but only show ones from the last 30 days on dashboard
         $allPendingPayments = $this->paymentModel->getPendingPaymentsByTenant($_SESSION['user_id']);
         $pendingPayments = array_filter($allPendingPayments, function($p) {
             return strtotime($p->created_at ?? '') >= strtotime('-30 days');
         });
 
-        // Filter recent issues by last 30 days
+        // Get recent issues, filtered to last 30 days
         $allRecentIssues = $this->issueModel->getRecentIssues($_SESSION['user_id'], 5);
         $recentIssues = array_filter($allRecentIssues, function($i) {
             return strtotime($i->created_at ?? '') >= strtotime('-30 days');
@@ -68,11 +74,13 @@ class Tenant extends Controller
         $this->view('tenant/v_dashboard', $data);
     }
 
+    // Redirect to the property search page
     public function search_properties()
     {
         redirect('tenantproperties/index');
     }
 
+    // Show all bookings for this tenant
     public function bookings()
     {
         // Get all bookings for the tenant
@@ -91,17 +99,18 @@ class Tenant extends Controller
         $this->view('tenant/v_bookings', $data);
     }
 
+    // Pay rent page - shows pending payments, payment history, and overdue amounts
     public function pay_rent()
 {
-    // Get all pending and overdue payments for the tenant (Full lists for sections)
+    // Get all payment data (full lists for displaying in sections)
     $pendingPayments = $this->paymentModel->getPendingPaymentsByTenant($_SESSION['user_id']);
     $paymentHistory = $this->paymentModel->getPaymentsByTenant($_SESSION['user_id']);
     $overduePayments = $this->paymentModel->getOverduePayments($_SESSION['user_id']);
     
-    // Get 30-day stats for cards
+    // Get 30-day stats for the stat cards at the top
     $stats30Days = $this->paymentModel->getTotalPaymentsByTenant($_SESSION['user_id'], 30);
     
-    // Filter lists for 30-day stats counts
+    // Count how many pending/overdue in last 30 days for the cards
     $pendingCount30Days = array_filter($pendingPayments, function($p) {
         return strtotime($p->created_at ?? '') >= strtotime('-30 days');
     });

@@ -1,4 +1,8 @@
-<?php
+/**
+ * M_Inspection Model
+ * This model manages "Property Inspections" — when a manager actually visits 
+ * a property to check for damage or verify a reported issue.
+ */
 class M_Inspection
 {
     private $db;
@@ -8,7 +12,9 @@ class M_Inspection
         $this->db = new Database;
     }
 
-    // Get properties that have maintenance issues
+    /**
+     * DASHBOARD: Find which houses have open problems that might need a physical check.
+     */
     public function getPropertiesWithIssues()
     {
         $this->db->query("
@@ -39,7 +45,9 @@ class M_Inspection
         return $this->db->resultSet();
     }
 
-    // Get issues by property ID
+    /**
+     * List all specific problems for a house, sorted by how urgent they are.
+     */
     public function getIssuesByPropertyId($property_id)
     {
         $this->db->query("
@@ -86,7 +94,9 @@ class M_Inspection
         return $this->db->single();
     }
 
-    // Insert inspection
+    /**
+     * Schedule a new visit. This sends it to the "scheduled" state.
+     */
     public function addInspection($data)
     {
         try {
@@ -175,7 +185,10 @@ class M_Inspection
         return $this->db->single();
     }
 
-    // Update inspection
+    /**
+     * Record what actually happened during the visit.
+     * This is where notes about the property's condition are saved.
+     */
     public function updateInspection($id, $data)
     {
         $this->db->query("UPDATE inspections

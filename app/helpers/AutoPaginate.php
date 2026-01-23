@@ -1,15 +1,20 @@
 <?php
 
+// AutoPaginate class - makes it super easy to add pagination to any list of items
+// We use this throughout the app for tables and lists
 class AutoPaginate
 {
     /**
-     * SUPER SIMPLE - Auto-detects and paginates ANY array in $data
+     * Initialize pagination - this automatically finds arrays in your data and paginates them
+     * Just pass in your data array and it handles the rest!
      */
     public static function init(&$data, $perPage = 10)
     {
+        // Get the current page from the URL, default to page 1
         $currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
-        // Find the first array in $data that has items
+        // Auto-detect which array in the data needs pagination
+        // We're looking for the first array that contains objects or arrays
         $itemsKey = null;
         $items = null;
 
@@ -17,28 +22,30 @@ class AutoPaginate
             if (is_array($value) && ! empty($value) && (is_object($value[0]) || is_array($value[0]))) {
                 $itemsKey = $key;
                 $items = $value;
-                break;
+                break;  // Found it, stop looking
             }
         }
 
-        // If no items found, return empty
+        // If we didn't find any items to paginate, return empty pagination data
         if (! $items) {
             $data['_paginated'] = [];
             $data['_pagination'] = ['total' => 0, 'current' => 1, 'pages' => 0];
             return;
         }
 
+        // Calculate pagination numbers
         $totalItems = count($items);
         $totalPages = ceil($totalItems / $perPage);
-        $currentPage = min($currentPage, max(1, $totalPages));
+        $currentPage = min($currentPage, max(1, $totalPages));  // Make sure we're within valid range
 
+        // Slice the array to get just the items for this page
         $offset = ($currentPage - 1) * $perPage;
         $paginatedItems = array_slice($items, $offset, $perPage);
 
-        // Replace original data with paginated version
+        // Replace the original full array with just the items for this page
         $data[$itemsKey] = $paginatedItems;
 
-        // Store pagination meta
+        // Store pagination metadata so the view can display page numbers
         $data['_pagination'] = [
             'current' => $currentPage,
             'total' => $totalPages,
@@ -48,18 +55,22 @@ class AutoPaginate
     }
 
     /**
-     * Render pagination with simplified UI
+     * THE VIEW BUTTONS: This generates the actual HTML buttons.
+     * It includes logic for "Previous", "Next", and those "..." dots for long lists.
      */
     public static function render($pagination)
     {
+        // If there's only one page or less, don't show pagination
         if (! is_array($pagination) || $pagination['total'] <= 1) {
             return '';
         }
 
+        // Get the base URL without query parameters
         $baseUrl = strtok($_SERVER['REQUEST_URI'], '?  ');
         $current = $pagination['current'];
         $total = $pagination['total'];
 
+        // Start output buffering so we can return the HTML as a string
         ob_start();
 ?>
 
@@ -99,10 +110,11 @@ class AutoPaginate
 
                     <!-- Page Number Buttons -->
                     <?php
+                    // Show a range of 5 page numbers around the current page
                     $range = 5;
                     $start = max(1, $current - floor($range / 2));
                     $end = min($total, $start + $range - 1);
-                    $start = max(1, $end - $range + 1);
+                    $start = max(1, $end - $range + 1);  // Adjust start if we're near the end
 
                     if ($start > 1): ?>
                         <li>

@@ -1,4 +1,8 @@
-<?php
+/**
+ * M_Issue Model
+ * This is for the "Report a Problem" feature for tenants.
+ * These reports (issues) often get promoted to full Maintenance Requests later.
+ */
 class M_Issue
 {
     private $db;
@@ -8,6 +12,9 @@ class M_Issue
         $this->db = new Database;
     }
 
+    /**
+     * Create a new issue report from a tenant
+     */
     public function addIssue($data)
     {
         $this->db->query("
@@ -31,6 +38,9 @@ class M_Issue
         return false;
     }
 
+    /**
+     * Get all issues reported by a specific tenant
+     */
     public function getIssuesByTenant($tenant_id)
     {
         $this->db->query("
@@ -121,6 +131,10 @@ class M_Issue
         return $this->db->resultSet();
     }
 
+    /**
+     * Get a list of every issue on the platform, sorted by priority
+     * (Emergency stuff at the top!)
+     */
     public function getAllIssues()
     {
         $this->db->query("
@@ -151,7 +165,9 @@ class M_Issue
         return $this->getRecentIssuesByTenant($tenantId, $limit);
     }
 
-    // Get issues by property manager (assigned properties)
+    /**
+     * Fetch issues for properties managed by a specific Property Manager
+     */
     public function getIssuesByManager($manager_id)
     {
         $this->db->query("
@@ -200,7 +216,10 @@ class M_Issue
         return $this->db->resultSet();
     }
 
-    // Update issue status
+    /**
+     * Update the status of an issue (e.g., from 'pending' to 'resolved')
+     * Also records when it was resolved and any notes about the fix.
+     */
     public function updateStatus($issue_id, $status, $resolution_notes = null)
     {
         $query = 'UPDATE issues SET status = :status';
@@ -226,7 +245,10 @@ class M_Issue
         return $this->db->execute();
     }
 
-    // Link issue to maintenance request
+    /**
+     * Linking: When a landlord decides to fix this issue, they create a 
+     * maintenance request. This link keeps the history connected.
+     */
     public function linkToMaintenance($issue_id, $maintenance_request_id)
     {
         $this->db->query('UPDATE issues SET maintenance_request_id = :maintenance_id WHERE id = :id');
@@ -260,7 +282,9 @@ class M_Issue
         return $this->db->execute();
     }
 
-    // Get issue statistics
+    /**
+     * Get counts for different issue types and statuses to show on dashboards
+     */
     public function getIssueStats($user_id = null, $user_type = null)
     {
         $whereClause = '';

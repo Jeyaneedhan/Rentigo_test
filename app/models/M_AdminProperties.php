@@ -1,4 +1,8 @@
-<?php
+/**
+ * M_AdminProperties Model
+ * This is the "Control Panel" for house listings. 
+ * Admins use this to review, approve, or reject new properties uploaded by landlords.
+ */
 class M_AdminProperties
 {
     private $db;
@@ -8,6 +12,9 @@ class M_AdminProperties
         $this->db = new Database();
     }
 
+    /**
+     * Get every single property on the platform (approved or not).
+     */
     public function getAllProperties($status = null)
     {
         $query = "SELECT 
@@ -18,10 +25,13 @@ class M_AdminProperties
                   FROM properties p
                   LEFT JOIN users u ON p.landlord_id = u.id
                   LEFT JOIN users pm ON p.manager_id = pm.id";
+        
+        // If a status is provided, filter by it (pending, approved, rejected)
         if ($status) {
             $query .= " WHERE p.approval_status = :status";
         }
         $query .= " ORDER BY p.created_at DESC";
+        
         $this->db->query($query);
         if ($status) {
             $this->db->bind(':status', $status);
@@ -30,6 +40,9 @@ class M_AdminProperties
         return is_array($result) ? $result : [];
     }
 
+    /**
+     * Counts for the dashboard: How many houses are waiting to be checked?
+     */
     public function getPropertyCounts()
     {
         $this->db->query("SELECT 
@@ -41,6 +54,7 @@ class M_AdminProperties
         return $this->db->single();
     }
 
+    // Get a single property by ID with all its details
     public function getPropertyById($id)
     {
         $this->db->query("SELECT 
@@ -57,25 +71,30 @@ class M_AdminProperties
         return $this->db->single();
     }
 
+    /**
+     * The BIG button: Approving a property so it goes live!
+     * If it's a rental, it becomes 'available' for booking immediately.
+     */
     public function approveProperty($id)
     {
-        // Get property type
+        // First, check what type of property this is
         $this->db->query("SELECT listing_type FROM properties WHERE id = :id");
         $this->db->bind(':id', $id);
         $row = $this->db->single();
         $listingType = $row ? $row->listing_type : 'rent';
 
         if ($listingType === 'maintenance') {
-            // Don't change status for maintenance property
+            // Maintenance properties don't need a status change, just approval
             $this->db->query("UPDATE properties SET approval_status = 'approved', approved_at = NOW() WHERE id = :id");
         } else {
-            // Rental property: set to available
+            // Rental properties should be marked as 'available' when approved
             $this->db->query("UPDATE properties SET approval_status = 'approved', status = 'available', approved_at = NOW() WHERE id = :id");
         }
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
 
+    // Reject a property listing
     public function rejectProperty($id)
     {
         $this->db->query("UPDATE properties 
@@ -86,6 +105,7 @@ class M_AdminProperties
         return $this->db->execute();
     }
 
+    // Delete a property completely from the database
     public function deleteProperty($id)
     {
         $this->db->query("DELETE FROM properties WHERE id = :id");
@@ -93,6 +113,9 @@ class M_AdminProperties
         return $this->db->execute();
     }
 
+    /**
+     * Helper: Get a list of "Vetted" managers so an admin can assign them to houses.
+     */
     public function getApprovedPropertyManagers()
     {
         $this->db->query("SELECT u.id, u.name, u.email, pm.phone
@@ -105,6 +128,7 @@ class M_AdminProperties
         return is_array($result) ? $result : [];
     }
 
+    // Assign a property to a property manager
     public function assignPropertyToManager($property_id, $manager_id)
     {
         $this->db->query("UPDATE properties 
@@ -115,6 +139,7 @@ class M_AdminProperties
         return $this->db->execute();
     }
 
+    // Remove property manager assignment from a property
     public function unassignProperty($property_id)
     {
         $this->db->query("UPDATE properties 

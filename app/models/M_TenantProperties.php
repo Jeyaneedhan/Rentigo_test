@@ -1,4 +1,8 @@
-<?php
+/**
+ * M_TenantProperties Model
+ * This is the "House Hunting" logic for tenants.
+ * It strictly only shows properties that have been vetted and approved by admins.
+ */
 class M_TenantProperties
 {
     private $db;
@@ -8,7 +12,10 @@ class M_TenantProperties
         $this->db = new Database;
     }
 
-    // Get all approved and available properties for tenants
+    /**
+     * Get the main list of houses for the marketplace.
+     * We don't show pending or rejected properties here!
+     */
     public function getApprovedProperties()
     {
         $this->db->query(
@@ -21,8 +28,9 @@ class M_TenantProperties
         return $this->db->resultSet();
     }
 
-    // Get a single property by id (only if approved)
-    // Allows viewing of available, reserved, and occupied properties
+    /**
+     * Get full details for one house—if you're thinking about booking it.
+     */
     public function getPropertyById($id)
     {
         $this->db->query(
@@ -36,7 +44,10 @@ class M_TenantProperties
         return $this->db->single();
     }
 
-    // Optional: filter/search with more advanced logic
+    /**
+     * FILTERS: Help the tenant find exactly what they want.
+     * (e.g., "An apartment in Colombo for under 50k")
+     */
     public function searchProperties($filters)
     {
         $sql = "SELECT * FROM properties WHERE approval_status = 'approved' AND status = 'available'";

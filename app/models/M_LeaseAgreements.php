@@ -1,10 +1,8 @@
-<?php
-
-/*
-    LEASE AGREEMENTS MODEL
-    Handles rental lease/contract operations
-*/
-
+/**
+ * M_LeaseAgreements Model
+ * This is the legal core of Rentigo.
+ * It manages the actual contracts between Landlords and Tenants.
+ */
 class M_LeaseAgreements
 {
     private $db;
@@ -14,7 +12,9 @@ class M_LeaseAgreements
         $this->db = new Database;
     }
 
-    // Create a new lease agreement
+    /**
+     * Create a new legal draft of a lease
+     */
     public function createLeaseAgreement($data)
     {
         $this->db->query('INSERT INTO lease_agreements (tenant_id, landlord_id, property_id, booking_id, start_date, end_date, monthly_rent, deposit_amount, terms_and_conditions, status, lease_duration_months)
@@ -114,7 +114,9 @@ class M_LeaseAgreements
         return $this->db->resultSet();
     }
 
-    // Update lease agreement status
+    /**
+     * Update the phase of the lease (e.g., 'pending_signatures' -> 'active')
+     */
     public function updateLeaseStatus($id, $status)
     {
         $this->db->query('UPDATE lease_agreements SET status = :status, updated_at = NOW() WHERE id = :id');
@@ -123,7 +125,9 @@ class M_LeaseAgreements
         return $this->db->execute();
     }
 
-    // Sign lease agreement by tenant
+    /**
+     * Record the tenant's digital confirmation of the terms
+     */
     public function signLeaseByTenant($id, $signature_data = null)
     {
         $this->db->query('UPDATE lease_agreements SET signed_by_tenant = 1, tenant_signature_date = NOW(), updated_at = NOW() WHERE id = :id');
@@ -139,7 +143,9 @@ class M_LeaseAgreements
         return $this->db->execute();
     }
 
-    // Terminate lease agreement
+    /**
+     * End a lease early (e.g., if a tenant moves out before the year is up)
+     */
     public function terminateLease($id, $termination_reason, $termination_date)
     {
         $this->db->query('UPDATE lease_agreements SET status = "terminated", termination_reason = :termination_reason, termination_date = :termination_date, updated_at = NOW() WHERE id = :id');
@@ -173,7 +179,10 @@ class M_LeaseAgreements
         return $result->count;
     }
 
-    // Get expiring leases (within X days)
+    /**
+     * ALERTS: Find leases that are about to end soon.
+     * This is useful for landlords to start looking for new tenants or offering renewals.
+     */
     public function getExpiringLeases($days = 30, $landlord_id = null)
     {
         $query = 'SELECT la.*,
@@ -255,7 +264,9 @@ class M_LeaseAgreements
         return $this->db->execute();
     }
 
-    // Get all lease agreements (for admin or property manager)
+    /**
+     * Big picture view for the site administrators
+     */
     public function getAllLeases()
     {
         $this->db->query('SELECT la.*,

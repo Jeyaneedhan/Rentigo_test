@@ -1,10 +1,9 @@
-<?php
-
-/*
-    BOOKINGS MODEL
-    Handles property booking/reservation operations
-*/
-
+/**
+ * M_Bookings Model
+ * This is the "Sales Pipeline" for Rentigo. 
+ * It manages everything from the moment a tenant requests a house 
+ * to when they actually move in and eventually move out.
+ */
 class M_Bookings
 {
     private $db;
@@ -14,12 +13,16 @@ class M_Bookings
         $this->db = new Database;
     }
 
-    // Create a new booking request
+    /**
+     * Start the process: A tenant wants to move in!
+     * This creates a 'pending' request that the landlord needs to review.
+     */
     public function createBooking($data)
     {
         $this->db->query('INSERT INTO bookings (tenant_id, property_id, landlord_id, move_in_date, move_out_date, monthly_rent, deposit_amount, total_amount, status, notes)
                          VALUES (:tenant_id, :property_id, :landlord_id, :move_in_date, :move_out_date, :monthly_rent, :deposit_amount, :total_amount, :status, :notes)');
 
+        // Bind all the details for the new request
         $this->db->bind(':tenant_id', $data['tenant_id']);
         $this->db->bind(':property_id', $data['property_id']);
         $this->db->bind(':landlord_id', $data['landlord_id']);
@@ -28,7 +31,7 @@ class M_Bookings
         $this->db->bind(':monthly_rent', $data['monthly_rent']);
         $this->db->bind(':deposit_amount', $data['deposit_amount']);
         $this->db->bind(':total_amount', $data['total_amount']);
-        $this->db->bind(':status', $data['status']);
+        $this->db->bind(':status', $data['status']); // Usually starts as 'pending'
         $this->db->bind(':notes', $data['notes']);
 
         if ($this->db->execute()) {
@@ -38,7 +41,9 @@ class M_Bookings
         }
     }
 
-    // Get booking by ID
+    /**
+     * Fetch a booking with all the important names (Tenant, Landlord, House Address)
+     */
     public function getBookingById($id)
     {
         $this->db->query('SELECT b.*,
@@ -54,7 +59,9 @@ class M_Bookings
         return $this->db->single();
     }
 
-    // Get all bookings by tenant
+    /**
+     * Get all bookings for a specific tenant (their history)
+     */
     public function getBookingsByTenant($tenant_id)
     {
         $this->db->query('SELECT b.*,
@@ -69,7 +76,9 @@ class M_Bookings
         return $this->db->resultSet();
     }
 
-    // Get all bookings by landlord
+    /**
+     * Get all bookings for properties owned by a specific landlord
+     */
     public function getBookingsByLandlord($landlord_id)
     {
         $this->db->query('SELECT b.*,
@@ -84,7 +93,9 @@ class M_Bookings
         return $this->db->resultSet();
     }
 
-    // Get all bookings by property
+    /**
+     * Find all bookings associated with one particular property
+     */
     public function getBookingsByProperty($property_id)
     {
         $this->db->query('SELECT b.*,
@@ -97,7 +108,10 @@ class M_Bookings
         return $this->db->resultSet();
     }
 
-    // Update booking status
+    /**
+     * Update the status of a booking (e.g., from 'pending' to 'approved')
+     * Also saves a reason if it was rejected.
+     */
     public function updateBookingStatus($id, $status, $rejection_reason = null)
     {
         $this->db->query('UPDATE bookings SET status = :status, rejection_reason = :rejection_reason, updated_at = NOW() WHERE id = :id');
@@ -107,7 +121,9 @@ class M_Bookings
         return $this->db->execute();
     }
 
-    // Cancel booking
+    /**
+     * Cancel a booking by the landlord or tenant
+     */
     public function cancelBooking($id, $cancellation_reason)
     {
         $this->db->query('UPDATE bookings SET status = :status, cancellation_reason = :cancellation_reason, updated_at = NOW() WHERE id = :id');
@@ -117,16 +133,11 @@ class M_Bookings
         return $this->db->execute();
     }
 
-    // Check if property has active booking
-    public function hasActiveBooking($property_id)
-    {
-        $this->db->query('SELECT COUNT(*) as count FROM bookings WHERE property_id = :property_id AND status IN ("approved", "active")');
-        $this->db->bind(':property_id', $property_id);
-        $result = $this->db->single();
-        return $result->count > 0;
-    }
-
-    // Check if dates conflict with existing bookings
+    /**
+     * THE DOUBLE-BOOKING CHECK:
+     * This makes sure two different tenants don't book the same dates for the same house.
+     * It's some of the most important logic in the whole app!
+     */
     public function checkDateConflict($property_id, $move_in_date, $move_out_date, $exclude_booking_id = null)
     {
         $query = 'SELECT COUNT(*) as count FROM bookings
@@ -139,6 +150,7 @@ class M_Bookings
                       (move_out_date BETWEEN :move_in_date AND :move_out_date)
                   )';
 
+        // If we're updating a booking, we ignore itself when checking for conflicts
         if ($exclude_booking_id) {
             $query .= ' AND id != :exclude_booking_id';
         }
@@ -156,7 +168,9 @@ class M_Bookings
         return $result->count > 0;
     }
 
-    // Get active booking for a tenant
+    /**
+     * Get the one active place where a tenant is currently living
+     */
     public function getActiveBookingByTenant($tenant_id)
     {
         $this->db->query('SELECT b.*,
@@ -171,7 +185,9 @@ class M_Bookings
         return $this->db->single();
     }
 
-    // Get pending bookings count for landlord in last 30 days
+    /**
+     * Stats for the landlord's dashboard card
+     */
     public function getPendingBookingsCount($landlord_id)
     {
         $this->db->query('SELECT COUNT(*) as count FROM bookings WHERE landlord_id = :landlord_id AND status = "pending" AND ' . getDateRangeSql('created_at'));
@@ -180,7 +196,9 @@ class M_Bookings
         return $result->count;
     }
 
-    // Get booking statistics
+    /**
+     * Get a row of counts (pending, active, etc.) for a user's dashboard in the last 30 days
+     */
     public function getBookingStats($user_id, $user_type)
     {
         $stats = [];
@@ -211,7 +229,9 @@ class M_Bookings
         return $this->db->single();
     }
 
-    // Update booking to active (after lease agreement)
+    /**
+     * Set a booking to 'active' (meaning the lease is signed and in effect)
+     */
     public function activateBooking($id)
     {
         $this->db->query('UPDATE bookings SET status = "active", updated_at = NOW() WHERE id = :id');
@@ -219,7 +239,9 @@ class M_Bookings
         return $this->db->execute();
     }
 
-    // Complete booking (tenant moved out)
+    /**
+     * MARK DOWN: The tenant has moved out and the house is free again.
+     */
     public function completeBooking($id)
     {
         $this->db->query('UPDATE bookings SET status = "completed", updated_at = NOW() WHERE id = :id');
@@ -227,7 +249,9 @@ class M_Bookings
         return $this->db->execute();
     }
 
-    // Get all bookings (for admin)
+    /**
+     * Global fetch for admin logs
+     */
     public function getAllBookings()
     {
         $this->db->query('SELECT b.*,
@@ -242,13 +266,16 @@ class M_Bookings
         return $this->db->resultSet();
     }
 
-    // Get all bookings for multiple properties (for property manager)
+    /**
+     * Fetch all bookings across a list of properties (useful for a Property Manager)
+     */
     public function getBookingsByProperties($propertyIds)
     {
         if (empty($propertyIds)) {
             return [];
         }
 
+        // Prepare placeholders (?,?,?) for the IN clause
         $placeholders = implode(',', array_fill(0, count($propertyIds), '?'));
 
         $this->db->query("SELECT b.*,
@@ -262,7 +289,7 @@ class M_Bookings
                          WHERE b.property_id IN ($placeholders)
                          ORDER BY b.created_at DESC");
 
-        // Bind property IDs
+        // Bind property IDs to the positional placeholders
         foreach ($propertyIds as $index => $propertyId) {
             $this->db->bind($index + 1, $propertyId);
         }

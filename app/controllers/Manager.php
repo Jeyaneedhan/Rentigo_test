@@ -1,6 +1,8 @@
 <?php
 require_once '../app/helpers/helper.php';
 
+// Manager (Property Manager) controller - handles all PM-related pages
+// Property managers oversee properties assigned to them by landlords
 class Manager extends Controller
 {
     private $userModel;
@@ -10,45 +12,49 @@ class Manager extends Controller
     {
         $this->userModel = $this->model('M_Users');
         $this->notificationModel = $this->model('M_Notifications');
+        // Security check - only property managers can access this controller
         if (!isLoggedIn() || $_SESSION['user_type'] !== 'property_manager') {
             redirect('users/login');
         }
     }
 
     // Helper method to get unread notification count
+    // We use this on every page to show the notification badge
     private function getUnreadNotificationCount()
     {
         return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
     }
 
+    // Default landing page - redirects to dashboard
     public function index()
     {
         $this->dashboard();
     }
 
+    // Main dashboard - shows overview of managed properties and financial stats
     public function dashboard()
     {
-        // Load models
+        // Load all the models we need
         $propertyModel = $this->model('M_ManagerProperties');
         $maintenanceModel = $this->model('M_Maintenance');
         $paymentModel = $this->model('M_Payments');
         $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
 
-        // Get manager's data
+        // Get this property manager's data
         $manager_id = $_SESSION['user_id'];
         $properties = $propertyModel->getAssignedProperties($manager_id);
 
-        // Get recent maintenance requests
+        // Get recent maintenance requests for the dashboard
         $allMaintenance = $maintenanceModel->getAllMaintenanceRequests();
         $recentMaintenance = array_slice($allMaintenance, 0, 5);
 
-        // Get recent rental payments
+        // Get all rental payments
         $allPayments = $paymentModel->getAllPayments();
 
-        // Get recent maintenance payments
+        // Get all maintenance service payments
         $maintenancePayments = $maintenanceQuotationModel->getAllMaintenancePayments();
 
-        // Combine and sort all payments by date
+        // Combine both types of payments and sort by date (newest first)
         $combinedPayments = array_merge($allPayments, $maintenancePayments);
         usort($combinedPayments, function ($a, $b) {
             $dateA = $a->payment_date ?? $a->due_date ?? $a->created_at;
@@ -57,7 +63,8 @@ class Manager extends Controller
         });
         $recentPayments = array_slice($combinedPayments, 0, 10);
 
-        // Calculate statistics (Last 30 days)
+        // Calculate statistics for the last 30 days
+        // Filter properties to only those created in the last 30 days
         $propertiesLast30Days = array_filter($properties, function($p) {
             return strtotime($p->created_at ?? '') >= strtotime('-30 days');
         });
@@ -65,16 +72,18 @@ class Manager extends Controller
         $totalProperties = count($propertiesLast30Days);
         $totalUnits = 0;
         $occupiedUnits = 0;
+        // Count total and occupied units across all properties
         foreach ($propertiesLast30Days as $property) {
             $totalUnits += $property->occupancy_total ?? 0;
             $occupiedUnits += $property->occupancy_occupied ?? 0;
         }
 
-        // Calculate total income and expenses (Last 30 days)
+        // Calculate total income and expenses for the last 30 days
         $totalIncome = 0;
         $totalExpenses = 0;
 
-        // Rental payment income (10% service fee) - Filtered by 30 days
+        // Calculate rental payment income - platform gets 10% service fee
+        // Only count completed payments from the last 30 days
         foreach ($allPayments as $payment) {
             $paymentDate = $payment->payment_date ?? $payment->created_at;
             if ($payment->status === 'completed' && strtotime($paymentDate) >= strtotime('-30 days')) {
@@ -83,7 +92,7 @@ class Manager extends Controller
             }
         }
 
-        // Maintenance payment income (100% - full payment amount) - Filtered by 30 days
+        // Maintenance payment income - platform gets 100% of these payments
         $maintenanceIncome = $maintenanceQuotationModel->getTotalMaintenanceIncome(30);
         $totalIncome += $maintenanceIncome;
 
@@ -119,11 +128,14 @@ class Manager extends Controller
         $this->view('manager/v_dashboard', $data);
     }
 
+    // Redirect to properties management page
     public function properties()
     {
         redirect('ManagerProperties/index');
     }
 
+    // Tenant management page - shows all tenants in properties this PM manages
+    // Includes filtering options
     public function tenants()
     {
         // Load models
@@ -247,11 +259,13 @@ class Manager extends Controller
         $this->view('manager/v_maintenance', $data);
     }
 
+    // Redirect to inspections page
     public function inspections()
     {
         redirect('inspections/index'); // route to inspection controller
     }
 
+    // Issue tracking page - shows all tenant issues for managed properties
     public function issues()
     {
         $issueModel = $this->model('M_Issue');

@@ -1,10 +1,9 @@
-<?php
-
-/*
-    REVIEWS MODEL
-    Handles property and tenant reviews/ratings
-*/
-
+/**
+ * M_Reviews Model
+ * Trust is everything! 
+ * This handles ratings and feedback for both Properties (by Tenants) 
+ * and Tenants (by Landlords).
+ */
 class M_Reviews
 {
     private $db;
@@ -14,7 +13,10 @@ class M_Reviews
         $this->db = new Database;
     }
 
-    // Create a new review
+    /**
+     * Submit a new bit of feedback
+     * 'review_type' helps us distinguish if we're rating a 'property' or a 'tenant'.
+     */
     public function createReview($data)
     {
         $this->db->query('INSERT INTO reviews (reviewer_id, reviewee_id, property_id, booking_id, rating, review_text, review_type, status)
@@ -121,7 +123,9 @@ class M_Reviews
         return $this->db->resultSet();
     }
 
-    // Get average rating for a property
+    /**
+     * Calculate the average "stars" for a property based on all approved feedback
+     */
     public function getPropertyAverageRating($property_id)
     {
         $this->db->query('SELECT AVG(rating) as avg_rating, COUNT(*) as review_count
@@ -142,7 +146,9 @@ class M_Reviews
         return $this->db->single();
     }
 
-    // Check if user already reviewed a property/tenant
+    /**
+     * Prevent double-rating: Checks if this user has already left feedback for this booking.
+     */
     public function hasUserReviewed($reviewer_id, $property_id = null, $reviewee_id = null, $review_type = 'property')
     {
         if ($review_type == 'property' && $property_id) {
@@ -187,7 +193,9 @@ class M_Reviews
         return $this->db->execute();
     }
 
-    // Get pending reviews (for moderation)
+    /**
+     * MODERATION: Find reviews that haven't been approved yet so an admin can check them.
+     */
     public function getPendingReviews()
     {
         $this->db->query('SELECT r.*,
@@ -245,7 +253,9 @@ class M_Reviews
         return $this->db->single();
     }
 
-    // Get reviews for tenant's completed bookings
+    /**
+     * Find bookings where the tenant has moved out and can now leave a review.
+     */
     public function getReviewableBookings($tenant_id)
     {
         $this->db->query('SELECT b.*, p.address, p.id as property_id, l.id as landlord_id, l.name as landlord_name,

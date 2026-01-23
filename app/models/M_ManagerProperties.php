@@ -1,4 +1,8 @@
-<?php
+/**
+ * M_ManagerProperties Model
+ * This model manages the relationship between properties and Property Managers.
+ * It helps PMs see exactly which houses they are responsible for looking after.
+ */
 class M_ManagerProperties
 {
     private $db;
@@ -8,7 +12,9 @@ class M_ManagerProperties
         $this->db = new Database;
     }
 
-    // Get all properties assigned to a manager WITH OWNER NAME
+    /**
+     * Get the full portfolio of houses assigned to a specific manager.
+     */
     public function getAssignedProperties($manager_id)
     {
         $this->db->query(
@@ -22,7 +28,9 @@ class M_ManagerProperties
         return $this->db->resultSet();
     }
 
-    // Get a single property by id, only if assigned to this manager
+    /**
+     * Fetch details for a house, but only if this manager has permission to see it.
+     */
     public function getPropertyById($id, $manager_id)
     {
         $this->db->query(

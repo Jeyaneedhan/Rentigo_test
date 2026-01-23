@@ -1,10 +1,8 @@
-<?php
-
-/*
-    NOTIFICATIONS MODEL
-    Handles user notification operations
-*/
-
+/**
+ * M_Notifications Model
+ * Think of this as the "Activity Feed" logic. 
+ * It handles creating alerts and messaging for all users so they stay in the loop.
+ */
 class M_Notifications
 {
     private $db;
@@ -14,7 +12,9 @@ class M_Notifications
         $this->db = new Database;
     }
 
-    // Create a new notification
+    /**
+     * The core method to send a message to a user's inbox
+     */
     public function createNotification($data)
     {
         $this->db->query('INSERT INTO notifications (user_id, type, title, message, link, is_read)
@@ -60,7 +60,9 @@ class M_Notifications
         return $this->db->resultSet();
     }
 
-    // Get unread notifications count
+    /**
+     * How many alerts are currently unread? (The red dot number)
+     */
     public function getUnreadCount($user_id)
     {
         $this->db->query('SELECT COUNT(*) as count FROM notifications WHERE user_id = :user_id AND is_read = 0');
@@ -69,7 +71,9 @@ class M_Notifications
         return $result->count;
     }
 
-    // Mark notification as read
+    /**
+     * Mark a single notification as 'read' - like when a user clicks it
+     */
     public function markAsRead($id)
     {
         $this->db->query('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = :id');
@@ -109,7 +113,10 @@ class M_Notifications
         return $this->db->execute();
     }
 
-    // Helper methods to create specific notification types
+    // ==========================================
+    // HELPER METHODS: Pre-baked notifications
+    // These make it super easy for other controllers to send standard alerts
+    // ==========================================
 
     // Booking notification
     public function notifyBookingCreated($landlord_id, $tenant_name, $property_address, $booking_id)
@@ -145,7 +152,9 @@ class M_Notifications
         ]);
     }
 
-    // Payment notifications
+    /**
+     * Remind the tenant to pay their rent - very important for cashflow!
+     */
     public function notifyPaymentDue($tenant_id, $amount, $due_date, $property_address)
     {
         return $this->createNotification([
@@ -168,7 +177,9 @@ class M_Notifications
         ]);
     }
 
-    // Issue notifications
+    /**
+     * Alert the landlord when something breaks (e.g., "Toilet is leaking...")
+     */
     public function notifyIssueReported($landlord_id, $issue_title, $property_address, $issue_id)
     {
         return $this->createNotification([
@@ -238,7 +249,9 @@ class M_Notifications
         ]);
     }
 
-    // Get all admin-related notifications (for admin dashboard)
+    /**
+     * Admin tools: See what's being sent across the whole platform
+     */
     public function getAllAdminNotifications()
     {
         // Get all notifications grouped by type with aggregated statistics
@@ -256,7 +269,9 @@ class M_Notifications
         return $this->db->resultSet();
     }
 
-    // Get admin-sent notifications (system type) with recipient details
+    /**
+     * Filter specifically for messages sent BY the admin (like site-wide alerts)
+     */
     public function getAdminSentNotifications()
     {
         $this->db->query("SELECT
@@ -277,7 +292,10 @@ class M_Notifications
         return $this->db->resultSet();
     }
 
-    // Get other notifications (non-admin sent) with sender and recipient details
+    /**
+     * This big query tries to figure out WHO sent a notification based on the type
+     * (e.g., if it's a "booking", a Tenant probably sent it)
+     */
     public function getOtherNotifications()
     {
         $this->db->query("SELECT

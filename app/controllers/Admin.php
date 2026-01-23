@@ -1,57 +1,62 @@
 <?php
 require_once '../app/helpers/helper.php';
 
+// Admin controller - handles all admin-related pages and actions
+// Only admins can access these methods
 class Admin extends Controller
 {
     private $userModel;
 
     public function __construct()
     {
+        // Make sure only admins can access this controller
         if (!isLoggedIn() || $_SESSION['user_type'] !== 'admin') {
             redirect('users/login');
         }
         $this->userModel = $this->model('M_Users');
     }
 
-    // Main dashboard page
+    // Main dashboard page - shows overview stats and recent activity
     public function index()
     {
-        // Load models for dashboard data
+        // Load all the models we need for dashboard data
         $propertyModel = $this->model('M_Properties');
         $bookingModel = $this->model('M_Bookings');
         $paymentModel = $this->model('M_Payments');
         $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
 
-        // Get statistics
+        // Get all the data from the database
         $allProperties = $propertyModel->getAllProperties();
         $allBookings = $bookingModel->getAllBookings();
         $allPayments = $paymentModel->getAllPayments();
         $pendingPMs = $this->userModel->getPendingPMs();
-        // Calculate 30-day revenue (10% platform service fee from rentals + 100% maintenance payments)
+        
+        // Calculate 30-day revenue
+        // Platform earns 10% from rental payments + 100% from maintenance payments
         $rentalRevenue = $paymentModel->getPlatformRentalIncome(30);
         $maintenanceRevenue = $maintenanceQuotationModel->getTotalMaintenanceIncome(30);
         $total30DayRevenue = $rentalRevenue + $maintenanceRevenue;
 
-        // Calculate active tenants (approved and active bookings created in last 30 days)
+        // Count active tenants - these are bookings that are approved or active in the last 30 days
         $activeBookings = array_filter($allBookings, function($b) {
             $isCorrectStatus = ($b->status === 'active' || $b->status === 'approved');
             $isWithin30Days = strtotime($b->created_at) >= strtotime('-30 days');
             return $isCorrectStatus && $isWithin30Days;
         });
 
-        // Filter total properties (last 30 days)
+        // Filter properties created in the last 30 days
         $propertiesLast30Days = array_filter($allProperties, function($p) {
             return strtotime($p->created_at) >= strtotime('-30 days');
         });
 
-        // Filter pending approvals (last 30 days)
+        // Filter pending PM approvals from the last 30 days
         $pendingApprovalsLast30Days = array_filter($pendingPMs, function($pm) {
             return strtotime($pm->created_at) >= strtotime('-30 days');
         });
 
-        // Get recent properties (last 10)
+        // Get the 10 most recent properties to display on the dashboard
         $recentProperties = array_slice($allProperties, -10);
-        $recentProperties = array_reverse($recentProperties);
+        $recentProperties = array_reverse($recentProperties);  // Newest first
 
         $data = [
             'title' => 'Admin Dashboard - Rentigo',
@@ -84,20 +89,21 @@ class Admin extends Controller
         $this->view('admin/v_managers', $data);
     }
 
-    // Financial management page
+    // Financial management page - shows all transactions and revenue stats
     public function financials()
     {
-        // Load payment models
+        // Load the payment models
         $paymentModel = $this->model('M_Payments');
         $maintenanceQuotationsModel = $this->model('M_MaintenanceQuotations');
 
-        // Get all rental payments
+        // Get all rental payments from tenants
         $allPayments = $paymentModel->getAllPayments();
 
-        // Get all maintenance payments
+        // Get all maintenance service payments
         $maintenancePayments = $maintenanceQuotationsModel->getAllMaintenancePayments();
 
-        // Calculate statistics (10% platform service fee from all payments)
+        // Initialize variables for calculating stats
+        // We're tracking revenue, collected amounts, pending, and overdue
         $totalRevenue = 0;
         $collected = 0;
         $pending = 0;
@@ -105,7 +111,8 @@ class Admin extends Controller
         $pendingCount = 0;
         $overdueCount = 0;
 
-        // Calculate rental payment fees (10% service fee) - Filtered by 30 days for stats
+        // Calculate rental payment fees - platform takes 10% service fee
+        // Only count payments from the last 30 days for the stats
         foreach ($allPayments as $payment) {
             $date = $payment->payment_date ?? $payment->created_at;
             if (strtotime($date) >= strtotime('-30 days')) {
@@ -123,7 +130,8 @@ class Admin extends Controller
             }
         }
 
-        // Calculate maintenance payment income (100% goes to platform) - Filtered by 30 days for stats
+        // Calculate maintenance payment income - platform gets 100% of these
+        // Only count payments from the last 30 days
         foreach ($maintenancePayments as $payment) {
             $date = $payment->payment_date ?? $payment->created_at;
             if (strtotime($date) >= strtotime('-30 days')) {
@@ -135,27 +143,28 @@ class Admin extends Controller
                     $pending += $payment->amount;
                     $pendingCount++;
                 } elseif ($payment->status === 'failed') {
-                    // Treat failed as overdue for maintenance
+                    // Treat failed payments as overdue for maintenance
                     $overdue += $payment->amount;
                     $overdueCount++;
                 }
             }
         }
 
-        // Merge and sort all transactions by date
+        // Combine all transactions into one array for display
         $allTransactions = array_merge($allPayments, $maintenancePayments);
 
-        // Sort by payment_date (descending)
+        // Sort all transactions by date, newest first
         usort($allTransactions, function($a, $b) {
             $dateA = strtotime($a->payment_date ?? $a->due_date ?? $a->created_at);
             $dateB = strtotime($b->payment_date ?? $b->due_date ?? $b->created_at);
-            return $dateB - $dateA;
+            return $dateB - $dateA;  // Descending order
         });
 
         // ==================== APPLY FILTERS ====================
+        // Start with all transactions, then filter based on user's selections
         $filteredTransactions = $allTransactions;
         
-        // Get filter parameters
+        // Get filter parameters from the URL
         $filterType = $_GET['filter_type'] ?? '';
         $filterStatus = $_GET['filter_status'] ?? '';
         $filterDateFrom = $_GET['filter_date_from'] ?? '';

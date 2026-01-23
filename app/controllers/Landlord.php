@@ -1,8 +1,11 @@
 <?php
 require_once '../app/helpers/helper.php';
 
+// Landlord controller - handles all landlord-specific pages and actions
+// Only logged-in landlords can access these methods
 class Landlord extends Controller
 {
+    // Store all the models we'll need throughout this controller
     private $userModel;
     private $bookingModel;
     private $paymentModel;
@@ -14,10 +17,12 @@ class Landlord extends Controller
 
     public function __construct()
     {
+        // Security check - only landlords can access this controller
         if (!isLoggedIn() || $_SESSION['user_type'] !== 'landlord') {
             redirect('users/login');
         }
 
+        // Load all the models we'll need
         $this->userModel = $this->model('M_Users');
         $this->bookingModel = $this->model('M_Bookings');
         $this->paymentModel = $this->model('M_Payments');
@@ -29,19 +34,23 @@ class Landlord extends Controller
     }
 
     // Helper method to get unread notification count
+    // We use this on every page to show the notification badge
     private function getUnreadNotificationCount()
     {
         return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
     }
 
+    // Default landing page - just redirects to dashboard
     public function index()
     {
         $this->dashboard();
     }
 
+    // Main dashboard - shows overview of landlord's properties and income
     public function dashboard()
     {
-        // Get dashboard statistics - Filtered by 30 days (Models already updated)
+        // Get all the stats we need for the dashboard
+        // Most of these are already filtered to last 30 days in the models
         $propertyStats = $this->propertyModel->getPropertyStatsByLandlord($_SESSION['user_id']);
         $bookingStats = $this->bookingModel->getBookingStats($_SESSION['user_id'], 'landlord');
         $pendingBookings = $this->bookingModel->getPendingBookingsCount($_SESSION['user_id']);
@@ -49,13 +58,13 @@ class Landlord extends Controller
         $activeLeases = $this->leaseModel->getActiveLeasesCount($_SESSION['user_id']);
         $pendingMaintenance = $this->maintenanceModel->getPendingMaintenanceCount($_SESSION['user_id']);
         
-        // Filter recent bookings by last 30 days
+        // Get recent bookings and filter to last 30 days
         $allRecentBookings = $this->bookingModel->getBookingsByLandlord($_SESSION['user_id']);
         $recentBookings = array_filter($allRecentBookings, function($b) {
             return strtotime($b->created_at ?? '') >= strtotime('-30 days');
         });
 
-        // Filter recent payments by last 30 days
+        // Get recent payments and filter to last 30 days
         $allRecentPayments = $this->paymentModel->getRecentPayments($_SESSION['user_id'], 'landlord', 10);
         $recentPayments = array_filter($allRecentPayments, function($p) {
             $date = $p->payment_date ?? $p->created_at;
@@ -64,16 +73,16 @@ class Landlord extends Controller
 
         $unreadNotifications = $this->notificationModel->getUnreadCount($_SESSION['user_id']);
 
-        // Get issue statistics (Updated in model)
+        // Get issue/inquiry statistics
         $issueModel = $this->model('M_Issue');
         $issueStats = $issueModel->getIssueStats($_SESSION['user_id'], 'landlord');
 
-        // Limit recent bookings to 5
+        // Limit recent bookings to 5 for the dashboard
         if (count($recentBookings) > 5) {
             $recentBookings = array_slice($recentBookings, 0, 5);
         }
         
-        // Limit recent payments to 5
+        // Limit recent payments to 5 for the dashboard
         if (count($recentPayments) > 5) {
             $recentPayments = array_slice($recentPayments, 0, 5);
         }
@@ -97,16 +106,20 @@ class Landlord extends Controller
         $this->view('landlord/v_dashboard', $data);
     }
 
+    // Redirect to properties management page
     public function properties()
     {
         redirect('properties/index');
     }
 
+    // Redirect to maintenance requests page
     public function maintenance()
     {
         redirect('maintenance/index');
     }
 
+    // Show all bookings for this landlord's properties
+    // Includes filtering options
     public function bookings()
     {
         // Get all bookings for landlord's properties

@@ -1,5 +1,8 @@
-<?php
-
+/**
+ * M_MaintenanceQuotations Model
+ * This model handles "Price Bids" or "Quotes" for fixing things.
+ * When something breaks, service providers say "I can fix that for X amount".
+ */
 class M_MaintenanceQuotations
 {
     private $db;
@@ -9,7 +12,9 @@ class M_MaintenanceQuotations
         $this->db = new Database;
     }
 
-    // Create a new quotation
+    /**
+     * Submit a new price offer for a job.
+     */
     public function createQuotation($data)
     {
         $this->db->query('INSERT INTO maintenance_quotations
@@ -47,7 +52,10 @@ class M_MaintenanceQuotations
         return $this->db->single();
     }
 
-    // Get quotations by maintenance request
+    /**
+     * See all the different price offers for one specific broken item.
+     * This lets the landlord compare prices.
+     */
     public function getQuotationsByRequest($request_id)
     {
         $this->db->query('SELECT q.*,
@@ -79,7 +87,9 @@ class M_MaintenanceQuotations
         return $this->db->resultSet();
     }
 
-    // Approve quotation
+    /**
+     * The landlord "Accepts" a bid. This locks in the price.
+     */
     public function approveQuotation($id, $approved_by)
     {
         $this->db->query('UPDATE maintenance_quotations
@@ -106,7 +116,9 @@ class M_MaintenanceQuotations
         return $this->db->execute();
     }
 
-    // Create payment record
+    /**
+     * Once the work is done, this handles paying the professional.
+     */
     public function createPayment($data)
     {
         $this->db->query('INSERT INTO maintenance_payments

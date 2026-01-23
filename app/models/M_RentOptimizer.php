@@ -2,7 +2,8 @@
 
 /**
  * Rent Optimizer Model
- * Analyzes market data to suggest optimal rent prices
+ * This is like a "Smart Pricing" tool for landlords.
+ * It looks at other houses in Colombo and suggests a competitive rent price.
  */
 class M_RentOptimizer
 {
@@ -14,14 +15,11 @@ class M_RentOptimizer
     }
 
     /**
-     * Suggest optimal rent for a property
-     * 
-     * @param array $propertyData Property details from form
-     * @return array Suggestion with rent, confidence, breakdown
+     * The main logic: Suggest a price based on a property's features.
      */
     public function suggestRent($propertyData)
     {
-        // Find similar properties from BOTH tables
+        // Step 1: Find "Comparable" houses (comps) from our DB and the wider market
         $similarProperties = $this->findSimilarProperties($propertyData);
 
         if (empty($similarProperties)) {
@@ -65,7 +63,8 @@ class M_RentOptimizer
     }
 
     /**
-     * Find similar properties from BOTH properties and market_properties tables
+     * ALGORITHM: Search two different tables (actual Rentigo listings + general market data)
+     * and calculate a "Similarity Score" for each one.
      */
     private function findSimilarProperties($propertyData)
     {
@@ -93,6 +92,7 @@ class M_RentOptimizer
             
             UNION ALL
             
+            -- We also search a "market_properties" table which contains scraped data from other sites
             SELECT 
                 id, address, property_type, bedrooms, bathrooms, sqft, rent, 
                 parking, pet_policy, laundry, status, "market" as source,
@@ -161,7 +161,8 @@ class M_RentOptimizer
     }
 
     /**
-     * Calculate adjustment factors based on property features
+     * REFINEMENT: Adjust the base rent up or down based on extra features.
+     * e.g., If the house has extra parking or allows pets, we can usually charge more.
      */
     private function calculateAdjustments($propertyData, $similarProperties)
     {
@@ -252,7 +253,8 @@ class M_RentOptimizer
     }
 
     /**
-     * Calculate confidence score (0-100)
+     * HONESTY CHECK: How much can we trust this suggestion?
+     * If we only found 2 similar houses, the confidence is low.
      */
     private function calculateConfidence($similarCount, $adjustments)
     {

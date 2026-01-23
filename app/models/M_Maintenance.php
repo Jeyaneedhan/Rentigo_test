@@ -1,10 +1,8 @@
-<?php
-
-/*
-    MAINTENANCE MODEL
-    Handles maintenance request operations
-*/
-
+/**
+ * M_Maintenance Model
+ * This handles all the maintenance requests in the system.
+ * From a tenant reporting a leaky faucet to a landlord hiring a plumber.
+ */
 class M_Maintenance
 {
     private $db;
@@ -14,7 +12,10 @@ class M_Maintenance
         $this->db = new Database;
     }
 
-    // Create a new maintenance request
+    /**
+     * Create a new maintenance request
+     * This can be initiated by a tenant, property manager, or landlord.
+     */
     public function createMaintenanceRequest($data)
     {
         $this->db->query('INSERT INTO maintenance_requests (property_id, landlord_id, issue_id, requester_id, title, description, category, priority, status, estimated_cost, notes)
@@ -22,7 +23,7 @@ class M_Maintenance
 
         $this->db->bind(':property_id', $data['property_id']);
         $this->db->bind(':landlord_id', $data['landlord_id']);
-        $this->db->bind(':issue_id', $data['issue_id'] ?? null);
+        $this->db->bind(':issue_id', $data['issue_id'] ?? null); // Linked to a tenant-reported 'Issue' if applicable
         $this->db->bind(':requester_id', $data['requester_id']);
         $this->db->bind(':title', $data['title']);
         $this->db->bind(':description', $data['description']);
@@ -39,7 +40,9 @@ class M_Maintenance
         }
     }
 
-    // Get maintenance request by ID
+    /**
+     * Get a single maintenance request with all the important names (landlord, tenant, provider)
+     */
     public function getMaintenanceById($id)
     {
         $this->db->query('SELECT m.*,
@@ -57,7 +60,9 @@ class M_Maintenance
         return $this->db->single();
     }
 
-    // Get all maintenance requests by property
+    /**
+     * List all maintenance history for one specific property
+     */
     public function getMaintenanceByProperty($property_id)
     {
         $this->db->query('SELECT m.*,
@@ -72,7 +77,10 @@ class M_Maintenance
         return $this->db->resultSet();
     }
 
-    // Get all maintenance requests by landlord
+    /**
+     * Get all requests for a landlord, including subqueries for quotation and payment status
+     * This query is a bit of a beast! It helps show the current progress of each fix.
+     */
     public function getMaintenanceByLandlord($landlord_id, $status = null)
     {
         $query = 'SELECT m.*,
@@ -107,7 +115,9 @@ class M_Maintenance
         return $this->db->resultSet();
     }
 
-    // Get all maintenance requests by property manager
+    /**
+     * Similar to the landlord version, but filtered by properties assigned to a specific PM
+     */
     public function getMaintenanceByManager($manager_id, $status = null)
     {
         $query = 'SELECT m.*,
@@ -144,7 +154,9 @@ class M_Maintenance
         return $this->db->resultSet();
     }
 
-    // Update maintenance request status
+    /**
+     * Simple status update (e.g., 'pending' -> 'in_progress')
+     */
     public function updateMaintenanceStatus($id, $status)
     {
         $this->db->query('UPDATE maintenance_requests SET status = :status, updated_at = NOW() WHERE id = :id');
@@ -153,7 +165,9 @@ class M_Maintenance
         return $this->db->execute();
     }
 
-    // Assign service provider to maintenance request
+    /**
+     * Tie a service provider to a request and set the scheduled date
+     */
     public function assignProvider($id, $provider_id, $scheduled_date = null)
     {
         $this->db->query('UPDATE maintenance_requests SET provider_id = :provider_id, scheduled_date = :scheduled_date, status = "scheduled", updated_at = NOW() WHERE id = :id');
@@ -163,7 +177,9 @@ class M_Maintenance
         return $this->db->execute();
     }
 
-    // Update maintenance cost
+    /**
+     * Keep track of the money! Update estimates and final costs.
+     */
     public function updateMaintenanceCost($id, $estimated_cost, $actual_cost = null)
     {
         $this->db->query('UPDATE maintenance_requests SET estimated_cost = :estimated_cost, actual_cost = :actual_cost, updated_at = NOW() WHERE id = :id');
@@ -173,7 +189,9 @@ class M_Maintenance
         return $this->db->execute();
     }
 
-    // Complete maintenance request
+    /**
+     * Finalize the request once the work is done
+     */
     public function completeMaintenance($id, $actual_cost, $completion_notes = '')
     {
         $this->db->query('UPDATE maintenance_requests SET
@@ -189,7 +207,9 @@ class M_Maintenance
         return $this->db->execute();
     }
 
-    // Cancel maintenance request
+    /**
+     * Sometimes a repair is canceled (e.g., if the tenant fixed it themselves)
+     */
     public function cancelMaintenance($id, $cancellation_reason)
     {
         $this->db->query('UPDATE maintenance_requests SET status = "cancelled", cancellation_reason = :cancellation_reason, updated_at = NOW() WHERE id = :id');
@@ -198,7 +218,9 @@ class M_Maintenance
         return $this->db->execute();
     }
 
-    // Get maintenance statistics
+    /**
+     * Calculate counts and sums for for dashboard stats (last 30 days)
+     */
     public function getMaintenanceStats($landlord_id = null, $manager_id = null)
     {
         if ($manager_id) {
@@ -250,7 +272,9 @@ class M_Maintenance
         return $this->db->single();
     }
 
-    // Get pending maintenance count
+    /**
+     * Quick glance at how many repairs are currently waiting
+     */
     public function getPendingMaintenanceCount($landlord_id = null, $manager_id = null)
     {
         $dateFilter = getDateRangeSql('m.created_at');
@@ -270,7 +294,9 @@ class M_Maintenance
         return $result->count;
     }
 
-    // Get recent maintenance requests (for dashboard)
+    /**
+     * Get the latest requests to show on a dashboard feed
+     */
     public function getRecentMaintenance($landlord_id = null, $manager_id = null, $limit = 10)
     {
         $query = 'SELECT m.*,
@@ -303,7 +329,9 @@ class M_Maintenance
         return $this->db->resultSet();
     }
 
-    // Update maintenance request
+    /**
+     * Update the core details of a request if it was typo'd or needs more info
+     */
     public function updateMaintenance($id, $data)
     {
         $this->db->query('UPDATE maintenance_requests SET
@@ -327,7 +355,9 @@ class M_Maintenance
         return $this->db->execute();
     }
 
-    // Get all maintenance requests (for admin)
+    /**
+     * Admin tool: Get everything across the whole platform
+     */
     public function getAllMaintenance()
     {
         $this->db->query('SELECT m.*,

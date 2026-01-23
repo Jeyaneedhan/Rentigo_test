@@ -1,4 +1,8 @@
-<?php
+/**
+ * M_ServiceProviders Model
+ * This is the platform's "Yellow Pages" or "Vendor Directory".
+ * It stores info about plumbers, electricians, and other tradespeople.
+ */
 class M_ServiceProviders
 {
     private $db;
@@ -8,7 +12,9 @@ class M_ServiceProviders
         $this->db = new Database();
     }
 
-    // CREATE - Add new service provider
+    /**
+     * Add a new professional to our directory.
+     */
     public function create($data)
     {
         $this->db->query('INSERT INTO service_providers (name, company, specialty, phone, email, address, rating, status) 
@@ -45,7 +51,9 @@ class M_ServiceProviders
         return $this->db->single();
     }
 
-    // READ - Get providers by specialty
+    /**
+     * Useful when a landlord says "I need an electrician" - we filter by specialty.
+     */
     public function getProvidersBySpecialty($specialty)
     {
         $this->db->query('SELECT * FROM service_providers WHERE specialty = :specialty AND status = "active"');
@@ -113,7 +121,9 @@ class M_ServiceProviders
         }
     }
 
-    // UTILITY - Search providers
+    /**
+     * Flexible search for the Admin dashboard.
+     */
     public function searchProviders($searchTerm, $specialty = '', $status = '')
     {
         $query = 'SELECT * FROM service_providers WHERE 1=1';
@@ -149,7 +159,9 @@ class M_ServiceProviders
         return $this->db->resultSet();
     }
 
-    // UTILITY - Get provider count by status and calculate average rating
+    /**
+     * Stats for the dashboard: How many active vendors do we have and are they any good?
+     */
     public function getProviderCounts()
     {
         $this->db->query('SELECT 

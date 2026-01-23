@@ -1,4 +1,8 @@
-<?php
+/**
+ * M_Properties Model
+ * This is the ultimate "House Manager" for Rentigo. 
+ * It handles the properties: Tenant, Landlord, Admin.
+ */
 class M_Properties
 {
     private $db;
@@ -8,7 +12,9 @@ class M_Properties
         $this->db = new Database;
     }
 
-    // Get properties by landlord
+    /**
+     * Get all properties owned by a specific landlord
+     */
     public function getPropertiesByLandlord($landlordId)
     {
         $this->db->query('SELECT * FROM properties WHERE landlord_id = :landlord_id ORDER BY created_at DESC');
@@ -17,7 +23,9 @@ class M_Properties
         return $this->db->resultSet();
     }
 
-    // Get property by ID
+    /**
+     * Fetch all the details for a single property
+     */
     public function getPropertyById($id)
     {
         $this->db->query('SELECT * FROM properties WHERE id = :id');
@@ -26,7 +34,9 @@ class M_Properties
         return $this->db->single();
     }
 
-    // Add property (existing method - kept for backward compatibility)
+    /**
+     * The older way to add a house—kept just in case! 
+     */
     public function addProperty($data)
     {
         $this->db->query('INSERT INTO properties (
@@ -37,7 +47,7 @@ class M_Properties
             :available_date, :parking, :pet_policy, :laundry, :description, :status, :listing_type
         )');
 
-        // Bind values
+        // Bind all the property features
         $this->db->bind(':landlord_id', $data['landlord_id']);
         $this->db->bind(':address', $data['address']);
         $this->db->bind(':property_type', $data['property_type']);
@@ -57,7 +67,10 @@ class M_Properties
         return $this->db->execute();
     }
 
-    // Add property and return ID
+    /**
+     * The NEW way: Add a house and get its ID immediately.
+     * This is useful for redirecting a Landlord to their new listing page. 
+     */
     public function addPropertyAndReturnId($data)
     {
         $this->db->query('INSERT INTO properties (
@@ -68,7 +81,6 @@ class M_Properties
             :available_date, :parking, :pet_policy, :laundry, :description, :status, :listing_type
         )');
 
-        // Bind values
         $this->db->bind(':landlord_id', $data['landlord_id']);
         $this->db->bind(':address', $data['address']);
         $this->db->bind(':property_type', $data['property_type']);
@@ -92,7 +104,9 @@ class M_Properties
         return false;
     }
 
-    // Update property
+    /**
+     * Update details for an existing property
+     */
     public function update($data)
     {
         $this->db->query('UPDATE properties SET
@@ -110,7 +124,6 @@ class M_Properties
                          description = :description
                          WHERE id = :id');
 
-        // Bind values
         $this->db->bind(':id', $data['id']);
         $this->db->bind(':address', $data['address']);
         $this->db->bind(':property_type', $data['property_type']);
@@ -128,7 +141,9 @@ class M_Properties
         return $this->db->execute();
     }
 
-    // Delete property
+    /**
+     * Remove a property listing
+     */
     public function deleteProperty($id)
     {
         $this->db->query('DELETE FROM properties WHERE id = :id');
@@ -137,13 +152,17 @@ class M_Properties
         return $this->db->execute();
     }
 
-    // Get properties by landlord ID (alternative method name)
+    /**
+     * Just another name for getPropertiesByLandlord - sometimes models use common aliases
+     */
     public function getPropertiesByLandlordId($landlordId)
     {
         return $this->getPropertiesByLandlord($landlordId);
     }
 
-    // Count properties by landlord
+    /**
+     * Get the count of properties a landlord owns
+     */
     public function countPropertiesByLandlord($landlordId)
     {
         $this->db->query('SELECT COUNT(*) as count FROM properties WHERE landlord_id = :landlord_id');
@@ -153,7 +172,9 @@ class M_Properties
         return $result ? $result->count : 0;
     }
 
-    // Get properties by status
+    /**
+     * Filter properties for a landlord by their availability status (occupied, available, etc.)
+     */
     public function getPropertiesByStatus($landlordId, $status)
     {
         $this->db->query('SELECT * FROM properties WHERE landlord_id = :landlord_id AND status = :status ORDER BY created_at DESC');
@@ -163,7 +184,9 @@ class M_Properties
         return $this->db->resultSet();
     }
 
-    // Get properties by type
+    /**
+     * Filter properties for a landlord by type (apartment, house, etc.)
+     */
     public function getPropertiesByType($landlordId, $type)
     {
         $this->db->query('SELECT * FROM properties WHERE landlord_id = :landlord_id AND property_type = :property_type ORDER BY created_at DESC');
@@ -173,7 +196,9 @@ class M_Properties
         return $this->db->resultSet();
     }
 
-    // NEW: Get properties by listing type
+    /**
+     * Filter by whether it is a 'rent' or 'maintenance' listing
+     */
     public function getPropertiesByListingType($landlordId, $listingType)
     {
         $this->db->query('SELECT * FROM properties WHERE landlord_id = :landlord_id AND listing_type = :listing_type ORDER BY created_at DESC');
@@ -183,19 +208,25 @@ class M_Properties
         return $this->db->resultSet();
     }
 
-    // NEW: Get rental properties only
+    /**
+     * Get all rental-only listings
+     */
     public function getRentalProperties($landlordId)
     {
         return $this->getPropertiesByListingType($landlordId, 'rent');
     }
 
-    // NEW: Get maintenance properties only
+    /**
+     * Get all maintenance-only listings
+     */
     public function getMaintenanceProperties($landlordId)
     {
         return $this->getPropertiesByListingType($landlordId, 'maintenance');
     }
 
-    // Search properties
+    /**
+     * Simple search by address or description for a landlord's dashboard
+     */
     public function searchProperties($landlordId, $searchTerm)
     {
         $this->db->query('SELECT * FROM properties WHERE landlord_id = :landlord_id AND (address LIKE :search OR description LIKE :search) ORDER BY created_at DESC');
@@ -205,7 +236,9 @@ class M_Properties
         return $this->db->resultSet();
     }
 
-    // Get recent properties
+    /**
+     * Fetch the most recently added properties
+     */
     public function getRecentProperties($landlordId, $limit = 5)
     {
         $this->db->query('SELECT * FROM properties WHERE landlord_id = :landlord_id ORDER BY created_at DESC LIMIT :limit');
@@ -215,7 +248,9 @@ class M_Properties
         return $this->db->resultSet();
     }
 
-    // Update property status
+    /**
+     * Update the active status of a property
+     */
     public function updateStatus($propertyId, $status)
     {
         $this->db->query('UPDATE properties SET status = :status WHERE id = :id');
@@ -225,27 +260,32 @@ class M_Properties
         return $this->db->execute();
     }
 
-    // Get property statistics (Last 30 days)
-public function getPropertyStats($landlordId)
-{
-    $this->db->query('SELECT
-                     COUNT(*) as total_properties,
-                     COUNT(CASE WHEN listing_type = "rent" THEN 1 END) as rental_properties,
-                     COUNT(CASE WHEN listing_type = "maintenance" THEN 1 END) as maintenance_properties,
-                     COUNT(CASE WHEN status = "occupied" THEN 1 END) as occupied,
-                     COUNT(CASE WHEN status = "available" THEN 1 END) as available,
-                     COUNT(CASE WHEN status IN ("available", "occupied") THEN 1 END) as active_properties,
-                     COUNT(CASE WHEN status = "maintenance" THEN 1 END) as maintenance,
-                     COUNT(CASE WHEN status = "maintenance_only" THEN 1 END) as maintenance_only,
-                     AVG(CASE WHEN listing_type = "rent" THEN rent ELSE NULL END) as average_rent,
-                     SUM(CASE WHEN status = "occupied" AND listing_type = "rent" THEN rent ELSE 0 END) as monthly_revenue
-                     FROM properties WHERE landlord_id = :landlord_id AND ' . getDateRangeSql('created_at'));
-    $this->db->bind(':landlord_id', $landlordId);
+    /**
+     * DASHBOARD CALCULATION: Sum up all the money a landlord is making. 
+     * It also counts how many houses are active, occupied, or in maintenance. 
+     */
+    public function getPropertyStats($landlordId)
+    {
+        $this->db->query('SELECT
+                         COUNT(*) as total_properties,
+                         COUNT(CASE WHEN listing_type = "rent" THEN 1 END) as rental_properties,
+                         COUNT(CASE WHEN listing_type = "maintenance" THEN 1 END) as maintenance_properties,
+                         COUNT(CASE WHEN status = "occupied" THEN 1 END) as occupied,
+                         COUNT(CASE WHEN status = "available" THEN 1 END) as available,
+                         COUNT(CASE WHEN status IN ("available", "occupied") THEN 1 END) as active_properties,
+                         COUNT(CASE WHEN status = "maintenance" THEN 1 END) as maintenance,
+                         COUNT(CASE WHEN status = "maintenance_only" THEN 1 END) as maintenance_only,
+                         AVG(CASE WHEN listing_type = "rent" THEN rent ELSE NULL END) as average_rent,
+                         SUM(CASE WHEN status = "occupied" AND listing_type = "rent" THEN rent ELSE 0 END) as monthly_revenue
+                         FROM properties WHERE landlord_id = :landlord_id AND ' . getDateRangeSql('created_at'));
+        $this->db->bind(':landlord_id', $landlordId);
 
-    return $this->db->single();
-}
+        return $this->db->single();
+    }
 
-    // NEW: Count properties by listing type
+    /**
+     * Count properties by listing type
+     */
     public function countPropertiesByListingType($landlordId, $listingType)
     {
         $this->db->query('SELECT COUNT(*) as count FROM properties WHERE landlord_id = :landlord_id AND listing_type = :listing_type');
@@ -268,7 +308,9 @@ public function getPropertyStats($landlordId)
         return $this->updateStatus($propertyId, $status);
     }
 
-    // Get all properties (for admin)
+    /**
+     * Global property fetch for admin usage
+     */
     public function getAllProperties()
     {
         $this->db->query('SELECT p.*, u.name as landlord_name, u.email as landlord_email

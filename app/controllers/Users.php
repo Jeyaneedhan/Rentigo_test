@@ -1,5 +1,7 @@
 <?php
 
+// Users controller - handles registration, login, logout, and profile management
+// This is where all the authentication magic happens
 class Users extends Controller
 {
     private $userModel;
@@ -9,18 +11,19 @@ class Users extends Controller
         $this->userModel = $this->model('M_Users');
     }
 
-    // STEP 1: User type selection page (v_usertype.php)
+    // STEP 1: User type selection page
+    // This is the first step of registration - user chooses their role
     public function usertype()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // User selected a type, validate and redirect to step 2
+            // User selected a type, let's validate it
             $user_type = trim($_POST['user_type']);
 
             if (!empty($user_type) && in_array($user_type, ['admin', 'property_manager', 'tenant', 'landlord'])) {
-                // Store user type in session temporarily
+                // Store user type in session temporarily so we remember it for step 2
                 $_SESSION['selected_user_type'] = $user_type;
 
-                // Redirect to PM-specific registration if property_manager
+                // Property managers need a special registration form (they upload ID)
                 if ($user_type === 'property_manager') {
                     redirect('users/register_pm');
                 } else {
@@ -38,16 +41,17 @@ class Users extends Controller
         }
     }
 
-    // STEP 2: Regular Registration (for non-PM users)
+    // STEP 2: Regular Registration (for tenants, landlords, admins)
+    // Property managers use a different form (register_pm)
     public function register()
     {
-        // Check if user type is selected (must come from step 1)
+        // Make sure they came from step 1 (user type selection)
         if (!isset($_SESSION['selected_user_type'])) {
             redirect('users/usertype');
             return;
         }
 
-        // Redirect PM to their specific registration
+        // If they're a PM, send them to the PM-specific form
         if ($_SESSION['selected_user_type'] === 'property_manager') {
             redirect('users/register_pm');
             return;
@@ -119,11 +123,12 @@ class Users extends Controller
                 empty($data['terms_err'])
             ) {
 
-                // Hash password
+                // Hash the password for security - never store plain text passwords!
                 $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
-                // Register user
+                // Try to register the user
                 if ($this->userModel->register($data)) {
+                    // Clear the temporary session variable
                     unset($_SESSION['selected_user_type']);
                     flash('reg_flash', 'Registration successful! You can now login with your credentials.');
                     redirect('users/login');
@@ -152,10 +157,11 @@ class Users extends Controller
         }
     }
 
-    // STEP 2B: Property Manager Registration (with ID upload)
+    // STEP 2B: Property Manager Registration
+    // PMs need to upload their employee ID for verification
     public function register_pm()
     {
-        // Check if user type is selected and is property_manager
+        // Make sure they selected property_manager in step 1
         if (!isset($_SESSION['selected_user_type']) || $_SESSION['selected_user_type'] !== 'property_manager') {
             redirect('users/usertype');
             return;
@@ -222,18 +228,18 @@ class Users extends Controller
                 $data['terms_err'] = 'You must accept the Terms and Conditions';
             }
 
-            // Handle file upload - store in database
+            // Handle file upload - we store the ID document in the database
             if (isset($_FILES['employee_id']) && $_FILES['employee_id']['error'] === UPLOAD_ERR_OK) {
                 $file = $_FILES['employee_id'];
                 $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-                $max_size = 5 * 1024 * 1024; // 5MB
+                $max_size = 5 * 1024 * 1024; // 5MB max file size
 
                 if (!in_array($file['type'], $allowed_types)) {
                     $data['employee_id_err'] = 'Only JPG, PNG, and PDF files are allowed';
                 } elseif ($file['size'] > $max_size) {
                     $data['employee_id_err'] = 'File size must not exceed 5MB';
                 } else {
-                    // Read file content into binary data
+                    // Read the file content and store it as binary data
                     $data['employee_id_data'] = file_get_contents($file['tmp_name']);
                     $data['employee_id_filename'] = $file['name'];
                     $data['employee_id_filetype'] = $file['type'];
@@ -250,10 +256,10 @@ class Users extends Controller
                 empty($data['employee_id_err']) && empty($data['terms_err'])
             ) {
 
-                // Hash password
+                // Hash password for security
                 $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
-                // Register PM
+                // Register the PM - their account will be pending until admin approves
                 if ($this->userModel->registerPM($data)) {
                     unset($_SESSION['selected_user_type']);
                     flash('reg_flash', 'Registration successful! Your account is pending approval. You will be notified once verified.');
@@ -316,15 +322,15 @@ class Users extends Controller
 
                     // Handle different login scenarios
                     if ($loggedUser === 'pending') {
-                        // Property Manager account is pending approval
+                        // Property Manager account is still waiting for admin approval
                         $data['password_err'] = 'Your account is under review. You will be able to login within 24-48 hours after approval.';
                         $this->view('users/v_login', $data);
                     } elseif ($loggedUser === 'rejected') {
-                        // Property Manager account was rejected
+                        // Property Manager account was rejected by admin
                         $data['password_err'] = 'Your account application has been rejected. Please contact admin for more information.';
                         $this->view('users/v_login', $data);
                     } elseif ($loggedUser) {
-                        // Successful login
+                        // Successful login! Create session and redirect to their dashboard
                         $this->createUserSession($loggedUser);
                         $this->redirectBasedOnUserType($loggedUser->user_type);
                     } else {
@@ -373,7 +379,7 @@ class Users extends Controller
         }
     }
 
-    // Create user session
+    // Create user session - store their info so they stay logged in
     public function createUserSession($user)
     {
         $_SESSION['user_id'] = $user->id;
@@ -382,7 +388,7 @@ class Users extends Controller
         $_SESSION['user_type'] = $user->user_type;
     }
 
-    // Logout
+    // Logout - clear all session data and send them back to login
     public function logout()
     {
         unset($_SESSION['user_id']);

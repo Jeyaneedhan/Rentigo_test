@@ -1,10 +1,8 @@
-<?php
-
-/*
-    PAYMENTS MODEL
-    Handles rent payment operations and transaction history
-*/
-
+/**
+ * M_Payments Model
+ * This handles all the money-related stuff—rent, deposits, and platform fees.
+ * It tracks who paid what, when they paid it, and if anything is overdue.
+ */
 class M_Payments
 {
     private $db;
@@ -14,7 +12,9 @@ class M_Payments
         $this->db = new Database;
     }
 
-    // Create a new payment record
+    /**
+     * Log a new payment record (could be for rent, deposit, etc.)
+     */
     public function createPayment($data)
     {
         $this->db->query('INSERT INTO payments (tenant_id, landlord_id, property_id, booking_id, amount, payment_method, transaction_id, status, payment_date, due_date, notes)
@@ -39,7 +39,9 @@ class M_Payments
         }
     }
 
-    // Get payment by ID
+    /**
+     * Fetch all the details for a single payment transaction
+     */
     public function getPaymentById($id)
     {
         $this->db->query('SELECT p.*,
@@ -55,7 +57,9 @@ class M_Payments
         return $this->db->single();
     }
 
-    // Get all payments by tenant
+    /**
+     * Get a tenant's full payment history
+     */
     public function getPaymentsByTenant($tenant_id)
     {
         $this->db->query('SELECT p.*,
@@ -106,7 +110,9 @@ class M_Payments
         return $this->db->resultSet();
     }
 
-    // Calculate total income for landlord
+    /**
+     * Useful for the landlord's dashboard—see how much they've actually earned
+     */
     public function getTotalIncomeByLandlord($landlord_id)
     {
         $this->db->query('SELECT SUM(amount) as total FROM payments WHERE landlord_id = :landlord_id AND status = "completed" AND ' . getDateRangeSql('payment_date'));
@@ -140,7 +146,9 @@ class M_Payments
         return $this->db->execute();
     }
 
-    // Get pending payments for a tenant
+    /**
+     * Payments that are due but haven't been completed yet
+     */
     public function getPendingPaymentsByTenant($tenant_id)
     {
         $this->db->query('SELECT p.*,
@@ -155,7 +163,10 @@ class M_Payments
         return $this->db->resultSet();
     }
 
-    // Get overdue payments
+    /**
+     * Logic check: Find all pending payments where the due date has already passed.
+     * Tenants aren't going to like this list!
+     */
     public function getOverduePayments($tenant_id = null)
     {
         $query = 'SELECT p.*,
@@ -280,7 +291,10 @@ class M_Payments
         return $this->db->resultSet();
     }
 
-    // Create scheduled rent payments for active booking
+    /**
+     * AUTOMATION: When a lease is signed, we pre-create all the monthly rent payment rows as 'pending'.
+     * This makes it easy for the tenant to see what's coming up and for the system to flag overdue rent.
+     */
     public function createScheduledPayments($booking_id, $tenant_id, $landlord_id, $property_id, $monthly_rent, $start_date, $end_date)
     {
         $start = new DateTime($start_date);
@@ -342,7 +356,8 @@ class M_Payments
     }
 
     /**
-     * Get 10% platform fee from completed rental payments in the last X days
+     * Rentigo's business model: We take a 10% cut from every rental payment.
+     * This calculates how much the platform has earned.
      */
     public function getPlatformRentalIncome($days = 30)
     {
