@@ -1,3 +1,4 @@
+<?php
 /**
  * PDO Database Class
  * THE DATA ENGINE: This class handles all the talking to MySQL.

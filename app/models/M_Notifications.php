@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Notifications Model
  * Think of this as the "Activity Feed" logic. 

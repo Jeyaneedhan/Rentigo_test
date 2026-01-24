@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Issue Model
  * This is for the "Report a Problem" feature for tenants.

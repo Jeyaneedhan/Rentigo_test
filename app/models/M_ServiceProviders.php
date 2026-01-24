@@ -1,3 +1,4 @@
+<?php
 /**
  * M_ServiceProviders Model
  * This is the platform's "Yellow Pages" or "Vendor Directory".

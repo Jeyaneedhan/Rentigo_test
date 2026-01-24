@@ -1,3 +1,4 @@
+<?php
 /**
  * M_AdminProperties Model
  * This is the "Control Panel" for house listings. 

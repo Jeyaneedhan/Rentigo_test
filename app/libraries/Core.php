@@ -1,3 +1,4 @@
+<?php
 /**
  * Core Class
  * THE TRAFFIC COP: This is the first file that runs when someone visits the site.

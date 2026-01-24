@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Policies Model
  * This manages the "Boring Legal Stuff"—Terms of Service, Privacy Policies, etc.

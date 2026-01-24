@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Properties Model
  * This is the ultimate "House Manager" for Rentigo. 

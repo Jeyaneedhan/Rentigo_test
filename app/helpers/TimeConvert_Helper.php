@@ -1,3 +1,4 @@
+<?php
 /**
  * TimeConvert Helper
  * This takes those scary database timestamps (2023-10-27 14:05:32) 

@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Payments Model
  * This handles all the money-related stuff—rent, deposits, and platform fees.

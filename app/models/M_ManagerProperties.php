@@ -1,3 +1,4 @@
+<?php
 /**
  * M_ManagerProperties Model
  * This model manages the relationship between properties and Property Managers.

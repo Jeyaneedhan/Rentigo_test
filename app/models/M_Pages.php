@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Pages Model
  * A super simple model used for testing or for very basic site pages 

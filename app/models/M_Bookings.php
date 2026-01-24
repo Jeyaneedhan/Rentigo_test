@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Bookings Model
  * This is the "Sales Pipeline" for Rentigo. 

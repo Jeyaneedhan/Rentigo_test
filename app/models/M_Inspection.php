@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Inspection Model
  * This model manages "Property Inspections" — when a manager actually visits 

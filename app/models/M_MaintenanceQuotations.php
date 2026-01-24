@@ -1,3 +1,4 @@
+<?php
 /**
  * M_MaintenanceQuotations Model
  * This model handles "Price Bids" or "Quotes" for fixing things.

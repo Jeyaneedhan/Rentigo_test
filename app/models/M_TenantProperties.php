@@ -1,3 +1,4 @@
+<?php
 /**
  * M_TenantProperties Model
  * This is the "House Hunting" logic for tenants.

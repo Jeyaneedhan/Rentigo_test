@@ -1,3 +1,4 @@
+<?php
 /**
  * M_LeaseAgreements Model
  * This is the legal core of Rentigo.

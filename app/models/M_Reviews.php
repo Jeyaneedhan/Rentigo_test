@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Reviews Model
  * Trust is everything! 

@@ -1,3 +1,4 @@
+<?php
 /**
  * Base Controller
  * THE PARENT CLASS: Every single page controller (like Tenant, Landlord, etc.) 

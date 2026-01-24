@@ -1,3 +1,4 @@
+<?php
 /**
  * Validator Class
  * THE GATEKEEPER: This class makes sure that user input is safe and correct 

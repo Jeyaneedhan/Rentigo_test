@@ -1,3 +1,4 @@
+<?php
 /**
  * M_Maintenance Model
  * This handles all the maintenance requests in the system.
