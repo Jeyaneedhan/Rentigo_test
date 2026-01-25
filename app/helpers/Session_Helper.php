@@ -27,12 +27,12 @@ function flash($name = '', $message = '', $class = 'msg-flash')
             // DISPLAY MODE: If we only provided a $name, we want to show the message.
             if (isset($_SESSION[$name]) && !empty($_SESSION[$name])) {
                 $class = isset($_SESSION[$name . '_class']) && !empty($_SESSION[$name . '_class']) ? $_SESSION[$name . '_class'] : '';
-                echo '<div class="' . $class . '" id="' . $class . '">' . $_SESSION[$name] . '</div>';
-                
-                // IMPORTANT: Unset the values so the message disappears when they refresh.
-                unset($_SESSION[$name]);
+            echo '<div class="' . $class . '" id="' . $class . '">' . $_SESSION[$name] . '</div>';
+            
+            // IMPORTANT: Unset the values so the message disappears when they refresh.
+            unset($_SESSION[$name]);
                 if (isset($_SESSION[$name . '_class'])) {
-                    unset($_SESSION[$name . '_class']);
+            unset($_SESSION[$name . '_class']);
                 }
             }
         }
