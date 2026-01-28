@@ -8,6 +8,7 @@ require_once 'helpers/Validator.php';
 require_once 'helpers/URL_Helper.php';
 require_once 'helpers/Session_Helper.php';
 require_once 'helpers/TimeConvert_Helper.php';
+require_once 'helpers/Email_Helper.php';
 
 // Load configurations next - this sets up database credentials and app settings
 require_once 'config/config.php';

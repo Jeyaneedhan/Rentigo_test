@@ -17,3 +17,12 @@ define('URLROOT', 'http://localhost/Rentigo_test');
 
 // Site name - just the name of our app, used in page titles and stuff
 define('SITENAME', 'Rentigo');
+
+// Email Configuration (Gmail)
+define('MAIL_FROM', 'rentiogapp@gmail.com');
+define('MAIL_FROM_NAME', 'Rentigo App');
+define('MAIL_HOST', 'smtp.gmail.com');
+define('MAIL_PORT', 587);
+define('MAIL_USER', 'rentiogapp@gmail.com');
+define('MAIL_PASS', 'bmrb gfiz wnzn pamg'); // Gmail App Password
+define('MAIL_SECURE', 'tls');

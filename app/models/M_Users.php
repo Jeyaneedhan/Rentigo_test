@@ -394,4 +394,67 @@ class M_Users
 
         return $this->db->execute();
     }
+
+    // ==========================================
+    // PASSWORD RESET METHODS
+    // ==========================================
+
+    /**
+     * Store a 6-digit reset code for an email
+     * Codes expire after 15 minutes
+     */
+    public function storeResetCode($email, $code)
+    {
+        // First, clean up any old codes for this email
+        $this->db->query('DELETE FROM password_resets WHERE email = :email');
+        $this->db->bind(':email', $email);
+        $this->db->execute();
+
+        // Calculate expiry (15 minutes from now)
+        $expires_at = date('Y-m-d H:i:s', strtotime('+15 minutes'));
+
+        $this->db->query('INSERT INTO password_resets (email, code, expires_at) VALUES (:email, :code, :expires_at)');
+        $this->db->bind(':email', $email);
+        $this->db->bind(':code', $code);
+        $this->db->bind(':expires_at', $expires_at);
+
+        return $this->db->execute();
+    }
+
+    /**
+     * Verify if the provided code matches and is not expired
+     */
+    public function verifyResetCode($email, $code)
+    {
+        $this->db->query('SELECT * FROM password_resets 
+                          WHERE email = :email AND code = :code 
+                          AND expires_at > NOW()');
+        $this->db->bind(':email', $email);
+        $this->db->bind(':code', $code);
+
+        $row = $this->db->single();
+
+        return $row ? true : false;
+    }
+
+    /**
+     * Update the user's password and remove the reset code
+     */
+    public function updateUserPassword($email, $hashedPassword)
+    {
+        // 1. Update the password in users table
+        $this->db->query('UPDATE users SET password = :password WHERE email = :email');
+        $this->db->bind(':password', $hashedPassword);
+        $this->db->bind(':email', $email);
+
+        if (!$this->db->execute()) {
+            return false;
+        }
+
+        // 2. Remove the reset code(s)
+        $this->db->query('DELETE FROM password_resets WHERE email = :email');
+        $this->db->bind(':email', $email);
+        return $this->db->execute();
+    }
 }
+

@@ -70,7 +70,7 @@
                         <span class="checkmark"></span>
                         Remember me
                     </label>
-                    <a href="#" class="forgot-password">Forgot Password?</a>
+                    <a href="<?php echo URLROOT; ?>/users/forgotPassword" class="forgot-password">Forgot Password?</a>
                 </div>
 
                 <button type="submit" class="auth-btn">Log In</button>
