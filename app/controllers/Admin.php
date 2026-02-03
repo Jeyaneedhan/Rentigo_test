@@ -30,7 +30,7 @@ class Admin extends Controller
         $allBookings = $bookingModel->getAllBookings();
         $allPayments = $paymentModel->getAllPayments();
         $pendingPMs = $this->userModel->getPendingPMs();
-        
+
         // Calculate 30-day revenue
         // Platform earns 10% from rental payments + 100% from maintenance payments
         $rentalRevenue = $paymentModel->getPlatformRentalIncome(30);
@@ -38,19 +38,19 @@ class Admin extends Controller
         $total30DayRevenue = $rentalRevenue + $maintenanceRevenue;
 
         // Count active tenants - these are bookings that are approved or active in the last 30 days
-        $activeBookings = array_filter($allBookings, function($b) {
+        $activeBookings = array_filter($allBookings, function ($b) {
             $isCorrectStatus = ($b->status === 'active' || $b->status === 'approved');
             $isWithin30Days = strtotime($b->created_at) >= strtotime('-30 days');
             return $isCorrectStatus && $isWithin30Days;
         });
 
         // Filter properties created in the last 30 days
-        $propertiesLast30Days = array_filter($allProperties, function($p) {
+        $propertiesLast30Days = array_filter($allProperties, function ($p) {
             return strtotime($p->created_at) >= strtotime('-30 days');
         });
 
         // Filter pending PM approvals from the last 30 days
-        $pendingApprovalsLast30Days = array_filter($pendingPMs, function($pm) {
+        $pendingApprovalsLast30Days = array_filter($pendingPMs, function ($pm) {
             return strtotime($pm->created_at) >= strtotime('-30 days');
         });
 
@@ -154,7 +154,7 @@ class Admin extends Controller
         $allTransactions = array_merge($allPayments, $maintenancePayments);
 
         // Sort all transactions by date, newest first
-        usort($allTransactions, function($a, $b) {
+        usort($allTransactions, function ($a, $b) {
             $dateA = strtotime($a->payment_date ?? $a->due_date ?? $a->created_at);
             $dateB = strtotime($b->payment_date ?? $b->due_date ?? $b->created_at);
             return $dateB - $dateA;  // Descending order
@@ -163,7 +163,7 @@ class Admin extends Controller
         // ==================== APPLY FILTERS ====================
         // Start with all transactions, then filter based on user's selections
         $filteredTransactions = $allTransactions;
-        
+
         // Get filter parameters from the URL
         $filterType = $_GET['filter_type'] ?? '';
         $filterStatus = $_GET['filter_status'] ?? '';
@@ -172,9 +172,9 @@ class Admin extends Controller
 
         // Apply Type Filter
         if (!empty($filterType)) {
-            $filteredTransactions = array_filter($filteredTransactions, function($transaction) use ($filterType) {
+            $filteredTransactions = array_filter($filteredTransactions, function ($transaction) use ($filterType) {
                 $isMaintenance = isset($transaction->payment_type) && $transaction->payment_type === 'maintenance';
-                
+
                 if ($filterType === 'rental') {
                     return !$isMaintenance;
                 } elseif ($filterType === 'maintenance') {
@@ -186,17 +186,17 @@ class Admin extends Controller
 
         // Apply Status Filter
         if (!empty($filterStatus)) {
-            $filteredTransactions = array_filter($filteredTransactions, function($transaction) use ($filterStatus) {
+            $filteredTransactions = array_filter($filteredTransactions, function ($transaction) use ($filterStatus) {
                 return strtolower($transaction->status) === strtolower($filterStatus);
             });
         }
 
         // Apply Date Range Filter
         if (!empty($filterDateFrom) || !empty($filterDateTo)) {
-            $filteredTransactions = array_filter($filteredTransactions, function($transaction) use ($filterDateFrom, $filterDateTo) {
+            $filteredTransactions = array_filter($filteredTransactions, function ($transaction) use ($filterDateFrom, $filterDateTo) {
                 $displayDate = $transaction->payment_date ?? $transaction->due_date ?? $transaction->created_at;
                 $transactionDate = strtotime($displayDate);
-                
+
                 // Check FROM date
                 if (!empty($filterDateFrom)) {
                     $fromDate = strtotime($filterDateFrom);
@@ -204,7 +204,7 @@ class Admin extends Controller
                         return false;
                     }
                 }
-                
+
                 // Check TO date
                 if (!empty($filterDateTo)) {
                     $toDate = strtotime($filterDateTo . ' 23:59:59'); // End of day
@@ -212,7 +212,7 @@ class Admin extends Controller
                         return false;
                     }
                 }
-                
+
                 return true;
             });
         }
@@ -230,7 +230,7 @@ class Admin extends Controller
             'pendingCount' => $pendingCount,
             'overdueCount' => $overdueCount,
             'recentTransactions' => $filteredTransactions,
-            
+
             // Pass filter values back to view for persistence
             'filter_type' => $filterType,
             'filter_status' => $filterStatus,
@@ -408,9 +408,23 @@ class Admin extends Controller
                 error_log("ApprovePM result: " . ($result ? 'true' : 'false'));
 
                 if ($result) {
+                    // Send approval email to PM
+                    $user = $this->userModel->getUserById($userId);
+                    $emailSent = false;
+                    $emailWarning = '';
+
+                    if ($user && !empty($user->email)) {
+                        $emailSent = sendPMApprovalEmail($user->email, $user->name);
+                        if (!$emailSent) {
+                            global $smtp_error;
+                            $emailWarning = ' However, the notification email could not be sent.';
+                            error_log("Failed to send PM approval email to: " . $user->email . " Error: " . $smtp_error);
+                        }
+                    }
+
                     echo json_encode([
                         'success' => true,
-                        'message' => 'Property Manager approved successfully'
+                        'message' => 'Property Manager approved successfully' . $emailWarning
                     ]);
                 } else {
                     echo json_encode([
@@ -486,10 +500,26 @@ class Admin extends Controller
 
             $adminId = $_SESSION['user_id'];
 
+            // Get user details before rejection for email
+            $user = $this->userModel->getUserById($userId);
+
             if ($this->userModel->rejectPM($userId, $adminId)) {
+                // Send rejection email to PM
+                $emailSent = false;
+                $emailWarning = '';
+
+                if ($user && !empty($user->email)) {
+                    $emailSent = sendPMRejectionEmail($user->email, $user->name);
+                    if (!$emailSent) {
+                        global $smtp_error;
+                        $emailWarning = ' However, the notification email could not be sent.';
+                        error_log("Failed to send PM rejection email to: " . $user->email . " Error: " . $smtp_error);
+                    }
+                }
+
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Property Manager application rejected'
+                    'message' => 'Property Manager application rejected' . $emailWarning
                 ]);
             } else {
                 echo json_encode([
@@ -511,7 +541,7 @@ class Admin extends Controller
 
         // ==================== APPLY FILTERS ====================
         $filteredInspections = $allInspections;
-        
+
         // Get filter parameters
         $filterStatus = $_GET['filter_status'] ?? '';
         $filterType = $_GET['filter_type'] ?? '';
@@ -520,23 +550,23 @@ class Admin extends Controller
 
         // Apply Status Filter
         if (!empty($filterStatus)) {
-            $filteredInspections = array_filter($filteredInspections, function($inspection) use ($filterStatus) {
+            $filteredInspections = array_filter($filteredInspections, function ($inspection) use ($filterStatus) {
                 return strtolower($inspection->status) === strtolower($filterStatus);
             });
         }
 
         // Apply Type Filter
         if (!empty($filterType)) {
-            $filteredInspections = array_filter($filteredInspections, function($inspection) use ($filterType) {
+            $filteredInspections = array_filter($filteredInspections, function ($inspection) use ($filterType) {
                 return strtolower($inspection->type) === strtolower($filterType);
             });
         }
 
         // Apply Date Range Filter (on scheduled_date)
         if (!empty($filterDateFrom) || !empty($filterDateTo)) {
-            $filteredInspections = array_filter($filteredInspections, function($inspection) use ($filterDateFrom, $filterDateTo) {
+            $filteredInspections = array_filter($filteredInspections, function ($inspection) use ($filterDateFrom, $filterDateTo) {
                 $scheduledDate = strtotime($inspection->scheduled_date);
-                
+
                 // Check FROM date
                 if (!empty($filterDateFrom)) {
                     $fromDate = strtotime($filterDateFrom);
@@ -544,7 +574,7 @@ class Admin extends Controller
                         return false;
                     }
                 }
-                
+
                 // Check TO date
                 if (!empty($filterDateTo)) {
                     $toDate = strtotime($filterDateTo . ' 23:59:59'); // End of day
@@ -552,7 +582,7 @@ class Admin extends Controller
                         return false;
                     }
                 }
-                
+
                 return true;
             });
         }
@@ -565,7 +595,7 @@ class Admin extends Controller
             'page' => 'inspections',
             'user_name' => $_SESSION['user_name'],
             'inspections' => $filteredInspections,
-            
+
             // Pass filter values back to view for persistence
             'filter_status' => $filterStatus,
             'filter_type' => $filterType,

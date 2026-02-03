@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Users Model
  * This is the ultimate "User Manager" for Rentigo. 
@@ -333,30 +334,22 @@ class M_Users
     }
 
     /**
-     * Reject a PM account
+     * Reject a PM account - deletes the user so they can re-register
      */
     public function rejectPM($userId, $adminId)
     {
-        // Mark user as rejected
-        $this->db->query('UPDATE users 
-                          SET account_status = :status 
-                          WHERE id = :id');
-
-        $this->db->bind(':status', 'rejected');
-        $this->db->bind(':id', $userId);
+        // First delete the property_manager record
+        $this->db->query('DELETE FROM property_manager WHERE user_id = :user_id');
+        $this->db->bind(':user_id', $userId);
 
         if (!$this->db->execute()) {
             return false;
         }
 
-        // Update PM record with rejection info
-        $this->db->query('UPDATE property_manager 
-                          SET approval_status = :approval_status, approved_by = :admin_id, approved_at = NOW() 
-                          WHERE user_id = :user_id');
-
-        $this->db->bind(':approval_status', 'rejected');
-        $this->db->bind(':admin_id', $adminId);
-        $this->db->bind(':user_id', $userId);
+        // Then delete the user record so they can re-register
+        $this->db->query('DELETE FROM users WHERE id = :id AND user_type = :user_type');
+        $this->db->bind(':id', $userId);
+        $this->db->bind(':user_type', 'property_manager');
 
         return $this->db->execute();
     }
@@ -457,4 +450,3 @@ class M_Users
         return $this->db->execute();
     }
 }
-
