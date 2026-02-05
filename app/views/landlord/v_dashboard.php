@@ -475,7 +475,7 @@
     .quick-action-item:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border-color: #667eea;
+        border-color: #45a9ea;
     }
 
     .action-icon {
@@ -486,7 +486,7 @@
         height: 50px;
         background: #f8f9fa;
         border-radius: 8px;
-        color: #667eea;
+        color: #45a9ea;
         font-size: 24px;
         flex-shrink: 0;
     }
