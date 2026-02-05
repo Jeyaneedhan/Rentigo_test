@@ -29,10 +29,13 @@ AutoPaginate::init($data, 5);
             <div class="filter-dropdown-wrapper">
                 <select class="form-select" name="filter_type">
                     <option value="">All Types</option>
-                    <option value="routine_inspection" <?php echo ($data['filter_type'] ?? '') === 'routine_inspection' ? 'selected' : ''; ?>>Routine Inspection</option>
-                    <option value="move_in_inspection" <?php echo ($data['filter_type'] ?? '') === 'move_in_inspection' ? 'selected' : ''; ?>>Move-in Inspection</option>
-                    <option value="move_out_inspection" <?php echo ($data['filter_type'] ?? '') === 'move_out_inspection' ? 'selected' : ''; ?>>Move-out Inspection</option>
-                    <option value="maintenance_inspection" <?php echo ($data['filter_type'] ?? '') === 'maintenance_inspection' ? 'selected' : ''; ?>>Maintenance Inspection</option>
+                    <option value="routine" <?php echo ($data['filter_type'] ?? '') === 'routine' ? 'selected' : ''; ?>>Routine</option>
+                    <option value="move_in" <?php echo ($data['filter_type'] ?? '') === 'move_in' ? 'selected' : ''; ?>>Move In</option>
+                    <option value="move_out" <?php echo ($data['filter_type'] ?? '') === 'move_out' ? 'selected' : ''; ?>>Move Out</option>
+                    <option value="maintenance" <?php echo ($data['filter_type'] ?? '') === 'maintenance' ? 'selected' : ''; ?>>Maintenance</option>
+                    <option value="annual" <?php echo ($data['filter_type'] ?? '') === 'annual' ? 'selected' : ''; ?>>Annual</option>
+                    <option value="emergency" <?php echo ($data['filter_type'] ?? '') === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
+                    <option value="issue" <?php echo ($data['filter_type'] ?? '') === 'issue' ? 'selected' : ''; ?>>Issue</option>
                 </select>
             </div>
             <div class="filter-dropdown-wrapper">
