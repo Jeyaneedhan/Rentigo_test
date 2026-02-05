@@ -259,6 +259,55 @@ AutoPaginate::init($data, 5);
                         <i class="fas fa-plus"></i> Add Provider
                     </a>
                 </div>
+
+                <style>
+                    .empty-state {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 4rem 2rem;
+                        text-align: center;
+                        background: #fff;
+                        border-radius: 10px;
+                    }
+
+                    .empty-icon {
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                        background: #f1f5f9;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-bottom: 1.5rem;
+                    }
+
+                    .empty-icon i {
+                        font-size: 2.5rem;
+                        color: #94a3b8;
+                    }
+
+                    .empty-state h3 {
+                        font-size: 1.25rem;
+                        font-weight: 600;
+                        color: #1e293b;
+                        margin: 0 0 0.5rem 0;
+                    }
+
+                    .empty-state p {
+                        font-size: 0.875rem;
+                        color: #64748b;
+                        margin: 0 0 1.5rem 0;
+                        max-width: 300px;
+                    }
+
+                    .empty-state .btn {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                    }
+                </style>
             <?php endif; ?>
         </div>
     </div>
