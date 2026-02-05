@@ -10,13 +10,12 @@ AutoPaginate::init($data, 5);
 
 // Read filters from query string (no JS needed)
 $searchQuery = isset($_GET['q']) ? trim($_GET['q']) : '';
-$typeFilter = isset($_GET['type']) ? $_GET['type'] : 'all';     // values: all | Issue | Maintanace
-$statusFilter = isset($_GET['status']) ? $_GET['status'] : 'all'; // values: all | scheduled | in-progress | completed
+$typeFilter = isset($_GET['type']) ? $_GET['type'] : 'all';     // values: all | routine | move_in | move_out | maintenance | annual | emergency | issue
+$statusFilter = isset($_GET['status']) ? $_GET['status'] : 'all'; // values: all | scheduled | in_progress | completed | cancelled
 
 // Normalize helper
 $normalize = function ($v) {
     $v = strtolower((string) $v);
-    $v = str_replace('_', '-', $v);
     return trim($v);
 };
 
@@ -71,16 +70,22 @@ if (!empty($data['inspections']) && is_iterable($data['inspections'])) {
                     <div class="filter-dropdown-wrapper">
                         <select class="form-select" name="type">
                             <option value="all" <?php echo ($typeFilter === 'all') ? 'selected' : ''; ?>>All Types</option>
-                            <option value="Issue" <?php echo ($typeFilter === 'Issue') ? 'selected' : ''; ?>>Issue</option>
-                            <option value="Maintanace" <?php echo ($typeFilter === 'Maintanace') ? 'selected' : ''; ?>>Maintanace</option>
+                            <option value="routine" <?php echo ($typeFilter === 'routine') ? 'selected' : ''; ?>>Routine</option>
+                            <option value="move_in" <?php echo ($typeFilter === 'move_in') ? 'selected' : ''; ?>>Move In</option>
+                            <option value="move_out" <?php echo ($typeFilter === 'move_out') ? 'selected' : ''; ?>>Move Out</option>
+                            <option value="maintenance" <?php echo ($typeFilter === 'maintenance') ? 'selected' : ''; ?>>Maintenance</option>
+                            <option value="annual" <?php echo ($typeFilter === 'annual') ? 'selected' : ''; ?>>Annual</option>
+                            <option value="emergency" <?php echo ($typeFilter === 'emergency') ? 'selected' : ''; ?>>Emergency</option>
+                            <option value="issue" <?php echo ($typeFilter === 'issue') ? 'selected' : ''; ?>>Issue</option>
                         </select>
                     </div>
                     <div class="filter-dropdown-wrapper">
                         <select class="form-select" name="status">
                             <option value="all" <?php echo ($statusFilter === 'all') ? 'selected' : ''; ?>>All Status</option>
                             <option value="scheduled" <?php echo ($statusFilter === 'scheduled') ? 'selected' : ''; ?>>Scheduled</option>
-                            <option value="in-progress" <?php echo ($statusFilter === 'in-progress') ? 'selected' : ''; ?>>In Progress</option>
+                            <option value="in_progress" <?php echo ($statusFilter === 'in_progress') ? 'selected' : ''; ?>>In Progress</option>
                             <option value="completed" <?php echo ($statusFilter === 'completed') ? 'selected' : ''; ?>>Completed</option>
+                            <option value="cancelled" <?php echo ($statusFilter === 'cancelled') ? 'selected' : ''; ?>>Cancelled</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-secondary">
