@@ -68,7 +68,7 @@
                 </div>
             </a>
 
-            <a href="<?php echo URLROOT; ?>/admin/pm_approvals" class="attention-card">
+            <a href="<?php echo URLROOT; ?>/admin/managers" class="attention-card">
                 <div class="attention-icon warning">
                     <i class="fas fa-user-tie"></i>
                 </div>
