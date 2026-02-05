@@ -175,6 +175,162 @@
             color: #45a9ea;
         }
     </style>
+
+    <!-- Recent Activity Feed -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h2>Recent Activity</h2>
+        </div>
+
+        <div class="activity-feed">
+            <?php if (!empty($data['recentActivities'])): ?>
+                <?php foreach ($data['recentActivities'] as $activity): ?>
+                    <div class="activity-item">
+                        <div class="activity-icon <?php echo $activity['color']; ?>">
+                            <i class="fas <?php echo $activity['icon']; ?>"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-title"><?php echo htmlspecialchars($activity['title']); ?></p>
+                            <p class="activity-description"><?php echo htmlspecialchars($activity['description']); ?></p>
+                        </div>
+                        <div class="activity-time">
+                            <?php
+                            $timestamp = strtotime($activity['created_at']);
+                            $diff = time() - $timestamp;
+                            if ($diff < 60) {
+                                echo 'Just now';
+                            } elseif ($diff < 3600) {
+                                echo floor($diff / 60) . 'm ago';
+                            } elseif ($diff < 86400) {
+                                echo floor($diff / 3600) . 'h ago';
+                            } elseif ($diff < 604800) {
+                                echo floor($diff / 86400) . 'd ago';
+                            } else {
+                                echo date('M j', $timestamp);
+                            }
+                            ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="activity-empty">
+                    <i class="fas fa-inbox"></i>
+                    <p>No recent activity</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <style>
+        .activity-feed {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item:hover {
+            background: #f8fafc;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.primary {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .activity-icon.success {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .activity-icon.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .activity-icon.danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .activity-icon.info {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .activity-icon.secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .activity-description {
+            color: #64748b;
+            margin: 0.25rem 0 0 0;
+            font-size: 0.8125rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .activity-empty {
+            padding: 3rem;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .activity-empty i {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .activity-empty p {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+    </style>
 </div>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>

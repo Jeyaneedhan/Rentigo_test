@@ -63,6 +63,82 @@ class Admin extends Controller
         $activePolicies = $policyModel->getActivePolicies();
         $activePoliciesCount = count($activePolicies);
 
+        // Build Recent Activity Feed
+        $maintenanceModel = $this->model('M_Maintenance');
+        $recentUsers = $this->userModel->getRecentUsers(10);
+        $recentMaintenance = $maintenanceModel->getAllMaintenance();
+        $recentMaintenance = array_slice($recentMaintenance, 0, 10);
+
+        // Combine all activities into one array
+        $activities = [];
+
+        // Add user registrations
+        foreach ($recentUsers as $user) {
+            $activities[] = [
+                'type' => 'user_registration',
+                'icon' => 'fa-user-plus',
+                'color' => 'info',
+                'title' => 'New ' . ucfirst(str_replace('_', ' ', $user->user_type)) . ' Registered',
+                'description' => $user->name . ' joined the platform',
+                'created_at' => $user->created_at
+            ];
+        }
+
+        // Add bookings
+        foreach (array_slice($allBookings, 0, 10) as $booking) {
+            $activities[] = [
+                'type' => 'booking',
+                'icon' => 'fa-calendar-check',
+                'color' => 'primary',
+                'title' => 'New Booking Request',
+                'description' => ($booking->tenant_name ?? 'Tenant') . ' requested ' . ($booking->address ?? 'a property'),
+                'created_at' => $booking->created_at
+            ];
+        }
+
+        // Add payments
+        foreach (array_slice($allPayments, 0, 10) as $payment) {
+            $statusText = $payment->status === 'completed' ? 'Payment Received' : 'Payment ' . ucfirst($payment->status);
+            $activities[] = [
+                'type' => 'payment',
+                'icon' => 'fa-dollar-sign',
+                'color' => $payment->status === 'completed' ? 'success' : 'warning',
+                'title' => $statusText,
+                'description' => 'LKR ' . number_format($payment->amount) . ' from ' . ($payment->tenant_name ?? 'Tenant'),
+                'created_at' => $payment->created_at
+            ];
+        }
+
+        // Add maintenance requests
+        foreach ($recentMaintenance as $maintenance) {
+            $activities[] = [
+                'type' => 'maintenance',
+                'icon' => 'fa-wrench',
+                'color' => $maintenance->priority === 'emergency' ? 'danger' : 'secondary',
+                'title' => 'Maintenance Request',
+                'description' => $maintenance->title . ' at ' . ($maintenance->property_address ?? 'Property'),
+                'created_at' => $maintenance->created_at
+            ];
+        }
+
+        // Add new properties
+        foreach (array_slice($allProperties, 0, 10) as $property) {
+            $activities[] = [
+                'type' => 'property',
+                'icon' => 'fa-home',
+                'color' => 'primary',
+                'title' => 'New Property Listed',
+                'description' => ($property->address ?? 'Property') . ' by ' . ($property->landlord_name ?? 'Landlord'),
+                'created_at' => $property->created_at
+            ];
+        }
+
+        // Sort all activities by created_at descending and take top 10
+        usort($activities, function ($a, $b) {
+            return strtotime($b['created_at']) - strtotime($a['created_at']);
+        });
+        $recentActivities = array_slice($activities, 0, 10);
+
         $data = [
             'title' => 'Admin Dashboard - Rentigo',
             'page' => 'dashboard',
@@ -72,7 +148,8 @@ class Admin extends Controller
             'pendingApprovals' => count($pendingApprovalsLast30Days),
             'pendingPropertyApprovals' => $pendingPropertyApprovals,
             'pendingPMApprovals' => $pendingPMApprovals,
-            'activePoliciesCount' => $activePoliciesCount
+            'activePoliciesCount' => $activePoliciesCount,
+            'recentActivities' => $recentActivities
         ];
         $this->view('admin/v_dashboard', $data);
     }

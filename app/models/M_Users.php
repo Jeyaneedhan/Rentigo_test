@@ -14,6 +14,19 @@ class M_Users
         $this->db = new Database();
     }
 
+    /**
+     * Get recent user registrations for activity feed
+     */
+    public function getRecentUsers($limit = 10)
+    {
+        $this->db->query('SELECT id, name, email, user_type, account_status, created_at 
+                          FROM users 
+                          ORDER BY created_at DESC 
+                          LIMIT :limit');
+        $this->db->bind(':limit', $limit);
+        return $this->db->resultSet();
+    }
+
     // ==========================================
     // REGISTRATION METHODS
     // ==========================================
