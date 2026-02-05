@@ -148,17 +148,29 @@
 
 /* Provider Cards */
 .providers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1.5rem;
   padding: 0rem;
+  align-items: stretch;
 }
 
 .provider-card {
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
-  padding: 1.5rem;
+  padding: 1.25rem;
   background: white;
+  width: calc(33.333% - 1rem);
+  min-width: 280px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.provider-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .provider-header {
