@@ -19,10 +19,15 @@ class AutoPaginate
         $items = null;
 
         foreach ($data as $key => $value) {
-            if (is_array($value) && ! empty($value) && (is_object($value[0]) || is_array($value[0]))) {
-                $itemsKey = $key;
-                $items = $value;
-                break;  // Found it, stop looking
+            if (is_array($value) && !empty($value)) {
+                // Re-index array to ensure key 0 exists (fixes issues with array_filter results)
+                $value = array_values($value);
+                if (isset($value[0]) && (is_object($value[0]) || is_array($value[0]))) {
+                    $itemsKey = $key;
+                    $items = $value;
+                    $data[$key] = $value; // Update the original data with re-indexed array
+                    break;  // Found it, stop looking
+                }
             }
         }
 
