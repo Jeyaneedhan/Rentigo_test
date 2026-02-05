@@ -400,7 +400,7 @@ AutoPaginate::init($data, 5);
     .method-percentage,
     .status-percentage {
         font-weight: 600;
-        color: #667eea;
+        color: #45a9ea;
     }
 
     .empty-state {
