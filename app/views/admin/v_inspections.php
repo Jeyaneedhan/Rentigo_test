@@ -78,7 +78,35 @@ AutoPaginate::init($data, 5);
                                 <td><?php echo htmlspecialchars($inspection->landlord_name ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($inspection->tenant_name ?? 'N/A'); ?></td>
                                 <td>
-                                    <span class="badge badge-info">
+                                    <?php
+                                    $typeClass = '';
+                                    switch ($inspection->type) {
+                                        case 'routine':
+                                            $typeClass = 'badge-routine';
+                                            break;
+                                        case 'move_in':
+                                            $typeClass = 'badge-movein';
+                                            break;
+                                        case 'move_out':
+                                            $typeClass = 'badge-moveout';
+                                            break;
+                                        case 'maintenance':
+                                            $typeClass = 'badge-maintenance';
+                                            break;
+                                        case 'annual':
+                                            $typeClass = 'badge-annual';
+                                            break;
+                                        case 'emergency':
+                                            $typeClass = 'badge-emergency';
+                                            break;
+                                        case 'issue':
+                                            $typeClass = 'badge-issue';
+                                            break;
+                                        default:
+                                            $typeClass = 'badge-info';
+                                    }
+                                    ?>
+                                    <span class="badge <?php echo $typeClass; ?>">
                                         <?php echo ucfirst(str_replace('_', ' ', $inspection->type)); ?>
                                     </span>
                                 </td>
@@ -126,5 +154,83 @@ AutoPaginate::init($data, 5);
 
 <!-- ADD PAGINATION HERE - Render at bottom -->
 <?php echo AutoPaginate::render($data['_pagination']); ?>
+
+<style>
+    /* Badge Styles for Inspections */
+    .badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 50px;
+        text-transform: capitalize;
+    }
+
+    .badge-primary {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .badge-success {
+        background-color: #d1fae5;
+        color: #059669;
+    }
+
+    .badge-warning {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .badge-danger {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .badge-info {
+        background-color: #e0e7ff;
+        color: #4f46e5;
+    }
+
+    .badge-secondary {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+
+    /* Type-specific badges */
+    .badge-routine {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .badge-movein {
+        background-color: #d1fae5;
+        color: #059669;
+    }
+
+    .badge-moveout {
+        background-color: #ffedd5;
+        color: #c2410c;
+    }
+
+    .badge-maintenance {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .badge-annual {
+        background-color: #e0e7ff;
+        color: #4f46e5;
+    }
+
+    .badge-emergency {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .badge-issue {
+        background-color: #fae8ff;
+        color: #a21caf;
+    }
+</style>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>
