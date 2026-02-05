@@ -21,9 +21,11 @@ class Admin extends Controller
     {
         // Load all the models we need for dashboard data
         $propertyModel = $this->model('M_Properties');
+        $adminPropertyModel = $this->model('M_AdminProperties');
         $bookingModel = $this->model('M_Bookings');
         $paymentModel = $this->model('M_Payments');
         $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
+        $policyModel = $this->model('M_Policies');
 
         // Get all the data from the database
         $allProperties = $propertyModel->getAllProperties();
@@ -54,9 +56,12 @@ class Admin extends Controller
             return strtotime($pm->created_at) >= strtotime('-30 days');
         });
 
-        // Get the 10 most recent properties to display on the dashboard
-        $recentProperties = array_slice($allProperties, -10);
-        $recentProperties = array_reverse($recentProperties);  // Newest first
+        // Get counts for Admin Attention Summary
+        $propertyCounts = $adminPropertyModel->getPropertyCounts();
+        $pendingPropertyApprovals = $propertyCounts->pending ?? 0;
+        $pendingPMApprovals = count($pendingPMs);
+        $activePolicies = $policyModel->getActivePolicies();
+        $activePoliciesCount = count($activePolicies);
 
         $data = [
             'title' => 'Admin Dashboard - Rentigo',
@@ -65,7 +70,9 @@ class Admin extends Controller
             'activeTenants' => count($activeBookings),
             'monthlyRevenue' => $total30DayRevenue,
             'pendingApprovals' => count($pendingApprovalsLast30Days),
-            'recentProperties' => $recentProperties
+            'pendingPropertyApprovals' => $pendingPropertyApprovals,
+            'pendingPMApprovals' => $pendingPMApprovals,
+            'activePoliciesCount' => $activePoliciesCount
         ];
         $this->view('admin/v_dashboard', $data);
     }
