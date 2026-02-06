@@ -7,10 +7,10 @@ define('DB_PASSWORD', 'root');
 define('DB_NAME', 'rentigo_db');
 
 // App root - this gives us the path to the app folder so we can include files properly
-define('APPROOT', dirname(dirname(__FILE__)));
+define('APPROOT', dirname(dirname(__FILE__))); // points to /Rentigo/app
 
 // Public Root - this points to where our CSS, JS, and images are stored
-define('PUBROOT', dirname(dirname(dirname(__FILE__))) . '\public');
+define('PUBROOT', dirname(dirname(dirname(__FILE__))) . '\public'); // points to /Rentigo/public
 
 // URL root - this is the base URL for the app, we use it for redirects and links
 define('URLROOT', 'http://localhost/Rentigo_test');
