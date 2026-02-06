@@ -30,7 +30,11 @@
   }
 
   .properties-grid {
-    grid-template-columns: 1fr;
+    justify-content: center;
+  }
+
+  .property-card {
+    width: calc(50% - 0.75rem);
   }
 
   .booking-card {
@@ -109,6 +113,7 @@
   }
 
   .property-card {
+    width: 100%;
     max-width: none;
   }
 
