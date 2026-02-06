@@ -112,10 +112,13 @@ AutoPaginate::init($data, 5);
             <div class="filter-dropdown-wrapper">
                 <select class="form-select" name="categoryFilter">
                     <option value="">All Categories</option>
-                    <option value="Plumbing" <?= $categoryFilter == 'Plumbing' ? 'selected' : ''; ?>>Plumbing</option>
-                    <option value="Electrical" <?= $categoryFilter == 'Electrical' ? 'selected' : ''; ?>>Electrical</option>
-                    <option value="Heating/Cooling" <?= $categoryFilter == 'Heating/Cooling' ? 'selected' : ''; ?>>Heating/Cooling</option>
-                    <option value="Maintenance" <?= $categoryFilter == 'Maintenance' ? 'selected' : ''; ?>>Maintenance</option>
+                    <option value="plumbing" <?= $categoryFilter == 'plumbing' ? 'selected' : ''; ?>>Plumbing</option>
+                    <option value="electrical" <?= $categoryFilter == 'electrical' ? 'selected' : ''; ?>>Electrical</option>
+                    <option value="hvac" <?= $categoryFilter == 'hvac' ? 'selected' : ''; ?>>Heating/Cooling</option>
+                    <option value="appliance" <?= $categoryFilter == 'appliance' ? 'selected' : ''; ?>>Appliances</option>
+                    <option value="structural" <?= $categoryFilter == 'structural' ? 'selected' : ''; ?>>Structural</option>
+                    <option value="pest" <?= $categoryFilter == 'pest' ? 'selected' : ''; ?>>Pest Control</option>
+                    <option value="other" <?= $categoryFilter == 'other' ? 'selected' : ''; ?>>Other</option>
                 </select>
             </div>
             <button class="btn btn-secondary" type="submit">
@@ -130,91 +133,105 @@ AutoPaginate::init($data, 5);
             <h3>Your Issues</h3>
         </div>
 
-        <div class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Issue ID</th>
-                        <th>Property</th>
-                        <th>Category</th>
-                        <th>Priority</th>
-                        <th>Status</th>
-                        <th>Report Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($data['issues'] as $issue): ?>
-                        <?php
-                        // Apply filters
-                        if (
-                            ($statusFilter && $issue->status !== $statusFilter) ||
-                            ($priorityFilter && $issue->priority !== $priorityFilter) ||
-                            ($categoryFilter && $issue->category !== $categoryFilter)
-                        ) {
-                            continue;
-                        }
-                        ?>
-                        <?php
-                        // Check if issue can be edited/deleted (within 1 minute of creation)
-                        $createdTime = new DateTime($issue->created_at);
-                        $currentTime = new DateTime();
-                        $timeDiff = $currentTime->getTimestamp() - $createdTime->getTimestamp();
-                        $canEdit = ($timeDiff <= 60); // 60 seconds = 1 minute
-                        $canDelete = ($timeDiff <= 60); // 60 seconds = 1 minute
-                        ?>
+        <?php
+        // Pre-filter issues
+        $filteredIssues = array_filter($data['issues'], function ($issue) use ($statusFilter, $priorityFilter, $categoryFilter) {
+            if ($statusFilter && $issue->status !== $statusFilter) return false;
+            if ($priorityFilter && $issue->priority !== $priorityFilter) return false;
+            if ($categoryFilter && $issue->category !== $categoryFilter) return false;
+            return true;
+        });
+        ?>
+
+        <?php if (empty($filteredIssues)): ?>
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h3>No Issues Found</h3>
+                <p>No issues match your current filter criteria.</p>
+                <a href="<?php echo URLROOT; ?>/tenant/report_issue" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Report New Issue
+                </a>
+            </div>
+        <?php else: ?>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <td><strong><?= $issue->id; ?></strong></td>
-                            <td><?= $issue->property_address; ?></td>
-                            <td><?= $issue->category; ?></td>
-                            <td><span
-                                    class="priority-badge <?= $issue->priority; ?>"><?= ucfirst($issue->priority); ?></span>
-                            </td>
-                            <td><span
-                                    class="status-badge <?= $issue->status; ?>"><?= ucfirst(str_replace('_', ' ', $issue->status)); ?></span>
-                            </td>
-                            <td><?= date("F d, Y", strtotime($issue->created_at)); ?></td>
-                            <td class="actions-cell">
-                                <div class="action-buttons">
-                                    <a href="<?= URLROOT; ?>/issues/details/<?= $issue->id; ?>"
-                                        class="btn btn-icon btn-primary"
-                                        title="View Issue Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <?php if ($canEdit): ?>
-                                        <a href="<?= URLROOT; ?>/issues/edit/<?= $issue->id; ?>"
-                                            class="btn btn-icon btn-secondary"
-                                            title="Edit Issue">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    <?php else: ?>
-                                        <button class="btn btn-icon btn-secondary"
-                                            disabled
-                                            title="Can only edit within 1 minute of creation">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    <?php endif; ?>
-                                    <?php if ($canDelete): ?>
-                                        <a href="<?= URLROOT; ?>/issues/delete/<?= $issue->id; ?>"
-                                            class="btn btn-icon btn-danger"
-                                            title="Delete Issue"
-                                            onclick="return confirm('Are you sure you want to delete this issue? This action cannot be undone.');">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    <?php else: ?>
-                                        <button class="btn btn-icon btn-danger"
-                                            disabled
-                                            title="Can only delete within 1 minute of creation">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
+                            <th>Issue ID</th>
+                            <th>Property</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Report Date</th>
+                            <th>Actions</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($filteredIssues as $issue): ?>
+                            <?php
+                            // Check if issue can be edited/deleted (within 1 minute of creation)
+                            $createdTime = new DateTime($issue->created_at);
+                            $currentTime = new DateTime();
+                            $timeDiff = $currentTime->getTimestamp() - $createdTime->getTimestamp();
+                            $canEdit = ($timeDiff <= 60); // 60 seconds = 1 minute
+                            $canDelete = ($timeDiff <= 60); // 60 seconds = 1 minute
+                            ?>
+                            <tr>
+                                <td><strong><?= $issue->id; ?></strong></td>
+                                <td><?= $issue->property_address; ?></td>
+                                <td><?= $issue->category; ?></td>
+                                <td><span
+                                        class="priority-badge <?= $issue->priority; ?>"><?= ucfirst($issue->priority); ?></span>
+                                </td>
+                                <td><span
+                                        class="status-badge <?= $issue->status; ?>"><?= ucfirst(str_replace('_', ' ', $issue->status)); ?></span>
+                                </td>
+                                <td><?= date("F d, Y", strtotime($issue->created_at)); ?></td>
+                                <td class="actions-cell">
+                                    <div class="action-buttons">
+                                        <a href="<?= URLROOT; ?>/issues/details/<?= $issue->id; ?>"
+                                            class="btn btn-icon btn-primary"
+                                            title="View Issue Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <?php if ($canEdit): ?>
+                                            <a href="<?= URLROOT; ?>/issues/edit/<?= $issue->id; ?>"
+                                                class="btn btn-icon btn-secondary"
+                                                title="Edit Issue">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        <?php else: ?>
+                                            <button class="btn btn-icon btn-secondary"
+                                                disabled
+                                                title="Can only edit within 1 minute of creation">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                        <?php if ($canDelete): ?>
+                                            <a href="<?= URLROOT; ?>/issues/delete/<?= $issue->id; ?>"
+                                                class="btn btn-icon btn-danger"
+                                                title="Delete Issue"
+                                                onclick="return confirm('Are you sure you want to delete this issue? This action cannot be undone.');">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        <?php else: ?>
+                                            <button class="btn btn-icon btn-danger"
+                                                disabled
+                                                title="Can only delete within 1 minute of creation">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -237,6 +254,55 @@ AutoPaginate::init($data, 5);
 <?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <style>
+    /* Empty State Styles */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        text-align: center;
+        background: #fff;
+        border-radius: 10px;
+        margin-top: -3rem;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-icon i {
+        font-size: 2.5rem;
+        color: #94a3b8;
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .empty-state p {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin: 0 0 1.5rem 0;
+        max-width: 300px;
+    }
+
+    .empty-state .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     .actions-cell {
         white-space: nowrap;
     }
