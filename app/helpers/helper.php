@@ -11,25 +11,33 @@ function isLoggedIn()
  */
 function isTenant()
 {
-    return isLoggedIn() && isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'tenant';
+    return isLoggedIn() &&
+        isset($_SESSION['user_type']) &&
+        $_SESSION['user_type'] === 'tenant';
 }
 
 // Check if the logged-in user is a landlord
 function isLandlord()
 {
-    return isLoggedIn() && isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'landlord';
+    return isLoggedIn() &&
+        isset($_SESSION['user_type']) &&
+        $_SESSION['user_type'] === 'landlord';
 }
 
 // Check if the logged-in user is a property manager
 function isPropertyManager()
 {
-    return isLoggedIn() && isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'property_manager';
+    return isLoggedIn() &&
+        isset($_SESSION['user_type']) &&
+        $_SESSION['user_type'] === 'property_manager';
 }
 
 // Check if the logged-in user is an admin
 function isAdmin()
 {
-    return isLoggedIn() && isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin';
+    return isLoggedIn() &&
+        isset($_SESSION['user_type']) &&
+        $_SESSION['user_type'] === 'admin';
 }
 
 /**
@@ -76,25 +84,25 @@ function get30DayStat($db, $table, $dateColumn, $statType = 'count', $sumColumn 
     // Get the date filter SQL
     $dateFilter = getDateRangeSql($dateColumn, $days);
     $sql = "SELECT ";
-    
+
     // Build the SELECT part based on what type of stat we want
     if ($statType === 'count') {
         $sql .= "COUNT(*) as stat";
     } else {
         $sql .= "SUM($sumColumn) as stat";
     }
-    
+
     $sql .= " FROM $table WHERE $dateFilter";
-    
+
     // Add any extra conditions if provided
     if (!empty($where)) {
         $sql .= " AND ($where)";
     }
-    
+
     // Run the query and get the result
     $db->query($sql);
     $result = $db->single();
-    
+
     // Return the stat value, or 0 if nothing found
     return $result ? ($result->stat ?? 0) : 0;
 }
