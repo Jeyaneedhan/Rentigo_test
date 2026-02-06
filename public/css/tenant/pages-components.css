@@ -61,10 +61,11 @@
 
 /* Properties Grid */
 .properties-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1.5rem;
   padding: 1.5rem;
+  align-items: stretch;
 }
 
 .property-card {
@@ -73,6 +74,11 @@
   overflow: hidden;
   background: white;
   transition: transform 0.2s, box-shadow 0.2s;
+  width: calc(50% - 1rem);
+  min-width: 280px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .property-card:hover {
