@@ -13,6 +13,10 @@
 
     <!-- Review Stats -->
     <div class="dashboard-section">
+        <div class="section-header">
+            <h3>Landlord Reviews</h3>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">
@@ -32,15 +36,15 @@
                 <div class="stat-info">
                     <h3 class="stat-number">
                         <?php
-                            if (!empty($data['reviewsAboutMe'])) {
-                                $totalRating = 0;
-                                foreach ($data['reviewsAboutMe'] as $review) {
-                                    $totalRating += $review->rating;
-                                }
-                                echo number_format($totalRating / count($data['reviewsAboutMe']), 1);
-                            } else {
-                                echo '0.0';
+                        if (!empty($data['reviewsAboutMe'])) {
+                            $totalRating = 0;
+                            foreach ($data['reviewsAboutMe'] as $review) {
+                                $totalRating += $review->rating;
                             }
+                            echo number_format($totalRating / count($data['reviewsAboutMe']), 1);
+                        } else {
+                            echo '0.0';
+                        }
                         ?>
                     </h3>
                     <p class="stat-label">Average Rating</p>
@@ -80,13 +84,13 @@
                             <div class="landlord-info">
                                 <div class="landlord-avatar">
                                     <?php
-                                        $name = $review->reviewer_name ?? 'L';
-                                        $initials = strtoupper(substr($name, 0, 1));
-                                        if (strpos($name, ' ') !== false) {
-                                            $parts = explode(' ', $name);
-                                            $initials = strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1));
-                                        }
-                                        echo $initials;
+                                    $name = $review->reviewer_name ?? 'L';
+                                    $initials = strtoupper(substr($name, 0, 1));
+                                    if (strpos($name, ' ') !== false) {
+                                        $parts = explode(' ', $name);
+                                        $initials = strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1));
+                                    }
+                                    echo $initials;
                                     ?>
                                 </div>
                                 <div>
@@ -101,13 +105,13 @@
                                 <div class="rating">
                                     <div class="stars">
                                         <?php
-                                            for ($i = 1; $i <= 5; $i++) {
-                                                if ($i <= $review->rating) {
-                                                    echo '<i class="fas fa-star"></i>';
-                                                } else {
-                                                    echo '<i class="far fa-star"></i>';
-                                                }
+                                        for ($i = 1; $i <= 5; $i++) {
+                                            if ($i <= $review->rating) {
+                                                echo '<i class="fas fa-star"></i>';
+                                            } else {
+                                                echo '<i class="far fa-star"></i>';
                                             }
+                                        }
                                         ?>
                                     </div>
                                     <span class="rating-number"><?php echo number_format($review->rating, 1); ?>/5</span>
@@ -159,198 +163,198 @@
 </div>
 
 <style>
-.reviews-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.review-card {
-    background: white;
-    padding: 24px;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 16px;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.landlord-info {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.landlord-avatar {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 18px;
-    flex-shrink: 0;
-}
-
-.landlord-info h4 {
-    margin: 0 0 4px 0;
-    color: #1f2937;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.property-address {
-    margin: 0;
-    color: #6b7280;
-    font-size: 14px;
-}
-
-.property-address i {
-    margin-right: 6px;
-    color: #9ca3af;
-}
-
-.review-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-}
-
-.rating {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.stars {
-    display: flex;
-    gap: 2px;
-    color: #fbbf24;
-    font-size: 16px;
-}
-
-.rating-number {
-    font-weight: 600;
-    color: #374151;
-    font-size: 14px;
-}
-
-.review-date {
-    color: #9ca3af;
-    font-size: 13px;
-}
-
-.review-content {
-    padding-top: 16px;
-    border-top: 1px solid #f3f4f6;
-}
-
-.review-content p {
-    color: #4b5563;
-    line-height: 1.7;
-    margin: 0;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-}
-
-.empty-state i {
-    font-size: 64px;
-    color: #d1d5db;
-    margin-bottom: 20px;
-}
-
-.empty-state h4 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #374151;
-    margin: 0 0 12px 0;
-}
-
-.empty-state p {
-    font-size: 15px;
-    color: #6b7280;
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
-}
-
-.info-box {
-    background: #eff6ff;
-    padding: 24px;
-    border-radius: 12px;
-    border-left: 4px solid #3b82f6;
-    display: flex;
-    gap: 20px;
-}
-
-.info-icon {
-    flex-shrink: 0;
-}
-
-.info-icon i {
-    font-size: 32px;
-    color: #3b82f6;
-}
-
-.info-content h4 {
-    margin: 0 0 12px 0;
-    color: #1e40af;
-    font-size: 18px;
-}
-
-.info-content p {
-    color: #1e40af;
-    line-height: 1.6;
-    margin-bottom: 12px;
-}
-
-.info-content ul {
-    margin: 8px 0 0 0;
-    padding-left: 24px;
-    color: #1e40af;
-}
-
-.info-content li {
-    margin-bottom: 6px;
-    line-height: 1.5;
-}
-
-.text-muted {
-    color: #9ca3af !important;
-    font-style: italic;
-}
-
-@media (max-width: 768px) {
-    .review-header {
+    .reviews-container {
+        display: flex;
         flex-direction: column;
+        gap: 20px;
+    }
+
+    .review-card {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .landlord-info {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .landlord-avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .landlord-info h4 {
+        margin: 0 0 4px 0;
+        color: #1f2937;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .property-address {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .property-address i {
+        margin-right: 6px;
+        color: #9ca3af;
     }
 
     .review-meta {
-        align-items: flex-start;
-        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+    }
+
+    .rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stars {
+        display: flex;
+        gap: 2px;
+        color: #fbbf24;
+        font-size: 16px;
+    }
+
+    .rating-number {
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .review-date {
+        color: #9ca3af;
+        font-size: 13px;
+    }
+
+    .review-content {
+        padding-top: 16px;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .review-content p {
+        color: #4b5563;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        color: #d1d5db;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h4 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #374151;
+        margin: 0 0 12px 0;
+    }
+
+    .empty-state p {
+        font-size: 15px;
+        color: #6b7280;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
     }
 
     .info-box {
-        flex-direction: column;
+        background: #eff6ff;
+        padding: 24px;
+        border-radius: 12px;
+        border-left: 4px solid #3b82f6;
+        display: flex;
+        gap: 20px;
     }
-}
+
+    .info-icon {
+        flex-shrink: 0;
+    }
+
+    .info-icon i {
+        font-size: 32px;
+        color: #3b82f6;
+    }
+
+    .info-content h4 {
+        margin: 0 0 12px 0;
+        color: #1e40af;
+        font-size: 18px;
+    }
+
+    .info-content p {
+        color: #1e40af;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+
+    .info-content ul {
+        margin: 8px 0 0 0;
+        padding-left: 24px;
+        color: #1e40af;
+    }
+
+    .info-content li {
+        margin-bottom: 6px;
+        line-height: 1.5;
+    }
+
+    .text-muted {
+        color: #9ca3af !important;
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .review-header {
+            flex-direction: column;
+        }
+
+        .review-meta {
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .info-box {
+            flex-direction: column;
+        }
+    }
 </style>
 
 <?php require APPROOT . '/views/inc/tenant_footer.php'; ?>
