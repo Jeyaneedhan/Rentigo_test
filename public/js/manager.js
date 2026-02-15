@@ -386,6 +386,96 @@ function initializeModalHandlers() {
   })
 }
 
+// ============================================
+// STAT CARD DROPDOWN FUNCTIONS
+// ============================================
+
+// Toggle stat dropdown visibility
+function toggleStatDropdown(statType) {
+  // Close all other dropdowns first
+  closeAllStatDropdowns()
+
+  const dropdown = document.getElementById(`stat-dropdown-${statType}`)
+  if (dropdown) {
+    dropdown.classList.toggle("show")
+  }
+}
+
+// Close all stat dropdowns
+function closeAllStatDropdowns() {
+  const dropdowns = document.querySelectorAll(".stat-dropdown")
+  dropdowns.forEach((dropdown) => {
+    dropdown.classList.remove("show")
+  })
+}
+
+// Handle period selection
+function selectStatPeriod(statType, period, event) {
+  event.stopPropagation()
+
+  // Update selected state in dropdown
+  const dropdown = document.getElementById(`stat-dropdown-${statType}`)
+  if (dropdown) {
+    const items = dropdown.querySelectorAll(".stat-dropdown-item")
+    items.forEach((item) => {
+      item.classList.remove("selected")
+      if (item.getAttribute("data-period") === period) {
+        item.classList.add("selected")
+      }
+    })
+  }
+
+  // Fetch new data
+  fetchStatData(statType, period)
+
+  // Close dropdown
+  closeAllStatDropdowns()
+}
+
+// Fetch stat data via AJAX
+async function fetchStatData(statType, period) {
+  try {
+    const response = await fetch(`${URLROOT}/manager/getStatData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        stat_type: statType,
+        period: period,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (data.error) {
+      console.error("Error fetching stat:", data.error)
+      return
+    }
+
+    // Update the stat value
+    const valueElement = document.getElementById(`stat-value-${statType}`)
+    if (valueElement) {
+      valueElement.textContent = data.value
+    }
+
+    // Update the subtitle if provided
+    const subtitleElement = document.getElementById(`stat-subtitle-${statType}`)
+    if (subtitleElement && data.subtitle) {
+      subtitleElement.textContent = data.subtitle
+    }
+  } catch (error) {
+    console.error("Error fetching stat data:", error)
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener("click", function (e) {
+  if (!e.target.closest(".stat-header") && !e.target.closest(".stat-dropdown")) {
+    closeAllStatDropdowns()
+  }
+})
+
 // Initialize all functions when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   initializeSearch()

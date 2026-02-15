@@ -207,28 +207,40 @@ class M_Bookings
     public function getBookingStats($user_id, $user_type, $period = 'all')
     {
         $stats = [];
-        $dateFilter = getDateRangeByPeriod('created_at', $period);
+        $dateFilter = getDateRangeByPeriod('b.created_at', $period);
 
         if ($user_type == 'tenant') {
             $this->db->query('SELECT
                             COUNT(*) as total,
-                            SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending,
-                            SUM(CASE WHEN status = "approved" THEN 1 ELSE 0 END) as approved,
-                            SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active,
-                            SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
-                            SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END) as rejected,
-                            SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled
-                            FROM bookings WHERE tenant_id = :user_id AND ' . $dateFilter);
+                            SUM(CASE WHEN b.status = "pending" THEN 1 ELSE 0 END) as pending,
+                            SUM(CASE WHEN b.status = "approved" THEN 1 ELSE 0 END) as approved,
+                            SUM(CASE WHEN b.status = "active" THEN 1 ELSE 0 END) as active,
+                            SUM(CASE WHEN b.status = "completed" THEN 1 ELSE 0 END) as completed,
+                            SUM(CASE WHEN b.status = "rejected" THEN 1 ELSE 0 END) as rejected,
+                            SUM(CASE WHEN b.status = "cancelled" THEN 1 ELSE 0 END) as cancelled
+                            FROM bookings b WHERE b.tenant_id = :user_id AND ' . $dateFilter);
         } else if ($user_type == 'landlord') {
             $this->db->query('SELECT
                             COUNT(*) as total,
-                            SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending,
-                            SUM(CASE WHEN status = "approved" THEN 1 ELSE 0 END) as approved,
-                            SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active,
-                            SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
-                            SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END) as rejected,
-                            SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled
-                            FROM bookings WHERE landlord_id = :user_id AND ' . $dateFilter);
+                            SUM(CASE WHEN b.status = "pending" THEN 1 ELSE 0 END) as pending,
+                            SUM(CASE WHEN b.status = "approved" THEN 1 ELSE 0 END) as approved,
+                            SUM(CASE WHEN b.status = "active" THEN 1 ELSE 0 END) as active,
+                            SUM(CASE WHEN b.status = "completed" THEN 1 ELSE 0 END) as completed,
+                            SUM(CASE WHEN b.status = "rejected" THEN 1 ELSE 0 END) as rejected,
+                            SUM(CASE WHEN b.status = "cancelled" THEN 1 ELSE 0 END) as cancelled
+                            FROM bookings b WHERE b.landlord_id = :user_id AND ' . $dateFilter);
+        } else if ($user_type == 'manager') {
+            $this->db->query('SELECT
+                            COUNT(*) as total,
+                            SUM(CASE WHEN b.status = "pending" THEN 1 ELSE 0 END) as pending,
+                            SUM(CASE WHEN b.status = "approved" THEN 1 ELSE 0 END) as approved,
+                            SUM(CASE WHEN b.status = "active" THEN 1 ELSE 0 END) as active,
+                            SUM(CASE WHEN b.status = "completed" THEN 1 ELSE 0 END) as completed,
+                            SUM(CASE WHEN b.status = "rejected" THEN 1 ELSE 0 END) as rejected,
+                            SUM(CASE WHEN b.status = "cancelled" THEN 1 ELSE 0 END) as cancelled
+                            FROM bookings b
+                            JOIN properties p ON b.property_id = p.id
+                            WHERE p.manager_id = :user_id AND ' . $dateFilter);
         }
 
         $this->db->bind(':user_id', $user_id);

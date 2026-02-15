@@ -18,34 +18,55 @@ AutoPaginate::init($data, 5);
 
     <!-- Tenant Stats -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="tenant_active">
             <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Active</h3>
-                <div class="stat-value"><?php echo $data['activeCount'] ?? 0; ?></div>
-                <div class="stat-change">Currently active tenants</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-tenant_active" onclick="toggleStatDropdown('tenant_active')">Active</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-tenant_active">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_active', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_active', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_active', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-tenant_active"><?php echo $data['activeCount'] ?? 0; ?></div>
+                <div class="stat-change" id="stat-subtitle-tenant_active">Currently active tenants</div>
             </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="tenant_pending">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Pending</h3>
-                <div class="stat-value"><?php echo $data['pendingCount'] ?? 0; ?></div>
-                <div class="stat-change">Awaiting approval</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-tenant_pending" onclick="toggleStatDropdown('tenant_pending')">Pending</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-tenant_pending">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_pending', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_pending', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_pending', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-tenant_pending"><?php echo $data['pendingCount'] ?? 0; ?></div>
+                <div class="stat-change" id="stat-subtitle-tenant_pending">Awaiting approval</div>
             </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="tenant_vacated">
             <div class="stat-icon">
                 <i class="fas fa-user-slash"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Vacated</h3>
-                <div class="stat-value"><?php echo $data['vacatedCount'] ?? 0; ?></div>
-                <div class="stat-change">Completed or cancelled</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-tenant_vacated" onclick="toggleStatDropdown('tenant_vacated')">Vacated</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-tenant_vacated">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_vacated', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_vacated', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_vacated', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-tenant_vacated"><?php echo $data['vacatedCount'] ?? 0; ?></div>
+                <div class="stat-change" id="stat-subtitle-tenant_vacated">Completed or cancelled</div>
             </div>
         </div>
     </div>

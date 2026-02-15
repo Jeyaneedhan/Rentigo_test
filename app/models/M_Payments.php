@@ -423,4 +423,25 @@ class M_Payments
         FROM payments WHERE ' . $dateFilter);
         return $this->db->single();
     }
+
+    /**
+     * Get income stats for a property manager (10% of rental payments for managed properties)
+     * @param int $manager_id The manager's user ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getManagerIncomeStats($manager_id, $period = 'all')
+    {
+        // Use COALESCE to handle pending payments with NULL payment_date
+        $dateFilter = getDateRangeByPeriod('COALESCE(p.payment_date, p.due_date, p.created_at)', $period);
+        $this->db->query('SELECT
+            SUM(CASE WHEN p.status = "completed" THEN p.amount * 0.10 ELSE 0 END) as total_income,
+            COUNT(CASE WHEN p.status = "completed" THEN 1 END) as completed_count,
+            COUNT(CASE WHEN p.status = "pending" THEN 1 END) as pending_count,
+            SUM(CASE WHEN p.status = "pending" THEN p.amount * 0.10 ELSE 0 END) as pending_amount
+        FROM payments p
+        INNER JOIN properties pr ON p.property_id = pr.id
+        WHERE pr.manager_id = :manager_id AND ' . $dateFilter);
+        $this->db->bind(':manager_id', $manager_id);
+        return $this->db->single();
+    }
 }

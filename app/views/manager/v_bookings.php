@@ -17,34 +17,55 @@ AutoPaginate::init($data, 5);
 
 <!-- Booking Stats -->
 <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="booking_pending">
         <div class="stat-icon">
             <i class="fas fa-clock"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Pending</h3>
-            <div class="stat-value"><?php echo $data['pendingCount'] ?? 0; ?></div>
-            <div class="stat-change">Awaiting response</div>
+            <div class="stat-header">
+                <h3 class="stat-label" id="stat-label-booking_pending" onclick="toggleStatDropdown('booking_pending')">Pending</h3>
+                <div class="stat-dropdown" id="stat-dropdown-booking_pending">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_pending', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_pending', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_pending', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-booking_pending"><?php echo $data['pendingCount'] ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_pending">Awaiting response</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="booking_approved">
         <div class="stat-icon">
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Approved</h3>
-            <div class="stat-value"><?php echo $data['approvedCount'] ?? 0; ?></div>
-            <div class="stat-change">Accepted bookings</div>
+            <div class="stat-header">
+                <h3 class="stat-label" id="stat-label-booking_approved" onclick="toggleStatDropdown('booking_approved')">Approved</h3>
+                <div class="stat-dropdown" id="stat-dropdown-booking_approved">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_approved', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_approved', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_approved', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-booking_approved"><?php echo $data['approvedCount'] ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_approved">Accepted bookings</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="booking_rejected">
         <div class="stat-icon">
             <i class="fas fa-times-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Rejected</h3>
-            <div class="stat-value"><?php echo $data['rejectedCount'] ?? 0; ?></div>
-            <div class="stat-change">Declined requests</div>
+            <div class="stat-header">
+                <h3 class="stat-label" id="stat-label-booking_rejected" onclick="toggleStatDropdown('booking_rejected')">Rejected</h3>
+                <div class="stat-dropdown" id="stat-dropdown-booking_rejected">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_rejected', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_rejected', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_rejected', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-booking_rejected"><?php echo $data['rejectedCount'] ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_rejected">Declined requests</div>
         </div>
     </div>
 </div>

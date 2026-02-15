@@ -23,24 +23,38 @@ AutoPaginate::init($data, 10);
 
     <!-- Stats -->
     <div class="stats-grid">
-        <div class="stat-card success">
+        <div class="stat-card success" data-stat-type="all_payment_total">
             <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Total Income</h3>
-                <div class="stat-value">LKR <?php echo number_format($data['totalIncome'] ?? 0, 2); ?></div>
-                <div class="stat-change"><?php echo $data['completedCount'] ?? 0; ?> completed payments</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-all_payment_total" onclick="toggleStatDropdown('all_payment_total')">Total Income</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-all_payment_total">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('all_payment_total', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('all_payment_total', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('all_payment_total', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-all_payment_total">LKR <?php echo number_format($data['totalIncome'] ?? 0, 2); ?></div>
+                <div class="stat-change" id="stat-subtitle-all_payment_total"><?php echo $data['completedCount'] ?? 0; ?> completed payments</div>
             </div>
         </div>
-        <div class="stat-card warning">
+        <div class="stat-card warning" data-stat-type="all_payment_pending">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Pending</h3>
-                <div class="stat-value">LKR <?php echo number_format($data['pendingAmount'] ?? 0, 2); ?></div>
-                <div class="stat-change"><?php echo $data['pendingCount'] ?? 0; ?> pending payments</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-all_payment_pending" onclick="toggleStatDropdown('all_payment_pending')">Pending</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-all_payment_pending">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('all_payment_pending', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('all_payment_pending', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('all_payment_pending', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-all_payment_pending">LKR <?php echo number_format($data['pendingAmount'] ?? 0, 2); ?></div>
+                <div class="stat-change" id="stat-subtitle-all_payment_pending"><?php echo $data['pendingCount'] ?? 0; ?> pending payments</div>
             </div>
         </div>
     </div>

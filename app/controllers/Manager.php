@@ -63,47 +63,28 @@ class Manager extends Controller
         });
         $recentPayments = array_slice($combinedPayments, 0, 10);
 
-        // Calculate statistics for the last 30 days
-        // Filter properties to only those created in the last 30 days
-        $propertiesLast30Days = array_filter($properties, function($p) {
-            return strtotime($p->created_at ?? '') >= strtotime('-30 days');
-        });
+        // Get property stats using model method (All Time by default)
+        $propertyStats = $propertyModel->getPropertyStats($manager_id, 'all');
+        $totalProperties = $propertyStats->total_properties ?? 0;
+        $totalUnits = $propertyStats->total_units ?? 0;
+        $occupiedUnits = $propertyStats->occupied_units ?? 0;
 
-        $totalProperties = count($propertiesLast30Days);
-        $totalUnits = 0;
-        $occupiedUnits = 0;
-        // Count total and occupied units across all properties
-        foreach ($propertiesLast30Days as $property) {
-            $totalUnits += $property->occupancy_total ?? 0;
-            $occupiedUnits += $property->occupancy_occupied ?? 0;
-        }
+        // Get income stats using model method (All Time by default)
+        // Platform Income = 10% service fees from rent + maintenance fees
+        $incomeStats = $paymentModel->getManagerIncomeStats($manager_id, 'all');
+        $rentalServiceFee = $incomeStats->total_income ?? 0;
 
-        // Calculate total income and expenses for the last 30 days
-        $totalIncome = 0;
-        $totalExpenses = 0;
+        // Add maintenance income
+        $maintenanceIncomeStats = $maintenanceQuotationModel->getManagerMaintenanceIncome($manager_id, 'all');
+        $maintenanceIncome = $maintenanceIncomeStats->total_income ?? 0;
 
-        // Calculate rental payment income - platform gets 10% service fee
-        // Only count completed payments from the last 30 days
-        foreach ($allPayments as $payment) {
-            $paymentDate = $payment->payment_date ?? $payment->created_at;
-            if ($payment->status === 'completed' && strtotime($paymentDate) >= strtotime('-30 days')) {
-                // Platform earns 10% service fee from each rental payment
-                $totalIncome += ($payment->amount * 0.10);
-            }
-        }
+        $totalIncome = $rentalServiceFee + $maintenanceIncome;
 
-        // Maintenance payment income - platform gets 100% of these payments
-        $maintenanceIncome = $maintenanceQuotationModel->getTotalMaintenanceIncome(30);
-        $totalIncome += $maintenanceIncome;
+        // Get expense stats using model method (All Time by default)
+        $maintenanceStats = $maintenanceModel->getMaintenanceStats(null, $manager_id, 'all');
+        $totalExpenses = $maintenanceStats->total_cost ?? 0;
 
-        // Total Expenses (Maintenance costs) - Filtered by 30 days
-        foreach ($allMaintenance as $maintenance) {
-            if (strtotime($maintenance->created_at) >= strtotime('-30 days')) {
-                $totalExpenses += $maintenance->actual_cost ?? $maintenance->estimated_cost ?? 0;
-            }
-        }
-
-        // Get issue statistics (This already includes 30-day filter in the model update)
+        // Get issue statistics
         $issueModel = $this->model('M_Issue');
         $issueStats = $issueModel->getIssueStats($manager_id, 'manager');
 
@@ -187,13 +168,13 @@ class Manager extends Controller
 
         // Filter by date range (move-in date)
         if (!empty($dateFromFilter)) {
-            $filteredBookings = array_filter($filteredBookings, function($b) use ($dateFromFilter) {
+            $filteredBookings = array_filter($filteredBookings, function ($b) use ($dateFromFilter) {
                 return strtotime($b->move_in_date) >= strtotime($dateFromFilter);
             });
         }
 
         if (!empty($dateToFilter)) {
-            $filteredBookings = array_filter($filteredBookings, function($b) use ($dateToFilter) {
+            $filteredBookings = array_filter($filteredBookings, function ($b) use ($dateToFilter) {
                 return strtotime($b->move_in_date) <= strtotime($dateToFilter);
             });
         }
@@ -225,6 +206,7 @@ class Manager extends Controller
     {
         // Load maintenance model
         $maintenanceModel = $this->model('M_Maintenance');
+        $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
         $manager_id = $_SESSION['user_id'];
 
         // Get maintenance requests for this manager's properties only
@@ -232,6 +214,10 @@ class Manager extends Controller
 
         // Get maintenance statistics
         $maintenanceStats = $maintenanceModel->getMaintenanceStats(null, $manager_id);
+
+        // Get maintenance income (from completed maintenance payments)
+        $incomeStats = $maintenanceQuotationModel->getManagerMaintenanceIncome($manager_id, 'all');
+        $maintenanceIncome = $incomeStats->total_income ?? 0;
 
         // Filter by status
         $requestedRequests = array_filter($allRequests, fn($r) => $r->status === 'requested');
@@ -248,6 +234,7 @@ class Manager extends Controller
             'user_name' => $_SESSION['user_name'],
             'maintenanceRequests' => $allRequests,  // View expects this
             'maintenanceStats' => $maintenanceStats,  // View expects this
+            'maintenanceIncome' => $maintenanceIncome,  // Total income from maintenance payments
             'allRequests' => $allRequests,
             'requestedRequests' => $requestedRequests,
             'quotedRequests' => $quotedRequests,
@@ -373,13 +360,13 @@ class Manager extends Controller
             // Send notification to tenant
             $notificationModel = $this->model('M_Notifications');
             $statusText = ucfirst(str_replace('_', ' ', $status));
-            
+
             // Get current date/time
             $updateDateTime = date('F j, Y \a\t g:i A');
-            
+
             // Get Property Manager name
             $pmName = $_SESSION['user_name'] ?? 'Property Manager';
-            
+
             // Create enhanced notification message
             $notificationMessage = sprintf(
                 'Your issue "%s" has been updated to: %s by %s on %s',
@@ -497,13 +484,13 @@ class Manager extends Controller
 
         // Filter by date range (start date)
         if (!empty($dateFromFilter)) {
-            $filteredLeases = array_filter($filteredLeases, function($l) use ($dateFromFilter) {
+            $filteredLeases = array_filter($filteredLeases, function ($l) use ($dateFromFilter) {
                 return strtotime($l->start_date) >= strtotime($dateFromFilter);
             });
         }
 
         if (!empty($dateToFilter)) {
-            $filteredLeases = array_filter($filteredLeases, function($l) use ($dateToFilter) {
+            $filteredLeases = array_filter($filteredLeases, function ($l) use ($dateToFilter) {
                 return strtotime($l->start_date) <= strtotime($dateToFilter);
             });
         }
@@ -593,13 +580,13 @@ class Manager extends Controller
 
         // Filter by date range (move-in date)
         if (!empty($dateFromFilter)) {
-            $filteredBookings = array_filter($filteredBookings, function($b) use ($dateFromFilter) {
+            $filteredBookings = array_filter($filteredBookings, function ($b) use ($dateFromFilter) {
                 return strtotime($b->move_in_date) >= strtotime($dateFromFilter);
             });
         }
 
         if (!empty($dateToFilter)) {
-            $filteredBookings = array_filter($filteredBookings, function($b) use ($dateToFilter) {
+            $filteredBookings = array_filter($filteredBookings, function ($b) use ($dateToFilter) {
                 return strtotime($b->move_in_date) <= strtotime($dateToFilter);
             });
         }
@@ -742,12 +729,24 @@ class Manager extends Controller
     {
         $paymentModel = $this->model('M_Payments');
         $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
+        $propertyModel = $this->model('M_ManagerProperties');
+        $manager_id = $_SESSION['user_id'];
 
-        // Get all rental payments
-        $allPayments = $paymentModel->getAllPayments();
+        // Get assigned properties
+        $assignedProperties = $propertyModel->getAssignedProperties($manager_id);
+        $propertyIds = array_map(fn($p) => $p->id, $assignedProperties ?? []);
 
-        // Get all maintenance payments
-        $maintenancePayments = $maintenanceQuotationModel->getAllMaintenancePayments();
+        // Get rental payments for manager's properties
+        $allPayments = [];
+        if (!empty($propertyIds)) {
+            foreach ($propertyIds as $propertyId) {
+                $propertyPayments = $paymentModel->getPaymentsByProperty($propertyId);
+                $allPayments = array_merge($allPayments, $propertyPayments);
+            }
+        }
+
+        // Get maintenance payments for manager's properties using the proper method
+        $maintenancePayments = $maintenanceQuotationModel->getManagerMaintenancePayments($manager_id);
 
         // Combine and sort all payments by date
         $combinedPayments = array_merge($allPayments, $maintenancePayments);
@@ -757,24 +756,14 @@ class Manager extends Controller
             return strtotime($dateB) - strtotime($dateA);
         });
 
-        // Calculate statistics
-        $totalIncome = 0;
-        $completedCount = 0;
-        $pendingCount = 0;
-        $pendingAmount = 0;
+        // Get stats using proper model methods (All Time by default)
+        $rentalStats = $paymentModel->getManagerIncomeStats($manager_id, 'all');
+        $maintenanceIncomeStats = $maintenanceQuotationModel->getManagerMaintenanceIncome($manager_id, 'all');
 
-        foreach ($combinedPayments as $payment) {
-            $isMaintenance = isset($payment->payment_type) && $payment->payment_type === 'maintenance';
-            $platformFee = $isMaintenance ? $payment->amount : ($payment->amount * 0.10);
-
-            if ($payment->status === 'completed') {
-                $totalIncome += $platformFee;
-                $completedCount++;
-            } else if ($payment->status === 'pending') {
-                $pendingCount++;
-                $pendingAmount += $platformFee;
-            }
-        }
+        $totalIncome = ($rentalStats->total_income ?? 0) + ($maintenanceIncomeStats->total_income ?? 0);
+        $completedCount = ($rentalStats->completed_count ?? 0) + ($maintenanceIncomeStats->payment_count ?? 0);
+        $pendingCount = $rentalStats->pending_count ?? 0;
+        $pendingAmount = $rentalStats->pending_amount ?? 0;
 
         $data = [
             'title' => 'All Payments',
@@ -789,5 +778,229 @@ class Manager extends Controller
         ];
 
         $this->view('manager/v_all_payments', $data);
+    }
+
+    /**
+     * AJAX endpoint for getting stat card data by period
+     */
+    public function getStatData()
+    {
+        // Only accept POST requests
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            return;
+        }
+
+        // Get JSON data from request body
+        $input = json_decode(file_get_contents('php://input'), true);
+        $statType = $input['stat_type'] ?? '';
+        $period = $input['period'] ?? 'all';
+        $manager_id = $_SESSION['user_id'];
+
+        $response = ['value' => 0, 'subtitle' => ''];
+
+        // Load models
+        $propertyModel = $this->model('M_ManagerProperties');
+        $paymentModel = $this->model('M_Payments');
+        $maintenanceModel = $this->model('M_Maintenance');
+        $bookingModel = $this->model('M_Bookings');
+        $leaseModel = $this->model('M_LeaseAgreements');
+        $notificationModel = $this->model('M_Notifications');
+
+        switch ($statType) {
+            // Dashboard stats
+            case 'mgr_properties':
+                $stats = $propertyModel->getPropertyStats($manager_id, $period);
+                $response['value'] = $stats->total_properties ?? 0;
+                $response['subtitle'] = 'Assigned to you';
+                break;
+
+            case 'mgr_units':
+                $stats = $propertyModel->getPropertyStats($manager_id, $period);
+                $response['value'] = $stats->total_units ?? 0;
+                $response['subtitle'] = ($stats->occupied_units ?? 0) . ' occupied';
+                break;
+
+            case 'mgr_income':
+                // Platform Income = 10% service fees from rent + maintenance fees
+                $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
+                $rentalStats = $paymentModel->getManagerIncomeStats($manager_id, $period);
+                $rentalServiceFee = $rentalStats->total_income ?? 0;
+                $maintenanceIncomeStats = $maintenanceQuotationModel->getManagerMaintenanceIncome($manager_id, $period);
+                $maintenanceIncome = $maintenanceIncomeStats->total_income ?? 0;
+                $totalIncome = $rentalServiceFee + $maintenanceIncome;
+                $response['value'] = 'LKR ' . number_format($totalIncome, 0);
+                $response['subtitle'] = '10% rent fees + maintenance';
+                break;
+
+            case 'mgr_expenses':
+                $stats = $maintenanceModel->getMaintenanceStats(null, $manager_id, $period);
+                $response['value'] = 'LKR ' . number_format($stats->total_cost ?? 0, 0);
+                $response['subtitle'] = 'Maintenance costs';
+                break;
+
+            // Tenant stats
+            case 'tenant_active':
+                $stats = $bookingModel->getBookingStats($manager_id, 'manager', $period);
+                $activeCount = ($stats->active ?? 0) + ($stats->approved ?? 0);
+                $response['value'] = $activeCount;
+                $response['subtitle'] = 'Currently active tenants';
+                break;
+
+            case 'tenant_pending':
+                $stats = $bookingModel->getBookingStats($manager_id, 'manager', $period);
+                $response['value'] = $stats->pending ?? 0;
+                $response['subtitle'] = 'Awaiting approval';
+                break;
+
+            case 'tenant_vacated':
+                $stats = $bookingModel->getBookingStats($manager_id, 'manager', $period);
+                $vacatedCount = ($stats->completed ?? 0) + ($stats->cancelled ?? 0);
+                $response['value'] = $vacatedCount;
+                $response['subtitle'] = 'Completed or cancelled';
+                break;
+
+            // Maintenance stats
+            case 'maint_pending':
+                $stats = $maintenanceModel->getMaintenanceStats(null, $manager_id, $period);
+                $response['value'] = $stats->pending ?? 0;
+                $response['subtitle'] = 'Awaiting provider assignment';
+                break;
+
+            case 'maint_quotation':
+                $stats = $maintenanceModel->getMaintenanceStats(null, $manager_id, $period);
+                $response['value'] = $stats->quotation_needed ?? 0;
+                $response['subtitle'] = 'Ready to upload';
+                break;
+
+            case 'maint_completed':
+                $stats = $maintenanceModel->getMaintenanceStats(null, $manager_id, $period);
+                $response['value'] = $stats->completed ?? 0;
+                $response['subtitle'] = 'Total completed';
+                break;
+
+            case 'maint_cost':
+                // Total Income from maintenance payments
+                $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
+                $incomeStats = $maintenanceQuotationModel->getManagerMaintenanceIncome($manager_id, $period);
+                $response['value'] = 'LKR ' . number_format($incomeStats->total_income ?? 0, 0);
+                $response['subtitle'] = 'Maintenance income';
+                break;
+
+            // Lease stats
+            case 'lease_draft':
+                $stats = $leaseModel->getLeaseStats($manager_id, 'manager', $period);
+                $response['value'] = $stats->draft ?? 0;
+                $response['subtitle'] = 'Pending creation';
+                break;
+
+            case 'lease_active':
+                $stats = $leaseModel->getLeaseStats($manager_id, 'manager', $period);
+                $response['value'] = $stats->active ?? 0;
+                $response['subtitle'] = 'Currently active';
+                break;
+
+            case 'lease_completed':
+                $stats = $leaseModel->getLeaseStats($manager_id, 'manager', $period);
+                $response['value'] = $stats->completed ?? 0;
+                $response['subtitle'] = 'Ended leases';
+                break;
+
+            // Booking stats
+            case 'booking_pending':
+                $stats = $bookingModel->getBookingStats($manager_id, 'manager', $period);
+                $response['value'] = $stats->pending ?? 0;
+                $response['subtitle'] = 'Awaiting response';
+                break;
+
+            case 'booking_approved':
+                $stats = $bookingModel->getBookingStats($manager_id, 'manager', $period);
+                $response['value'] = $stats->approved ?? 0;
+                $response['subtitle'] = 'Accepted bookings';
+                break;
+
+            case 'booking_rejected':
+                $stats = $bookingModel->getBookingStats($manager_id, 'manager', $period);
+                $response['value'] = $stats->rejected ?? 0;
+                $response['subtitle'] = 'Declined requests';
+                break;
+
+            // Payment stats
+            case 'payment_total':
+                $stats = $paymentModel->getManagerIncomeStats($manager_id, $period);
+                $totalWithFees = ($stats->total_income ?? 0) * 1.10;
+                $response['value'] = 'Rs ' . number_format($totalWithFees, 0);
+                $response['subtitle'] = 'Total Collected (with fees)';
+                break;
+
+            case 'payment_completed':
+                $stats = $paymentModel->getManagerIncomeStats($manager_id, $period);
+                $response['value'] = $stats->completed_count ?? 0;
+                $response['subtitle'] = 'Completed Payments';
+                break;
+
+            case 'payment_pending':
+                $stats = $paymentModel->getManagerIncomeStats($manager_id, $period);
+                $pendingWithFees = ($stats->pending_amount ?? 0) * 1.10;
+                $response['value'] = $stats->pending_count ?? 0;
+                $response['subtitle'] = 'Rs ' . number_format($pendingWithFees, 0) . ' due';
+                break;
+
+            case 'payment_properties':
+                $stats = $propertyModel->getPropertyStats($manager_id, $period);
+                $response['value'] = $stats->total_properties ?? 0;
+                $response['subtitle'] = 'Properties Managed';
+                break;
+
+            // All payments stats (rental service fee + maintenance income)
+            case 'all_payment_total':
+                $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
+                // Get rental service fees (10% of rent)
+                $rentalStats = $paymentModel->getManagerIncomeStats($manager_id, $period);
+                $rentalServiceFee = $rentalStats->total_income ?? 0;
+                $rentalCompletedCount = $rentalStats->completed_count ?? 0;
+                // Get maintenance income
+                $maintenanceIncomeStats = $maintenanceQuotationModel->getManagerMaintenanceIncome($manager_id, $period);
+                $maintenanceIncome = $maintenanceIncomeStats->total_income ?? 0;
+                $maintenanceCount = $maintenanceIncomeStats->payment_count ?? 0;
+                // Combined total
+                $totalIncome = $rentalServiceFee + $maintenanceIncome;
+                $totalCount = $rentalCompletedCount + $maintenanceCount;
+                $response['value'] = 'LKR ' . number_format($totalIncome, 0);
+                $response['subtitle'] = $totalCount . ' completed payments';
+                break;
+
+            case 'all_payment_pending':
+                $stats = $paymentModel->getManagerIncomeStats($manager_id, $period);
+                $response['value'] = 'LKR ' . number_format($stats->pending_amount ?? 0, 2);
+                $response['subtitle'] = ($stats->pending_count ?? 0) . ' pending payments';
+                break;
+
+            // Notification stats
+            case 'notif_total':
+                $stats = $notificationModel->getUserNotificationStats($manager_id, $period);
+                $response['value'] = $stats->total_notifications ?? 0;
+                $response['subtitle'] = 'All time';
+                break;
+
+            case 'notif_unread':
+                $stats = $notificationModel->getUserNotificationStats($manager_id, $period);
+                $response['value'] = $stats->unread_count ?? 0;
+                $response['subtitle'] = 'Requires attention';
+                break;
+
+            case 'notif_read':
+                $stats = $notificationModel->getUserNotificationStats($manager_id, $period);
+                $response['value'] = $stats->read_count ?? 0;
+                $response['subtitle'] = 'Acknowledged';
+                break;
+
+            default:
+                $response['error'] = 'Unknown stat type';
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
     }
 }

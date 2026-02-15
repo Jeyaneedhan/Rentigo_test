@@ -469,3 +469,92 @@
   background-color: var(--success-color);
   transition: width 0.3s ease;
 }
+
+/* ============================================
+   STAT CARD DROPDOWN STYLES
+   ============================================ */
+.stat-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  cursor: pointer;
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.stat-label:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.stat-label::after {
+  content: '\f0d7';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 0.6rem;
+  margin-left: 0.35rem;
+  opacity: 0.6;
+}
+
+.stat-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+}
+
+.stat-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.stat-dropdown-item {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  color: var(--text-color);
+}
+
+.stat-dropdown-item:first-child {
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.stat-dropdown-item:last-child {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.stat-dropdown-item:hover {
+  background-color: #f1f5f9;
+}
+
+.stat-dropdown-item.selected {
+  background-color: #e0f2fe;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.stat-dropdown-item.selected::after {
+  content: '\f00c';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  float: right;
+  font-size: 0.7rem;
+}

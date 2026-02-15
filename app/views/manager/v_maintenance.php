@@ -18,44 +18,72 @@ AutoPaginate::init($data, 5);
 
     <!-- Stats -->
     <div class="stats-grid">
-        <div class="stat-card warning">
+        <div class="stat-card warning" data-stat-type="maint_pending">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Pending</h3>
-                <div class="stat-value"><?php echo $data['maintenanceStats']->pending ?? 0; ?></div>
-                <div class="stat-change">Awaiting provider assignment</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-maint_pending" onclick="toggleStatDropdown('maint_pending')">Pending</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-maint_pending">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maint_pending', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maint_pending', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_pending', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-maint_pending"><?php echo $data['maintenanceStats']->pending ?? 0; ?></div>
+                <div class="stat-change" id="stat-subtitle-maint_pending">Awaiting provider assignment</div>
             </div>
         </div>
-        <div class="stat-card info">
+        <div class="stat-card info" data-stat-type="maint_quotation">
             <div class="stat-icon">
                 <i class="fas fa-file-invoice"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Quotation Needed</h3>
-                <div class="stat-value"><?php echo $data['maintenanceStats']->quotation_needed ?? 0; ?></div>
-                <div class="stat-change">Ready to upload</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-maint_quotation" onclick="toggleStatDropdown('maint_quotation')">Quotation Needed</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-maint_quotation">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maint_quotation', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maint_quotation', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_quotation', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-maint_quotation"><?php echo $data['maintenanceStats']->quotation_needed ?? 0; ?></div>
+                <div class="stat-change" id="stat-subtitle-maint_quotation">Ready to upload</div>
             </div>
         </div>
-        <div class="stat-card success">
+        <div class="stat-card success" data-stat-type="maint_completed">
             <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Completed</h3>
-                <div class="stat-value"><?php echo $data['maintenanceStats']->completed ?? 0; ?></div>
-                <div class="stat-change">Total completed</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-maint_completed" onclick="toggleStatDropdown('maint_completed')">Completed</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-maint_completed">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maint_completed', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maint_completed', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_completed', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-maint_completed"><?php echo $data['maintenanceStats']->completed ?? 0; ?></div>
+                <div class="stat-change" id="stat-subtitle-maint_completed">Total completed</div>
             </div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="maint_cost">
             <div class="stat-icon">
                 <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Total Income</h3>
-                <div class="stat-value stat-value-small">LKR <?php echo number_format($data['maintenanceStats']->total_cost ?? 0, 2); ?></div>
-                <div class="stat-change">Maintenance income</div>
+                <div class="stat-header">
+                    <h3 class="stat-label" id="stat-label-maint_cost" onclick="toggleStatDropdown('maint_cost')">Total Income</h3>
+                    <div class="stat-dropdown" id="stat-dropdown-maint_cost">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maint_cost', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maint_cost', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_cost', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value stat-value-small" id="stat-value-maint_cost">LKR <?php echo number_format($data['maintenanceIncome'] ?? 0, 0); ?></div>
+                <div class="stat-change" id="stat-subtitle-maint_cost">Maintenance income</div>
             </div>
         </div>
     </div>
@@ -142,7 +170,7 @@ AutoPaginate::init($data, 5);
                                                 <i class="fas fa-check"></i> Approved
                                             </span>
                                         <?php endif; ?>
-                                        <br><small>LKR <?php echo number_format($request->quotation_amount ?? 0, 2); ?></small>
+                                        <br><small>LKR <?php echo number_format($request->quotation_amount ?? 0, 0); ?></small>
                                     <?php else: ?>
                                         <?php if ($request->provider_id): ?>
                                             <span class="badge badge-info">

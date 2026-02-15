@@ -10,47 +10,75 @@
 
     <!-- KPI Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="mgr_properties">
             <div class="stat-icon">
                 <i class="fas fa-building"></i>
             </div>
             <div class="stat-info">
-                <div class="stat-label">Total Properties</div>
-                <h3><?php echo $data['totalProperties'] ?? 0; ?></h3>
-                <div class="stat-change">Assigned to you</div>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-mgr_properties" onclick="toggleStatDropdown('mgr_properties')">Total Properties</span>
+                    <div class="stat-dropdown" id="stat-dropdown-mgr_properties">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('mgr_properties', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('mgr_properties', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('mgr_properties', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 id="stat-value-mgr_properties"><?php echo $data['totalProperties'] ?? 0; ?></h3>
+                <div class="stat-change" id="stat-subtitle-mgr_properties">Assigned to you</div>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="mgr_units">
             <div class="stat-icon">
                 <i class="fas fa-home"></i>
             </div>
             <div class="stat-info">
-                <div class="stat-label">Occupied Properties</div>
-                <h3><?php echo $data['totalUnits'] ?? 0; ?></h3>
-                <div class="stat-change"><?php echo $data['occupiedUnits'] ?? 0; ?> occupied</div>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-mgr_units" onclick="toggleStatDropdown('mgr_units')">Occupied Properties</span>
+                    <div class="stat-dropdown" id="stat-dropdown-mgr_units">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('mgr_units', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('mgr_units', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('mgr_units', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 id="stat-value-mgr_units"><?php echo $data['totalUnits'] ?? 0; ?></h3>
+                <div class="stat-change" id="stat-subtitle-mgr_units"><?php echo $data['occupiedUnits'] ?? 0; ?> occupied</div>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="mgr_income">
             <div class="stat-icon">
                 <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="stat-info">
-                <div class="stat-label">Platform Income</div>
-                <h3>LKR <?php echo number_format($data['totalIncome'] ?? 0, 0); ?></h3>
-                <div class="stat-change">10% service fees collected</div>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-mgr_income" onclick="toggleStatDropdown('mgr_income')">Platform Income</span>
+                    <div class="stat-dropdown" id="stat-dropdown-mgr_income">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('mgr_income', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('mgr_income', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('mgr_income', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 id="stat-value-mgr_income">LKR <?php echo number_format($data['totalIncome'] ?? 0, 0); ?></h3>
+                <div class="stat-change" id="stat-subtitle-mgr_income">10% rent fees + maintenance</div>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="mgr_expenses">
             <div class="stat-icon">
                 <i class="fas fa-arrow-down"></i>
             </div>
             <div class="stat-info">
-                <div class="stat-label">Total Expenses</div>
-                <h3>LKR <?php echo number_format($data['totalExpenses'] ?? 0, 0); ?></h3>
-                <div class="stat-change">Maintenance costs</div>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-mgr_expenses" onclick="toggleStatDropdown('mgr_expenses')">Total Expenses</span>
+                    <div class="stat-dropdown" id="stat-dropdown-mgr_expenses">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('mgr_expenses', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('mgr_expenses', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('mgr_expenses', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 id="stat-value-mgr_expenses">LKR <?php echo number_format($data['totalExpenses'] ?? 0, 0); ?></h3>
+                <div class="stat-change" id="stat-subtitle-mgr_expenses">Maintenance costs</div>
             </div>
         </div>
     </div>
@@ -79,7 +107,7 @@
         <div class="section-header">
             <h2>Unpaid Tenants (Overdue)</h2>
         </div>
-        
+
         <?php if (empty($data['unpaidTenants'])): ?>
             <div class="empty-state">
                 <p class="text-muted">No tenants with overdue payments.</p>

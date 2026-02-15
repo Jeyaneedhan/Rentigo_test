@@ -217,28 +217,40 @@ class M_LeaseAgreements
     }
 
     // Get lease statistics
-    public function getLeaseStats($user_id, $user_type)
+    public function getLeaseStats($user_id, $user_type, $period = 'all')
     {
         $stats = [];
+        $dateFilter = getDateRangeByPeriod('l.created_at', $period);
 
         if ($user_type == 'tenant') {
             $this->db->query('SELECT
                             COUNT(*) as total,
-                            SUM(CASE WHEN status = "draft" THEN 1 ELSE 0 END) as draft,
-                            SUM(CASE WHEN status = "pending_signatures" THEN 1 ELSE 0 END) as pending_signatures,
-                            SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active,
-                            SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
-                            SUM(CASE WHEN status = "terminated" THEN 1 ELSE 0 END) as `terminated`
-                            FROM lease_agreements WHERE tenant_id = :user_id');
+                            SUM(CASE WHEN l.status = "draft" THEN 1 ELSE 0 END) as draft,
+                            SUM(CASE WHEN l.status = "pending_signatures" THEN 1 ELSE 0 END) as pending_signatures,
+                            SUM(CASE WHEN l.status = "active" THEN 1 ELSE 0 END) as active,
+                            SUM(CASE WHEN l.status = "completed" THEN 1 ELSE 0 END) as completed,
+                            SUM(CASE WHEN l.status = "terminated" THEN 1 ELSE 0 END) as `terminated`
+                            FROM lease_agreements l WHERE l.tenant_id = :user_id AND ' . $dateFilter);
         } else if ($user_type == 'landlord') {
             $this->db->query('SELECT
                             COUNT(*) as total,
-                            SUM(CASE WHEN status = "draft" THEN 1 ELSE 0 END) as draft,
-                            SUM(CASE WHEN status = "pending_signatures" THEN 1 ELSE 0 END) as pending_signatures,
-                            SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active,
-                            SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
-                            SUM(CASE WHEN status = "terminated" THEN 1 ELSE 0 END) as `terminated`
-                            FROM lease_agreements WHERE landlord_id = :user_id');
+                            SUM(CASE WHEN l.status = "draft" THEN 1 ELSE 0 END) as draft,
+                            SUM(CASE WHEN l.status = "pending_signatures" THEN 1 ELSE 0 END) as pending_signatures,
+                            SUM(CASE WHEN l.status = "active" THEN 1 ELSE 0 END) as active,
+                            SUM(CASE WHEN l.status = "completed" THEN 1 ELSE 0 END) as completed,
+                            SUM(CASE WHEN l.status = "terminated" THEN 1 ELSE 0 END) as `terminated`
+                            FROM lease_agreements l WHERE l.landlord_id = :user_id AND ' . $dateFilter);
+        } else if ($user_type == 'manager') {
+            $this->db->query('SELECT
+                            COUNT(*) as total,
+                            SUM(CASE WHEN l.status = "draft" THEN 1 ELSE 0 END) as draft,
+                            SUM(CASE WHEN l.status = "pending_signatures" THEN 1 ELSE 0 END) as pending_signatures,
+                            SUM(CASE WHEN l.status = "active" THEN 1 ELSE 0 END) as active,
+                            SUM(CASE WHEN l.status = "completed" THEN 1 ELSE 0 END) as completed,
+                            SUM(CASE WHEN l.status = "terminated" THEN 1 ELSE 0 END) as `terminated`
+                            FROM lease_agreements l
+                            JOIN properties p ON l.property_id = p.id
+                            WHERE p.manager_id = :user_id AND ' . $dateFilter);
         }
 
         $this->db->bind(':user_id', $user_id);

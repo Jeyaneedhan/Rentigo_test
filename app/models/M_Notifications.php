@@ -94,6 +94,24 @@ class M_Notifications
     }
 
     /**
+     * Get notification statistics for a specific user with period filter
+     * @param int $user_id The user's ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getUserNotificationStats($user_id, $period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
+        $this->db->query("SELECT
+                            COUNT(*) as total_notifications,
+                            COUNT(CASE WHEN is_read = 1 THEN 1 END) as read_count,
+                            COUNT(CASE WHEN is_read = 0 THEN 1 END) as unread_count
+                         FROM notifications
+                         WHERE user_id = :user_id AND " . $dateFilter);
+        $this->db->bind(':user_id', $user_id);
+        return $this->db->single();
+    }
+
+    /**
      * Mark a single notification as 'read' - like when a user clicks it
      */
     public function markAsRead($id)

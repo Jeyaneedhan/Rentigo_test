@@ -182,6 +182,29 @@ class M_MaintenanceQuotations
         return $result->total_income ?? 0;
     }
 
+    /**
+     * Get maintenance income for a specific property manager by period
+     * @param int $manager_id The manager's user ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getManagerMaintenanceIncome($manager_id, $period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('mp.payment_date', $period);
+        $this->db->query('SELECT 
+            SUM(mp.amount) as total_income,
+            COUNT(*) as payment_count
+            FROM maintenance_payments mp
+            INNER JOIN maintenance_quotations mq ON mp.quotation_id = mq.id
+            INNER JOIN maintenance_requests mr ON mq.request_id = mr.id
+            INNER JOIN properties p ON mr.property_id = p.id
+            WHERE mp.status = "completed" 
+            AND p.manager_id = :manager_id 
+            AND ' . $dateFilter);
+        $this->db->bind(':manager_id', $manager_id);
+        $result = $this->db->single();
+        return $result;
+    }
+
     // Delete quotation
     public function deleteQuotation($id)
     {
@@ -205,6 +228,26 @@ class M_MaintenanceQuotations
             LEFT JOIN properties p ON mr.property_id = p.id
             LEFT JOIN users u ON mr.landlord_id = u.id
             ORDER BY mp.payment_date DESC');
+        return $this->db->resultSet();
+    }
+
+    // Get maintenance payments for a specific manager's properties
+    public function getManagerMaintenancePayments($manager_id)
+    {
+        $this->db->query('SELECT
+            mp.*,
+            mr.title as maintenance_title,
+            p.address as property_address,
+            u.name as landlord_name,
+            "maintenance" as payment_type
+            FROM maintenance_payments mp
+            LEFT JOIN maintenance_quotations mq ON mp.quotation_id = mq.id
+            LEFT JOIN maintenance_requests mr ON mq.request_id = mr.id
+            LEFT JOIN properties p ON mr.property_id = p.id
+            LEFT JOIN users u ON mr.landlord_id = u.id
+            WHERE p.manager_id = :manager_id
+            ORDER BY mp.payment_date DESC');
+        $this->db->bind(':manager_id', $manager_id);
         return $this->db->resultSet();
     }
 }

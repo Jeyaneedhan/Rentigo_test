@@ -2,6 +2,9 @@
 </main>
 </div>
 
+<script>
+    const URLROOT = '<?php echo URLROOT; ?>';
+</script>
 <script src="<?php echo URLROOT; ?>/js/manager.js"></script>
 <script>
     // Initialize sidebar functionality

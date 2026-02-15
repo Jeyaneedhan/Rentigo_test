@@ -17,34 +17,55 @@ AutoPaginate::init($data, 5);
 
 <!-- Lease Stats -->
 <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="lease_draft">
         <div class="stat-icon">
             <i class="fas fa-file-alt"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Draft</h3>
-            <div class="stat-value"><?php echo $data['draftCount'] ?? 0; ?></div>
-            <div class="stat-change">Pending creation</div>
+            <div class="stat-header">
+                <h3 class="stat-label" id="stat-label-lease_draft" onclick="toggleStatDropdown('lease_draft')">Draft</h3>
+                <div class="stat-dropdown" id="stat-dropdown-lease_draft">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('lease_draft', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('lease_draft', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('lease_draft', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-lease_draft"><?php echo $data['draftCount'] ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-lease_draft">Pending creation</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="lease_active">
         <div class="stat-icon">
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Active</h3>
-            <div class="stat-value"><?php echo $data['activeCount'] ?? 0; ?></div>
-            <div class="stat-change">Currently active</div>
+            <div class="stat-header">
+                <h3 class="stat-label" id="stat-label-lease_active" onclick="toggleStatDropdown('lease_active')">Active</h3>
+                <div class="stat-dropdown" id="stat-dropdown-lease_active">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('lease_active', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('lease_active', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('lease_active', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-lease_active"><?php echo $data['activeCount'] ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-lease_active">Currently active</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="lease_completed">
         <div class="stat-icon">
             <i class="fas fa-archive"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Completed</h3>
-            <div class="stat-value"><?php echo $data['completedCount'] ?? 0; ?></div>
-            <div class="stat-change">Ended leases</div>
+            <div class="stat-header">
+                <h3 class="stat-label" id="stat-label-lease_completed" onclick="toggleStatDropdown('lease_completed')">Completed</h3>
+                <div class="stat-dropdown" id="stat-dropdown-lease_completed">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('lease_completed', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('lease_completed', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('lease_completed', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-lease_completed"><?php echo $data['completedCount'] ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-lease_completed">Ended leases</div>
         </div>
     </div>
 </div>
