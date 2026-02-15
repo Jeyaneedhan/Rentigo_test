@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Notifications Model
  * Think of this as the "Activity Feed" logic. 
@@ -34,21 +35,27 @@ class M_Notifications
         }
     }
 
-    // Get all notifications for a user
-    public function getNotificationsByUser($user_id, $limit = null)
+    /**
+     * Get all notifications for a user with optional period filter
+     * @param int $user_id The user's ID
+     * @param string $period 'all', 'month', or 'year' for date filtering (or an integer for limit)
+     */
+    public function getNotificationsByUser($user_id, $period = 'all')
     {
-        $query = 'SELECT * FROM notifications WHERE user_id = :user_id ORDER BY created_at DESC';
-
-        if ($limit) {
-            $query .= ' LIMIT :limit';
+        // For backward compatibility: if $period is numeric, treat it as a limit
+        if (is_numeric($period)) {
+            $query = 'SELECT * FROM notifications WHERE user_id = :user_id ORDER BY created_at DESC LIMIT :limit';
+            $this->db->query($query);
+            $this->db->bind(':user_id', $user_id);
+            $this->db->bind(':limit', (int)$period);
+            return $this->db->resultSet();
         }
+
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
+        $query = 'SELECT * FROM notifications WHERE user_id = :user_id AND ' . $dateFilter . ' ORDER BY created_at DESC';
 
         $this->db->query($query);
         $this->db->bind(':user_id', $user_id);
-
-        if ($limit) {
-            $this->db->bind(':limit', $limit);
-        }
 
         return $this->db->resultSet();
     }
@@ -67,6 +74,20 @@ class M_Notifications
     public function getUnreadCount($user_id)
     {
         $this->db->query('SELECT COUNT(*) as count FROM notifications WHERE user_id = :user_id AND is_read = 0');
+        $this->db->bind(':user_id', $user_id);
+        $result = $this->db->single();
+        return $result->count;
+    }
+
+    /**
+     * Get unread notification count with period filter
+     * @param int $user_id The user's ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getUnreadCountByPeriod($user_id, $period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
+        $this->db->query('SELECT COUNT(*) as count FROM notifications WHERE user_id = :user_id AND is_read = 0 AND ' . $dateFilter);
         $this->db->bind(':user_id', $user_id);
         $result = $this->db->single();
         return $result->count;

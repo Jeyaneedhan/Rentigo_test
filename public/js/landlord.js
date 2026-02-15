@@ -26,6 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
+  // Close stat dropdowns when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".stat-header")) {
+      closeAllStatDropdowns()
+    }
+  })
+
   // Initialize tooltips and other UI enhancements
   initializeUI()
 })
@@ -115,5 +122,114 @@ function debounce(func, wait) {
     }
     clearTimeout(timeout)
     timeout = setTimeout(later, wait)
+  }
+}
+
+// ===== STAT CARD DROPDOWN FUNCTIONS =====
+
+/**
+ * Toggle the dropdown menu for a stat card
+ * @param {string} statType - The stat card type (properties, leases, income, maintenance)
+ */
+function toggleStatDropdown(statType) {
+  const dropdown = document.getElementById(`stat-dropdown-${statType}`)
+  if (!dropdown) return
+
+  // Close all other dropdowns first
+  closeAllStatDropdowns(statType)
+
+  // Toggle the clicked dropdown
+  dropdown.classList.toggle("active")
+}
+
+/**
+ * Close all stat dropdowns except the specified one
+ * @param {string} exceptStatType - Optional stat type to exclude from closing
+ */
+function closeAllStatDropdowns(exceptStatType = null) {
+  const allDropdowns = document.querySelectorAll(".stat-dropdown")
+  allDropdowns.forEach((dropdown) => {
+    const id = dropdown.id
+    const statType = id.replace("stat-dropdown-", "")
+    if (statType !== exceptStatType) {
+      dropdown.classList.remove("active")
+    }
+  })
+}
+
+/**
+ * Handle period selection from stat dropdown
+ * @param {string} statType - The stat card type
+ * @param {string} period - The selected period (all, month, year)
+ * @param {Event} event - The click event
+ */
+function selectStatPeriod(statType, period, event) {
+  event.stopPropagation()
+
+  const dropdown = document.getElementById(`stat-dropdown-${statType}`)
+  if (!dropdown) return
+
+  // Update selected state in dropdown
+  const items = dropdown.querySelectorAll(".stat-dropdown-item")
+  items.forEach((item) => {
+    item.classList.remove("selected")
+    if (item.dataset.period === period) {
+      item.classList.add("selected")
+    }
+  })
+
+  // Close the dropdown
+  dropdown.classList.remove("active")
+
+  // Fetch new data
+  fetchStatData(statType, period)
+}
+
+/**
+ * Fetch stat data from server via AJAX
+ * @param {string} statType - The stat card type
+ * @param {string} period - The selected period
+ */
+async function fetchStatData(statType, period) {
+  const valueElement = document.getElementById(`stat-value-${statType}`)
+  const subtitleElement = document.getElementById(`stat-subtitle-${statType}`)
+
+  if (!valueElement) return
+
+  // Show loading state
+  valueElement.classList.add("loading")
+
+  try {
+    const response = await fetch(`${URLROOT}/landlord/getStatData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        stat_type: statType,
+        period: period,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (data.success) {
+      // Update the stat value
+      valueElement.textContent = data.formatted
+
+      // Update the subtitle if provided
+      if (subtitleElement && data.subtitle) {
+        subtitleElement.textContent = data.subtitle
+      }
+    } else {
+      console.error("Failed to fetch stat data:", data.message)
+      showNotification("Failed to update stat", "error")
+    }
+  } catch (error) {
+    console.error("Error fetching stat data:", error)
+    showNotification("Error loading data", "error")
+  } finally {
+    // Remove loading state
+    valueElement.classList.remove("loading")
   }
 }

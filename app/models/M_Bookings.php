@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Bookings Model
  * This is the "Sales Pipeline" for Rentigo. 
@@ -198,11 +199,15 @@ class M_Bookings
     }
 
     /**
-     * Get a row of counts (pending, active, etc.) for a user's dashboard in the last 30 days
+     * Get a row of counts (pending, active, etc.) for a user's dashboard
+     * @param int $user_id The user ID
+     * @param string $user_type 'tenant' or 'landlord'
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getBookingStats($user_id, $user_type)
+    public function getBookingStats($user_id, $user_type, $period = 'all')
     {
         $stats = [];
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
 
         if ($user_type == 'tenant') {
             $this->db->query('SELECT
@@ -213,7 +218,7 @@ class M_Bookings
                             SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
                             SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END) as rejected,
                             SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled
-                            FROM bookings WHERE tenant_id = :user_id AND ' . getDateRangeSql('created_at'));
+                            FROM bookings WHERE tenant_id = :user_id AND ' . $dateFilter);
         } else if ($user_type == 'landlord') {
             $this->db->query('SELECT
                             COUNT(*) as total,
@@ -223,7 +228,7 @@ class M_Bookings
                             SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
                             SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END) as rejected,
                             SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled
-                            FROM bookings WHERE landlord_id = :user_id AND ' . getDateRangeSql('created_at'));
+                            FROM bookings WHERE landlord_id = :user_id AND ' . $dateFilter);
         }
 
         $this->db->bind(':user_id', $user_id);

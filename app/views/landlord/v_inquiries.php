@@ -12,44 +12,72 @@
 
 <!-- Statistics Cards -->
 <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="inquiry_total">
         <div class="stat-icon">
             <i class="fas fa-exclamation-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Total Inquiries</h3>
-            <div class="stat-value"><?php echo $data['issueStats']->total_issues ?? 0; ?></div>
-            <div class="stat-change">All time</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-inquiry_total" onclick="toggleStatDropdown('inquiry_total')">Total Inquiries</span>
+                <div class="stat-dropdown" id="stat-dropdown-inquiry_total">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('inquiry_total', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('inquiry_total', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('inquiry_total', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-inquiry_total"><?php echo $data['issueStats']->total_issues ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-inquiry_total">All time</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="inquiry_pending">
         <div class="stat-icon">
             <i class=" fas fa-clock"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Pending</h3>
-            <div class="stat-value"><?php echo $data['issueStats']->pending_count ?? 0; ?></div>
-            <div class="stat-change">Awaiting action</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-inquiry_pending" onclick="toggleStatDropdown('inquiry_pending')">Pending</span>
+                <div class="stat-dropdown" id="stat-dropdown-inquiry_pending">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('inquiry_pending', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('inquiry_pending', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('inquiry_pending', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-inquiry_pending"><?php echo $data['issueStats']->pending_count ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-inquiry_pending">Awaiting action</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="inquiry_in_progress">
         <div class="stat-icon">
             <i class="fas fa-spinner"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">In Progress</h3>
-            <div class="stat-value"><?php echo $data['issueStats']->in_progress_count ?? 0; ?></div>
-            <div class="stat-change">Being worked on</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-inquiry_in_progress" onclick="toggleStatDropdown('inquiry_in_progress')">In Progress</span>
+                <div class="stat-dropdown" id="stat-dropdown-inquiry_in_progress">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('inquiry_in_progress', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('inquiry_in_progress', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('inquiry_in_progress', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-inquiry_in_progress"><?php echo $data['issueStats']->in_progress_count ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-inquiry_in_progress">Being worked on</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="inquiry_resolved">
         <div class="stat-icon">
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Resolved</h3>
-            <div class="stat-value"><?php echo $data['issueStats']->resolved_count ?? 0; ?></div>
-            <div class="stat-change">Completed</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-inquiry_resolved" onclick="toggleStatDropdown('inquiry_resolved')">Resolved</span>
+                <div class="stat-dropdown" id="stat-dropdown-inquiry_resolved">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('inquiry_resolved', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('inquiry_resolved', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('inquiry_resolved', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-inquiry_resolved"><?php echo $data['issueStats']->resolved_count ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-inquiry_resolved">Completed</div>
         </div>
     </div>
 </div>

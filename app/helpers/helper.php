@@ -68,6 +68,29 @@ function getDateRangeSql($columnName, $days = 30)
 }
 
 /**
+ * PERIOD FILTER: Generates SQL date condition based on period selection.
+ * Used by stat card dropdowns for filtering by 'all', 'month', or 'year'.
+ * @param string $columnName The date column to filter on
+ * @param string $period 'all' (no filter), 'month' (current month), 'year' (current year)
+ * @return string SQL condition string (empty for 'all', date filter for others)
+ */
+function getDateRangeByPeriod($columnName, $period = 'all')
+{
+    switch ($period) {
+        case 'month':
+            // Current calendar month
+            return " $columnName >= DATE_FORMAT(CURDATE(), '%Y-%m-01') ";
+        case 'year':
+            // Current calendar year
+            return " $columnName >= DATE_FORMAT(CURDATE(), '%Y-01-01') ";
+        case 'all':
+        default:
+            // No date filter - return always true condition
+            return " 1=1 ";
+    }
+}
+
+/**
  * Generic helper to get statistics for the last 30 days
  * We use this for dashboard stats like "payments in last 30 days"
  * @param object $db Database object

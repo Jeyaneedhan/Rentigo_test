@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Reviews Model
  * Trust is everything! 
@@ -96,9 +97,36 @@ class M_Reviews
         return $this->db->resultSet();
     }
 
-    // Get reviews about a user (tenant or landlord)
-    public function getReviewsAboutUser($reviewee_id, $review_type = null)
+    /**
+     * Get reviews written by a user with optional period filter
+     * @param int $reviewer_id The user who wrote the reviews
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getReviewsByUser($reviewer_id, $period = 'all')
     {
+        $dateFilter = getDateRangeByPeriod('r.created_at', $period);
+
+        $this->db->query('SELECT r.*,
+                         reviewee.name as reviewee_name,
+                         p.address as property_address
+                         FROM reviews r
+                         LEFT JOIN users reviewee ON r.reviewee_id = reviewee.id
+                         LEFT JOIN properties p ON r.property_id = p.id
+                         WHERE r.reviewer_id = :reviewer_id AND ' . $dateFilter . '
+                         ORDER BY r.created_at DESC');
+        $this->db->bind(':reviewer_id', $reviewer_id);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Get reviews about a user (tenant or landlord) with optional period filter
+     * @param int $reviewee_id The user being reviewed
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getReviewsAboutUser($reviewee_id, $period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('r.created_at', $period);
+
         $query = 'SELECT r.*,
                   reviewer.name as reviewer_name,
                   reviewer.user_type as reviewer_type,
@@ -106,20 +134,11 @@ class M_Reviews
                   FROM reviews r
                   LEFT JOIN users reviewer ON r.reviewer_id = reviewer.id
                   LEFT JOIN properties p ON r.property_id = p.id
-                  WHERE r.reviewee_id = :reviewee_id AND r.status = "approved"';
-
-        if ($review_type) {
-            $query .= ' AND r.review_type = :review_type';
-        }
-
-        $query .= ' ORDER BY r.created_at DESC';
+                  WHERE r.reviewee_id = :reviewee_id AND r.status = "approved" AND ' . $dateFilter . '
+                  ORDER BY r.created_at DESC';
 
         $this->db->query($query);
         $this->db->bind(':reviewee_id', $reviewee_id);
-
-        if ($review_type) {
-            $this->db->bind(':review_type', $review_type);
-        }
 
         return $this->db->resultSet();
     }

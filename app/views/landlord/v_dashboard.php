@@ -11,51 +11,80 @@
 
     <!-- Stats Grid -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="properties">
             <div class="stat-icon">
                 <i class="fas fa-home"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Total Properties</h3>
-                <div class="stat-value"><?php echo $data['propertyStats']->total_properties ?? 0; ?></div>
-                <div class="stat-change">
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-properties" onclick="toggleStatDropdown('properties')">Total Properties</span>
+                    <div class="stat-dropdown" id="stat-dropdown-properties">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('properties', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('properties', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('properties', 'month', event)">Current Month</div>
+
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-properties"><?php echo $data['propertyStats']->total_properties ?? 0; ?></div>
+                <div class="stat-change" id="stat-subtitle-properties">
                     <?php echo ($data['propertyStats']->active_properties ?? 0); ?> active listings
                 </div>
             </div>
         </div>
 
-        <div class="stat-card success">
+        <div class="stat-card success" data-stat-type="leases">
             <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Active Leases</h3>
-                <div class="stat-value"><?php echo $data['activeLeases'] ?? 0; ?></div>
-                <div class="stat-change positive">Currently occupied</div>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-leases" onclick="toggleStatDropdown('leases')">Active Leases</span>
+                    <div class="stat-dropdown" id="stat-dropdown-leases">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('leases', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('leases', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('leases', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-leases"><?php echo $data['activeLeases'] ?? 0; ?></div>
+                <div class="stat-change positive" id="stat-subtitle-leases">Currently occupied</div>
             </div>
         </div>
 
-        <div class="stat-card info">
+        <div class="stat-card info" data-stat-type="income">
             <div class="stat-icon">
                 <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Total Income</h3>
-                <div class="stat-value">
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-income" onclick="toggleStatDropdown('income')">Total Income</span>
+                    <div class="stat-dropdown" id="stat-dropdown-income">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('income', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('income', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('income', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-income">
                     LKR <?php echo number_format($data['totalIncome']->total_income ?? 0, 0); ?>
                 </div>
-                <div class="stat-change positive">All time earnings</div>
+                <div class="stat-change positive" id="stat-subtitle-income">All time earnings</div>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="maintenance">
             <div class="stat-icon">
                 <i class="fas fa-tools"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-label">Maintenance</h3>
-                <div class="stat-value"><?php echo $data['pendingMaintenance'] ?? 0; ?></div>
-                <div class="stat-change">Pending requests</div>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-maintenance" onclick="toggleStatDropdown('maintenance')">Maintenance</span>
+                    <div class="stat-dropdown" id="stat-dropdown-maintenance">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maintenance', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maintenance', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maintenance', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <div class="stat-value" id="stat-value-maintenance"><?php echo $data['pendingMaintenance'] ?? 0; ?></div>
+                <div class="stat-change" id="stat-subtitle-maintenance">Pending requests</div>
             </div>
         </div>
     </div>

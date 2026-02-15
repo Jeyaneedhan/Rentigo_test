@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_LeaseAgreements Model
  * This is the legal core of Rentigo.
@@ -171,10 +172,13 @@ class M_LeaseAgreements
         return $this->db->single();
     }
 
-    // Get active leases for a landlord in last 30 days
-    public function getActiveLeasesCount($landlord_id)
+    // Get active leases for a landlord with optional period filter
+    // @param int $landlord_id The landlord's user ID
+    // @param string $period 'all', 'month', or 'year' for date filtering
+    public function getActiveLeasesCount($landlord_id, $period = 'all')
     {
-        $this->db->query('SELECT COUNT(*) as count FROM lease_agreements WHERE landlord_id = :landlord_id AND status = "active" AND ' . getDateRangeSql('created_at'));
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
+        $this->db->query('SELECT COUNT(*) as count FROM lease_agreements WHERE landlord_id = :landlord_id AND status = "active" AND ' . $dateFilter);
         $this->db->bind(':landlord_id', $landlord_id);
         $result = $this->db->single();
         return $result->count;

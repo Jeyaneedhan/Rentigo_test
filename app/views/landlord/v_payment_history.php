@@ -17,75 +17,79 @@ AutoPaginate::init($data, 5);
 
 <!-- Payment Stats -->
 <div class="stats-grid">
-    <div class="stat-card success">
+    <div class="stat-card success" data-stat-type="payment_income">
         <div class="stat-icon">
             <i class="fas fa-dollar-sign"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Total Income</h3>
-            <div class="stat-value">LKR <?php echo number_format($data['totalIncome']->total_income ?? 0, 0); ?></div>
-            <div class="stat-change positive">Last 30 days</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-payment_income" onclick="toggleStatDropdown('payment_income')">Total Income</span>
+                <div class="stat-dropdown" id="stat-dropdown-payment_income">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('payment_income', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('payment_income', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('payment_income', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-payment_income">LKR <?php echo number_format($data['totalIncome']->total_income ?? 0, 0); ?></div>
+            <div class="stat-change positive" id="stat-subtitle-payment_income">All time</div>
         </div>
     </div>
 
-    <div class="stat-card info">
+    <div class="stat-card info" data-stat-type="payment_completed">
         <div class="stat-icon">
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Completed Payments</h3>
-            <div class="stat-value">
-                <?php
-                $completedCount = 0;
-                $completedAmount = 0;
-                if (!empty($data['recentPayments'])) {
-                    foreach ($data['recentPayments'] as $payment) {
-                        if ($payment->status === 'completed') {
-                            $completedCount++;
-                            $completedAmount += $payment->amount;
-                        }
-                    }
-                }
-                echo $completedCount;
-                ?>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-payment_completed" onclick="toggleStatDropdown('payment_completed')">Completed Payments</span>
+                <div class="stat-dropdown" id="stat-dropdown-payment_completed">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('payment_completed', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('payment_completed', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('payment_completed', 'month', event)">Current Month</div>
+                </div>
             </div>
-            <div class="stat-change">LKR <?php echo number_format($completedAmount, 0); ?> (30 days)</div>
+            <div class="stat-value" id="stat-value-payment_completed">
+                <?php echo $data['paymentStatsAll']->completed_count ?? 0; ?>
+            </div>
+            <div class="stat-change" id="stat-subtitle-payment_completed">LKR <?php echo number_format($data['paymentStatsAll']->completed_amount ?? 0, 0); ?> (All time)</div>
         </div>
     </div>
 
-    <div class="stat-card warning">
+    <div class="stat-card warning" data-stat-type="payment_pending">
         <div class="stat-icon">
             <i class="fas fa-clock"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Pending Payments</h3>
-            <div class="stat-value">
-                <?php
-                $pendingCount = 0;
-                $pendingAmount = 0;
-                if (!empty($data['recentPayments'])) {
-                    foreach ($data['recentPayments'] as $payment) {
-                        if ($payment->status === 'pending') {
-                            $pendingCount++;
-                            $pendingAmount += $payment->amount;
-                        }
-                    }
-                }
-                echo $pendingCount;
-                ?>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-payment_pending" onclick="toggleStatDropdown('payment_pending')">Pending Payments</span>
+                <div class="stat-dropdown" id="stat-dropdown-payment_pending">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('payment_pending', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('payment_pending', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('payment_pending', 'month', event)">Current Month</div>
+                </div>
             </div>
-            <div class="stat-change">LKR <?php echo number_format($pendingAmount, 0); ?> (30 days)</div>
+            <div class="stat-value" id="stat-value-payment_pending">
+                <?php echo $data['paymentStatsAll']->pending_count ?? 0; ?>
+            </div>
+            <div class="stat-change" id="stat-subtitle-payment_pending">LKR <?php echo number_format($data['paymentStatsAll']->pending_amount ?? 0, 0); ?> (All time)</div>
         </div>
     </div>
 
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="payment_overdue">
         <div class="stat-icon">
-            <i class="fas fa-receipt"></i>
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Total Payments</h3>
-            <div class="stat-value"><?php echo count($data['recentPayments'] ?? []); ?></div>
-            <div class="stat-change">Last 30 days</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-payment_overdue" onclick="toggleStatDropdown('payment_overdue')">Overdue Payments</span>
+                <div class="stat-dropdown" id="stat-dropdown-payment_overdue">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('payment_overdue', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('payment_overdue', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('payment_overdue', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-payment_overdue"><?php echo $data['paymentStatsAll']->overdue_count ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-payment_overdue">LKR <?php echo number_format($data['paymentStatsAll']->overdue_amount ?? 0, 0); ?> (All time)</div>
         </div>
     </div>
 </div>

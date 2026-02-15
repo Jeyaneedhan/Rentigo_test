@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Properties Model
  * This is the ultimate "House Manager" for Rentigo. 
@@ -264,9 +265,12 @@ class M_Properties
     /**
      * DASHBOARD CALCULATION: Sum up all the money a landlord is making. 
      * It also counts how many houses are active, occupied, or in maintenance. 
+     * @param int $landlordId The landlord's user ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getPropertyStats($landlordId)
+    public function getPropertyStats($landlordId, $period = 'all')
     {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
         $this->db->query('SELECT
                          COUNT(*) as total_properties,
                          COUNT(CASE WHEN listing_type = "rent" THEN 1 END) as rental_properties,
@@ -278,7 +282,7 @@ class M_Properties
                          COUNT(CASE WHEN status = "maintenance_only" THEN 1 END) as maintenance_only,
                          AVG(CASE WHEN listing_type = "rent" THEN rent ELSE NULL END) as average_rent,
                          SUM(CASE WHEN status = "occupied" AND listing_type = "rent" THEN rent ELSE 0 END) as monthly_revenue
-                         FROM properties WHERE landlord_id = :landlord_id AND ' . getDateRangeSql('created_at'));
+                         FROM properties WHERE landlord_id = :landlord_id AND ' . $dateFilter);
         $this->db->bind(':landlord_id', $landlordId);
 
         return $this->db->single();
@@ -298,9 +302,9 @@ class M_Properties
     }
 
     // Alias for getPropertyStats (used by Landlord controller)
-    public function getPropertyStatsByLandlord($landlordId)
+    public function getPropertyStatsByLandlord($landlordId, $period = 'all')
     {
-        return $this->getPropertyStats($landlordId);
+        return $this->getPropertyStats($landlordId, $period);
     }
 
     // Alias for updateStatus (used by various controllers)

@@ -26,36 +26,57 @@ AutoPaginate::init($data, 10);
 
 <!-- Notification Stats -->
 <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="notif_total">
         <div class="stat-icon" style="background-color: var(--primary-color);">
             <i class="fas fa-bell"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Total Notifications</h3>
-            <div class="stat-value"><?php echo count($data['notifications'] ?? []); ?></div>
-            <div class="stat-change">All time</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-notif_total" onclick="toggleStatDropdown('notif_total')">Total Notifications</span>
+                <div class="stat-dropdown" id="stat-dropdown-notif_total">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('notif_total', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('notif_total', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('notif_total', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-notif_total"><?php echo count($data['notifications'] ?? []); ?></div>
+            <div class="stat-change" id="stat-subtitle-notif_total">All time</div>
         </div>
     </div>
-    <div class="stat-card warning">
+    <div class="stat-card warning" data-stat-type="notif_unread">
         <div class="stat-icon" style="background-color: var(--warning-color);">
             <i class="fas fa-envelope"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Unread</h3>
-            <div class="stat-value"><?php echo $data['unreadCount'] ?? 0; ?></div>
-            <div class="stat-change">Requires attention</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-notif_unread" onclick="toggleStatDropdown('notif_unread')">Unread</span>
+                <div class="stat-dropdown" id="stat-dropdown-notif_unread">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('notif_unread', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('notif_unread', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('notif_unread', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-notif_unread"><?php echo $data['unreadCount'] ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-notif_unread">Requires attention</div>
         </div>
     </div>
-    <div class="stat-card success">
+    <div class="stat-card success" data-stat-type="notif_read">
         <div class="stat-icon" style="background-color: var(--success-color);">
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Read</h3>
-            <div class="stat-value">
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-notif_read" onclick="toggleStatDropdown('notif_read')">Read</span>
+                <div class="stat-dropdown" id="stat-dropdown-notif_read">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('notif_read', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('notif_read', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('notif_read', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-notif_read">
                 <?php echo count($data['notifications'] ?? []) - ($data['unreadCount'] ?? 0); ?>
             </div>
-            <div class="stat-change">Acknowledged</div>
+            <div class="stat-change" id="stat-subtitle-notif_read">Acknowledged</div>
         </div>
     </div>
 </div>

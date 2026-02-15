@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Maintenance Model
  * This handles all the maintenance requests in the system.
@@ -220,10 +221,15 @@ class M_Maintenance
     }
 
     /**
-     * Calculate counts and sums for for dashboard stats (last 30 days)
+     * Calculate counts and sums for dashboard stats
+     * @param int|null $landlord_id The landlord's user ID
+     * @param int|null $manager_id The manager's user ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getMaintenanceStats($landlord_id = null, $manager_id = null)
+    public function getMaintenanceStats($landlord_id = null, $manager_id = null, $period = 'all')
     {
+        $dateFilter = getDateRangeByPeriod('m.created_at', $period);
+
         if ($manager_id) {
             $query = 'SELECT
                       COUNT(*) as total,
@@ -239,7 +245,7 @@ class M_Maintenance
                       FROM maintenance_requests m
                       LEFT JOIN properties p ON m.property_id = p.id
                       LEFT JOIN maintenance_payments mp ON m.id = mp.request_id
-                      WHERE p.manager_id = :manager_id AND ' . getDateRangeSql('m.created_at');
+                      WHERE p.manager_id = :manager_id AND ' . $dateFilter;
         } else {
             $query = 'SELECT
                       COUNT(*) as total,
@@ -254,7 +260,6 @@ class M_Maintenance
                       FROM maintenance_requests m
                       LEFT JOIN maintenance_payments mp ON m.id = mp.request_id';
 
-            $dateFilter = getDateRangeSql('m.created_at');
             if ($landlord_id) {
                 $query .= ' WHERE m.landlord_id = :landlord_id AND ' . $dateFilter;
             } else {
@@ -275,10 +280,13 @@ class M_Maintenance
 
     /**
      * Quick glance at how many repairs are currently waiting
+     * @param int|null $landlord_id The landlord's user ID
+     * @param int|null $manager_id The manager's user ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getPendingMaintenanceCount($landlord_id = null, $manager_id = null)
+    public function getPendingMaintenanceCount($landlord_id = null, $manager_id = null, $period = 'all')
     {
-        $dateFilter = getDateRangeSql('m.created_at');
+        $dateFilter = getDateRangeByPeriod('m.created_at', $period);
         if ($landlord_id) {
             $this->db->query('SELECT COUNT(*) as count FROM maintenance_requests m WHERE m.landlord_id = :landlord_id AND m.status = "pending" AND ' . $dateFilter);
             $this->db->bind(':landlord_id', $landlord_id);

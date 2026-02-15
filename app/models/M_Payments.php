@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Payments Model
  * This handles all the money-related stuff—rent, deposits, and platform fees.
@@ -113,13 +114,16 @@ class M_Payments
 
     /**
      * Useful for the landlord's dashboard—see how much they've actually earned
+     * @param int $landlord_id The landlord's user ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getTotalIncomeByLandlord($landlord_id)
+    public function getTotalIncomeByLandlord($landlord_id, $period = 'all')
     {
-        $this->db->query('SELECT SUM(amount) as total FROM payments WHERE landlord_id = :landlord_id AND status = "completed" AND ' . getDateRangeSql('payment_date'));
+        $dateFilter = getDateRangeByPeriod('payment_date', $period);
+        $this->db->query('SELECT SUM(amount) as total_income FROM payments WHERE landlord_id = :landlord_id AND status = "completed" AND ' . $dateFilter);
         $this->db->bind(':landlord_id', $landlord_id);
         $result = $this->db->single();
-        return $result->total ?? 0;
+        return $result;
     }
 
     // Update payment status
@@ -210,7 +214,7 @@ class M_Payments
                           AND p.status = "pending" 
                           AND p.due_date < CURDATE()
                           ORDER BY p.due_date ASC');
-                          
+
         $this->db->bind(':manager_id', $manager_id);
         return $this->db->resultSet();
     }
@@ -223,18 +227,46 @@ class M_Payments
                  SUM(CASE WHEN status = "pending" THEN amount ELSE 0 END) as total_pending,
                  COUNT(*) as total_payments
                  FROM payments WHERE tenant_id = :tenant_id';
-        
+
         if ($days) {
             $sql .= ' AND ' . getDateRangeSql('created_at', $days);
         }
-        
+
         $this->db->query($sql);
         $this->db->bind(':tenant_id', $tenant_id);
         return $this->db->single();
     }
 
-    // Get payment statistics for landlord (grouped by month)
-    public function getPaymentStatsByLandlord($landlord_id, $year = null, $month = null)
+    /**
+     * Get payment statistics for landlord with period filtering
+     * @param int $landlord_id The landlord's user ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getPaymentStatsByLandlord($landlord_id, $period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('payment_date', $period);
+
+        $sql = 'SELECT
+                COUNT(*) as total_payments,
+                COUNT(CASE WHEN status = "completed" THEN 1 END) as completed_count,
+                SUM(CASE WHEN status = "completed" THEN amount ELSE 0 END) as completed_amount,
+                COUNT(CASE WHEN status = "pending" THEN 1 END) as pending_count,
+                SUM(CASE WHEN status = "pending" THEN amount ELSE 0 END) as pending_amount,
+                COUNT(CASE WHEN status = "failed" OR (status = "pending" AND due_date < CURDATE()) THEN 1 END) as overdue_count,
+                SUM(CASE WHEN status = "failed" OR (status = "pending" AND due_date < CURDATE()) THEN amount ELSE 0 END) as overdue_amount
+            FROM payments
+            WHERE landlord_id = :landlord_id AND ' . $dateFilter;
+
+        $this->db->query($sql);
+        $this->db->bind(':landlord_id', $landlord_id);
+
+        return $this->db->single();
+    }
+
+    /**
+     * Get payment statistics grouped by month (for charts)
+     */
+    public function getPaymentStatsByLandlordMonthly($landlord_id, $year = null, $month = null)
     {
         $sql = 'SELECT
                 YEAR(payment_date) as year,

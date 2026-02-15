@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Issue Model
  * This is for the "Report a Problem" feature for tenants.
@@ -285,8 +286,11 @@ class M_Issue
 
     /**
      * Get counts for different issue types and statuses to show on dashboards
+     * @param int|null $user_id The user ID
+     * @param string|null $user_type 'manager', 'landlord', or 'tenant'
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getIssueStats($user_id = null, $user_type = null)
+    public function getIssueStats($user_id = null, $user_type = null, $period = 'all')
     {
         $whereClause = '';
 
@@ -298,8 +302,8 @@ class M_Issue
             $whereClause = 'WHERE i.tenant_id = :user_id';
         }
 
-        // Add date filter for last 30 days
-        $dateFilter = getDateRangeSql('i.created_at');
+        // Add date filter based on period
+        $dateFilter = getDateRangeByPeriod('i.created_at', $period);
         if (empty($whereClause)) {
             $whereClause = "WHERE $dateFilter";
         } else {

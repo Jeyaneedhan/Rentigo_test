@@ -57,16 +57,16 @@ class Landlord extends Controller
         $totalIncome = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id']);
         $activeLeases = $this->leaseModel->getActiveLeasesCount($_SESSION['user_id']);
         $pendingMaintenance = $this->maintenanceModel->getPendingMaintenanceCount($_SESSION['user_id']);
-        
+
         // Get recent bookings and filter to last 30 days
         $allRecentBookings = $this->bookingModel->getBookingsByLandlord($_SESSION['user_id']);
-        $recentBookings = array_filter($allRecentBookings, function($b) {
+        $recentBookings = array_filter($allRecentBookings, function ($b) {
             return strtotime($b->created_at ?? '') >= strtotime('-30 days');
         });
 
         // Get recent payments and filter to last 30 days
         $allRecentPayments = $this->paymentModel->getRecentPayments($_SESSION['user_id'], 'landlord', 10);
-        $recentPayments = array_filter($allRecentPayments, function($p) {
+        $recentPayments = array_filter($allRecentPayments, function ($p) {
             $date = $p->payment_date ?? $p->created_at;
             return strtotime($date) >= strtotime('-30 days');
         });
@@ -81,7 +81,7 @@ class Landlord extends Controller
         if (count($recentBookings) > 5) {
             $recentBookings = array_slice($recentBookings, 0, 5);
         }
-        
+
         // Limit recent payments to 5 for the dashboard
         if (count($recentPayments) > 5) {
             $recentPayments = array_slice($recentPayments, 0, 5);
@@ -128,7 +128,7 @@ class Landlord extends Controller
 
         // ==================== APPLY FILTERS ====================
         $filteredBookings = $allBookings;
-        
+
         // Get filter parameters
         $filterStatus = $_GET['filter_status'] ?? '';
         $filterDateFrom = $_GET['filter_date_from'] ?? '';
@@ -136,16 +136,16 @@ class Landlord extends Controller
 
         // Apply Status Filter
         if (!empty($filterStatus)) {
-            $filteredBookings = array_filter($filteredBookings, function($booking) use ($filterStatus) {
+            $filteredBookings = array_filter($filteredBookings, function ($booking) use ($filterStatus) {
                 return strtolower($booking->status) === strtolower($filterStatus);
             });
         }
 
         // Apply Date Range Filter (on move_in_date)
         if (!empty($filterDateFrom) || !empty($filterDateTo)) {
-            $filteredBookings = array_filter($filteredBookings, function($booking) use ($filterDateFrom, $filterDateTo) {
+            $filteredBookings = array_filter($filteredBookings, function ($booking) use ($filterDateFrom, $filterDateTo) {
                 $moveInDate = strtotime($booking->move_in_date);
-                
+
                 // Check FROM date
                 if (!empty($filterDateFrom)) {
                     $fromDate = strtotime($filterDateFrom);
@@ -153,7 +153,7 @@ class Landlord extends Controller
                         return false;
                     }
                 }
-                
+
                 // Check TO date
                 if (!empty($filterDateTo)) {
                     $toDate = strtotime($filterDateTo . ' 23:59:59'); // End of day
@@ -161,7 +161,7 @@ class Landlord extends Controller
                         return false;
                     }
                 }
-                
+
                 return true;
             });
         }
@@ -176,7 +176,7 @@ class Landlord extends Controller
             'bookings' => $filteredBookings,
             'bookingStats' => $bookingStats,
             'unread_notifications' => $this->getUnreadNotificationCount(),
-            
+
             // Pass filter values back to view for persistence
             'filter_status' => $filterStatus,
             'filter_date_from' => $filterDateFrom,
@@ -220,13 +220,14 @@ class Landlord extends Controller
     {
         // Get all payments for landlord (Full history for table)
         $payments = $this->paymentModel->getPaymentsByLandlord($_SESSION['user_id']);
-        
-        // Get summary statistics for last 30 days
-        $totalIncome = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id']);
-        $paymentStats = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id']);
 
-        // Filter payments for 30-day stat cards
-        $recentPayments = array_filter($payments, function($p) {
+        // Get summary statistics (all time for stat cards)
+        $totalIncome = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id']);
+        $paymentStatsAll = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id'], 'all');
+        $paymentStatsMonthly = $this->paymentModel->getPaymentStatsByLandlordMonthly($_SESSION['user_id']);
+
+        // Filter payments for 30-day list
+        $recentPayments = array_filter($payments, function ($p) {
             $date = $p->payment_date ?? $p->created_at;
             return strtotime($date) >= strtotime('-30 days');
         });
@@ -237,8 +238,9 @@ class Landlord extends Controller
             'user_name' => $_SESSION['user_name'],
             'payments' => $payments, // Full history
             'recentPayments' => $recentPayments, // 30-day filtered for cards
-            'totalIncome' => (object)['total_income' => $totalIncome],
-            'paymentStats' => $paymentStats,
+            'totalIncome' => $totalIncome,
+            'paymentStatsAll' => $paymentStatsAll,
+            'paymentStats' => $paymentStatsMonthly,
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('landlord/v_payment_history', $data);
@@ -388,5 +390,286 @@ class Landlord extends Controller
         ];
 
         $this->view('landlord/v_issue_details', $data);
+    }
+
+    /**
+     * AJAX endpoint for fetching filtered stat card data
+     * Called when user selects a period from stat card dropdown
+     * Accepts POST with: stat_type and period (all|month|year)
+     * Supports stat types from all landlord pages:
+     * - Dashboard: properties, leases, income, maintenance
+     * - Bookings: booking_total, booking_pending, booking_approved, booking_active
+     * - Maintenance: maint_pending, maint_in_progress, maint_completed, maint_total_cost
+     * - Payment History: payment_income, payment_completed, payment_pending
+     * - Inquiries: inquiry_total, inquiry_pending, inquiry_in_progress, inquiry_resolved
+     * - Income: income_total, income_maintenance, income_net
+     * - Feedback: feedback_about_me, feedback_rating, feedback_my_reviews
+     * - Notifications: notif_total, notif_unread, notif_read
+     */
+    public function getStatData()
+    {
+        // Only accept POST requests
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+            return;
+        }
+
+        // Get POST data
+        $input = json_decode(file_get_contents('php://input'), true);
+        $statType = $input['stat_type'] ?? '';
+        $period = $input['period'] ?? 'all';
+
+        // Validate period
+        if (!in_array($period, ['all', 'month', 'year'])) {
+            $period = 'all';
+        }
+
+        // Validate stat type and fetch data
+        $value = 0;
+        $formatted = '0';
+        $subtitle = '';
+        $periodLabel = $period === 'month' ? 'This month' : ($period === 'year' ? 'This year' : 'All time');
+
+        switch ($statType) {
+            // === DASHBOARD STATS ===
+            case 'properties':
+                $stats = $this->propertyModel->getPropertyStatsByLandlord($_SESSION['user_id'], $period);
+                $value = $stats->total_properties ?? 0;
+                $formatted = (string) $value;
+                $subtitle = ($stats->active_properties ?? 0) . ' active listings';
+                break;
+
+            case 'leases':
+                $value = $this->leaseModel->getActiveLeasesCount($_SESSION['user_id'], $period);
+                $formatted = (string) $value;
+                $subtitle = 'Currently occupied';
+                break;
+
+            case 'income':
+                $result = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id'], $period);
+                $value = $result->total_income ?? 0;
+                $formatted = 'LKR ' . number_format($value, 0);
+                $subtitle = $periodLabel . ' earnings';
+                break;
+
+            case 'maintenance':
+                $value = $this->maintenanceModel->getPendingMaintenanceCount($_SESSION['user_id'], null, $period);
+                $formatted = (string) $value;
+                $subtitle = 'Pending requests';
+                break;
+
+            // === BOOKINGS PAGE STATS ===
+            case 'booking_total':
+                $stats = $this->bookingModel->getBookingStats($_SESSION['user_id'], 'landlord', $period);
+                $value = $stats->total ?? 0;
+                $formatted = (string) $value;
+                $subtitle = $periodLabel;
+                break;
+
+            case 'booking_pending':
+                $stats = $this->bookingModel->getBookingStats($_SESSION['user_id'], 'landlord', $period);
+                $value = $stats->pending ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Awaiting response';
+                break;
+
+            case 'booking_approved':
+                $stats = $this->bookingModel->getBookingStats($_SESSION['user_id'], 'landlord', $period);
+                $value = $stats->approved ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Accepted bookings';
+                break;
+
+            case 'booking_active':
+                $stats = $this->bookingModel->getBookingStats($_SESSION['user_id'], 'landlord', $period);
+                $value = $stats->active ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Currently occupied';
+                break;
+
+            // === MAINTENANCE PAGE STATS ===
+            case 'maint_pending':
+                $stats = $this->maintenanceModel->getMaintenanceStats($_SESSION['user_id'], null, $period);
+                $value = $stats->pending ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Awaiting action';
+                break;
+
+            case 'maint_in_progress':
+                $stats = $this->maintenanceModel->getMaintenanceStats($_SESSION['user_id'], null, $period);
+                $value = $stats->in_progress ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Being worked on';
+                break;
+
+            case 'maint_completed':
+                $stats = $this->maintenanceModel->getMaintenanceStats($_SESSION['user_id'], null, $period);
+                $value = $stats->completed ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Total completed';
+                break;
+
+            case 'maint_total_cost':
+                $stats = $this->maintenanceModel->getMaintenanceStats($_SESSION['user_id'], null, $period);
+                $value = $stats->total_cost ?? 0;
+                $formatted = 'LKR ' . number_format($value, 2);
+                $subtitle = 'Maintenance expenses';
+                break;
+
+            // === PAYMENT HISTORY PAGE STATS ===
+            case 'payment_income':
+                $result = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id'], $period);
+                $value = $result->total_income ?? 0;
+                $formatted = 'LKR ' . number_format($value, 0);
+                $subtitle = $periodLabel;
+                break;
+
+            case 'payment_completed':
+                $stats = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id'], $period);
+                $value = $stats->completed_count ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'LKR ' . number_format($stats->completed_amount ?? 0, 0) . ' (' . $periodLabel . ')';
+                break;
+
+            case 'payment_pending':
+                $stats = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id'], $period);
+                $value = $stats->pending_count ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'LKR ' . number_format($stats->pending_amount ?? 0, 0) . ' (' . $periodLabel . ')';
+                break;
+
+            case 'payment_overdue':
+                $stats = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id'], $period);
+                $value = $stats->overdue_count ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'LKR ' . number_format($stats->overdue_amount ?? 0, 0) . ' (' . $periodLabel . ')';
+                break;
+
+            // === INQUIRIES PAGE STATS ===
+            case 'inquiry_total':
+                $issueModel = $this->model('M_Issue');
+                $stats = $issueModel->getIssueStats($_SESSION['user_id'], 'landlord', $period);
+                $value = $stats->total_issues ?? 0;
+                $formatted = (string) $value;
+                $subtitle = $periodLabel;
+                break;
+
+            case 'inquiry_pending':
+                $issueModel = $this->model('M_Issue');
+                $stats = $issueModel->getIssueStats($_SESSION['user_id'], 'landlord', $period);
+                $value = $stats->pending_count ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Awaiting action';
+                break;
+
+            case 'inquiry_in_progress':
+                $issueModel = $this->model('M_Issue');
+                $stats = $issueModel->getIssueStats($_SESSION['user_id'], 'landlord', $period);
+                $value = $stats->in_progress_count ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Being worked on';
+                break;
+
+            case 'inquiry_resolved':
+                $issueModel = $this->model('M_Issue');
+                $stats = $issueModel->getIssueStats($_SESSION['user_id'], 'landlord', $period);
+                $value = $stats->resolved_count ?? 0;
+                $formatted = (string) $value;
+                $subtitle = 'Completed';
+                break;
+
+            // === INCOME PAGE STATS ===
+            case 'income_total':
+                $result = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id'], $period);
+                $value = $result->total_income ?? 0;
+                $formatted = 'LKR ' . number_format($value, 0);
+                $subtitle = $periodLabel . ' earnings';
+                break;
+
+            case 'income_maintenance':
+                $stats = $this->maintenanceModel->getMaintenanceStats($_SESSION['user_id'], null, $period);
+                $value = ($stats->total_cost ?? 0);
+                $formatted = 'LKR ' . number_format($value, 0);
+                $subtitle = 'Total expenses';
+                break;
+
+            case 'income_net':
+                $incomeResult = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id'], $period);
+                $maintenanceStats = $this->maintenanceModel->getMaintenanceStats($_SESSION['user_id'], null, $period);
+                $income = $incomeResult->total_income ?? 0;
+                $costs = $maintenanceStats->total_cost ?? 0;
+                $value = $income - $costs;
+                $formatted = 'LKR ' . number_format($value, 0);
+                $subtitle = 'After expenses (' . $periodLabel . ')';
+                break;
+
+            // === FEEDBACK PAGE STATS ===
+            case 'feedback_about_me':
+                $reviews = $this->reviewModel->getReviewsAboutUser($_SESSION['user_id'], $period);
+                $value = count($reviews);
+                $formatted = (string) $value;
+                $subtitle = 'From tenants';
+                break;
+
+            case 'feedback_rating':
+                $reviews = $this->reviewModel->getReviewsAboutUser($_SESSION['user_id'], $period);
+                if (!empty($reviews)) {
+                    $totalRating = 0;
+                    foreach ($reviews as $review) {
+                        $totalRating += $review->rating;
+                    }
+                    $value = $totalRating / count($reviews);
+                    $formatted = number_format($value, 1);
+                } else {
+                    $formatted = '0.0';
+                }
+                $subtitle = 'Tenant ratings';
+                break;
+
+            case 'feedback_my_reviews':
+                $reviews = $this->reviewModel->getReviewsByUser($_SESSION['user_id'], $period);
+                $value = count($reviews);
+                $formatted = (string) $value;
+                $subtitle = 'Reviews written';
+                break;
+
+            // === NOTIFICATIONS PAGE STATS ===
+            case 'notif_total':
+                $notifications = $this->notificationModel->getNotificationsByUser($_SESSION['user_id'], $period);
+                $value = count($notifications);
+                $formatted = (string) $value;
+                $subtitle = $periodLabel;
+                break;
+
+            case 'notif_unread':
+                $count = $this->notificationModel->getUnreadCountByPeriod($_SESSION['user_id'], $period);
+                $value = $count;
+                $formatted = (string) $value;
+                $subtitle = 'Requires attention';
+                break;
+
+            case 'notif_read':
+                $total = $this->notificationModel->getNotificationsByUser($_SESSION['user_id'], $period);
+                $unread = $this->notificationModel->getUnreadCountByPeriod($_SESSION['user_id'], $period);
+                $value = count($total) - $unread;
+                $formatted = (string) $value;
+                $subtitle = 'Acknowledged';
+                break;
+
+            default:
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Invalid stat type']);
+                return;
+        }
+
+        // Return JSON response
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'value' => $value,
+            'formatted' => $formatted,
+            'subtitle' => $subtitle
+        ]);
     }
 }

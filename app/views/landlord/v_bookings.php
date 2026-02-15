@@ -17,44 +17,72 @@ AutoPaginate::init($data, 5);
 
 <!-- Booking Stats -->
 <div class="stats-grid">
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="booking_total">
         <div class="stat-icon">
             <i class="fas fa-calendar"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Total Bookings</h3>
-            <div class="stat-value"><?php echo $data['bookingStats']->total ?? 0; ?></div>
-            <div class="stat-change">All time</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-booking_total" onclick="toggleStatDropdown('booking_total')">Total Bookings</span>
+                <div class="stat-dropdown" id="stat-dropdown-booking_total">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_total', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_total', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_total', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-booking_total"><?php echo $data['bookingStats']->total ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_total">All time</div>
         </div>
     </div>
-    <div class="stat-card warning">
+    <div class="stat-card warning" data-stat-type="booking_pending">
         <div class="stat-icon">
             <i class="fas fa-clock"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Pending</h3>
-            <div class="stat-value"><?php echo $data['bookingStats']->pending ?? 0; ?></div>
-            <div class="stat-change">Awaiting response</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-booking_pending" onclick="toggleStatDropdown('booking_pending')">Pending</span>
+                <div class="stat-dropdown" id="stat-dropdown-booking_pending">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_pending', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_pending', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_pending', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-booking_pending"><?php echo $data['bookingStats']->pending ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_pending">Awaiting response</div>
         </div>
     </div>
-    <div class="stat-card success">
+    <div class="stat-card success" data-stat-type="booking_approved">
         <div class="stat-icon">
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Approved</h3>
-            <div class="stat-value"><?php echo $data['bookingStats']->approved ?? 0; ?></div>
-            <div class="stat-change">Accepted bookings</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-booking_approved" onclick="toggleStatDropdown('booking_approved')">Approved</span>
+                <div class="stat-dropdown" id="stat-dropdown-booking_approved">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_approved', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_approved', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_approved', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-booking_approved"><?php echo $data['bookingStats']->approved ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_approved">Accepted bookings</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="booking_active">
         <div class="stat-icon">
             <i class="fas fa-home"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Active</h3>
-            <div class="stat-value"><?php echo $data['bookingStats']->active ?? 0; ?></div>
-            <div class="stat-change">Currently occupied</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-booking_active" onclick="toggleStatDropdown('booking_active')">Active</span>
+                <div class="stat-dropdown" id="stat-dropdown-booking_active">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_active', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_active', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_active', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-booking_active"><?php echo $data['bookingStats']->active ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_active">Currently occupied</div>
         </div>
     </div>
 </div>
@@ -229,12 +257,12 @@ AutoPaginate::init($data, 5);
         .filter-grid {
             grid-template-columns: 1fr;
         }
-        
+
         .filter-actions {
             flex-direction: column;
             width: 100%;
         }
-        
+
         .filter-actions .btn {
             width: 100%;
         }

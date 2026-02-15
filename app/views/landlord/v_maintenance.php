@@ -25,44 +25,72 @@ AutoPaginate::init($data, 5);
 
 <!-- Stats -->
 <div class="stats-grid">
-    <div class="stat-card warning">
+    <div class="stat-card warning" data-stat-type="maint_pending">
         <div class="stat-icon">
             <i class="fas fa-clock"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Pending Requests</h3>
-            <div class="stat-value"><?php echo $data['maintenanceStats']->pending ?? 0; ?></div>
-            <div class="stat-change">Awaiting action</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-maint_pending" onclick="toggleStatDropdown('maint_pending')">Pending Requests</span>
+                <div class="stat-dropdown" id="stat-dropdown-maint_pending">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maint_pending', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maint_pending', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_pending', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-maint_pending"><?php echo $data['maintenanceStats']->pending ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-maint_pending">Awaiting action</div>
         </div>
     </div>
-    <div class="stat-card info">
+    <div class="stat-card info" data-stat-type="maint_in_progress">
         <div class="stat-icon">
             <i class="fas fa-tools"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">In Progress</h3>
-            <div class="stat-value"><?php echo $data['maintenanceStats']->in_progress ?? 0; ?></div>
-            <div class="stat-change">Being worked on</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-maint_in_progress" onclick="toggleStatDropdown('maint_in_progress')">In Progress</span>
+                <div class="stat-dropdown" id="stat-dropdown-maint_in_progress">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maint_in_progress', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maint_in_progress', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_in_progress', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-maint_in_progress"><?php echo $data['maintenanceStats']->in_progress ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-maint_in_progress">Being worked on</div>
         </div>
     </div>
-    <div class="stat-card success">
+    <div class="stat-card success" data-stat-type="maint_completed">
         <div class="stat-icon">
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Completed</h3>
-            <div class="stat-value"><?php echo $data['maintenanceStats']->completed ?? 0; ?></div>
-            <div class="stat-change">Total completed</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-maint_completed" onclick="toggleStatDropdown('maint_completed')">Completed</span>
+                <div class="stat-dropdown" id="stat-dropdown-maint_completed">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maint_completed', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maint_completed', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_completed', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-maint_completed"><?php echo $data['maintenanceStats']->completed ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-maint_completed">Total completed</div>
         </div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card" data-stat-type="maint_total_cost">
         <div class="stat-icon">
             <i class="fas fa-dollar-sign"></i>
         </div>
         <div class="stat-content">
-            <h3 class="stat-label">Total Cost</h3>
-            <div class="stat-value">LKR <?php echo number_format($data['maintenanceStats']->total_cost ?? 0, 2); ?></div>
-            <div class="stat-change">Maintenance expenses</div>
+            <div class="stat-header">
+                <span class="stat-label" id="stat-label-maint_total_cost" onclick="toggleStatDropdown('maint_total_cost')">Total Cost</span>
+                <div class="stat-dropdown" id="stat-dropdown-maint_total_cost">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('maint_total_cost', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('maint_total_cost', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_total_cost', 'month', event)">Current Month</div>
+                </div>
+            </div>
+            <div class="stat-value" id="stat-value-maint_total_cost">LKR <?php echo number_format($data['maintenanceStats']->total_cost ?? 0, 2); ?></div>
+            <div class="stat-change" id="stat-subtitle-maint_total_cost">Maintenance expenses</div>
         </div>
     </div>
 </div>
@@ -274,12 +302,12 @@ AutoPaginate::init($data, 5);
         .filter-grid {
             grid-template-columns: 1fr;
         }
-        
+
         .filter-actions {
             flex-direction: column;
             width: 100%;
         }
-        
+
         .filter-actions .btn {
             width: 100%;
         }
