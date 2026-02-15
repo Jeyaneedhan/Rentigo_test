@@ -251,6 +251,24 @@ class M_Users
     }
 
     /**
+     * Get manager statistics by period for admin dashboard
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getManagerStats($period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('u.created_at', $period);
+        $this->db->query('SELECT
+                            COUNT(*) as total,
+                            SUM(CASE WHEN pm.approval_status = "pending" THEN 1 ELSE 0 END) as pending,
+                            SUM(CASE WHEN pm.approval_status = "approved" THEN 1 ELSE 0 END) as approved,
+                            SUM(CASE WHEN pm.approval_status = "rejected" THEN 1 ELSE 0 END) as rejected
+                          FROM users u
+                          INNER JOIN property_manager pm ON u.id = pm.user_id
+                          WHERE u.user_type = "property_manager" AND ' . $dateFilter);
+        return $this->db->single();
+    }
+
+    /**
      * Get specific managers based on status (e.g., 'approved' only)
      */
     public function getManagersByStatus($status)

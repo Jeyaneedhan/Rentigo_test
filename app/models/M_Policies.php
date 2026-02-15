@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Policies Model
  * This manages the "Boring Legal Stuff"—Terms of Service, Privacy Policies, etc.
@@ -168,30 +169,33 @@ class M_Policies
 
     /**
      * Get a quick summary of how many active documents we have.
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getPolicyStats()
+    public function getPolicyStats($period = 'all')
     {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
+
         // Total policies
-        $this->db->query("SELECT COUNT(*) as total FROM policies");
+        $this->db->query("SELECT COUNT(*) as total FROM policies WHERE " . $dateFilter);
         $total = $this->db->single()->total;
 
         // Active policies
-        $this->db->query("SELECT COUNT(*) as active FROM policies WHERE policy_status = 'active'");
+        $this->db->query("SELECT COUNT(*) as active FROM policies WHERE policy_status = 'active' AND " . $dateFilter);
         $active = $this->db->single()->active;
 
         // Draft policies
-        $this->db->query("SELECT COUNT(*) as draft FROM policies WHERE policy_status = 'draft'");
+        $this->db->query("SELECT COUNT(*) as draft FROM policies WHERE policy_status = 'draft' AND " . $dateFilter);
         $draft = $this->db->single()->draft;
 
         // Archived policies
-        $this->db->query("SELECT COUNT(*) as archived FROM policies WHERE policy_status = 'archived'");
+        $this->db->query("SELECT COUNT(*) as archived FROM policies WHERE policy_status = 'archived' AND " . $dateFilter);
         $archived = $this->db->single()->archived;
 
         // Under review policies
-        $this->db->query("SELECT COUNT(*) as under_review FROM policies WHERE policy_status = 'under_review'");
+        $this->db->query("SELECT COUNT(*) as under_review FROM policies WHERE policy_status = 'under_review' AND " . $dateFilter);
         $underReview = $this->db->single()->under_review;
 
-        // Latest update
+        // Latest update (always all-time)
         $this->db->query("SELECT MAX(last_updated) as last_updated FROM policies");
         $lastUpdated = $this->db->single()->last_updated;
 

@@ -33,47 +33,75 @@ AutoPaginate::init($data, 5);
     ?>
 
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="mgr_total">
             <div class="stat-icon">
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $totalManagers; ?></h3>
-                <p class="stat-label">Total Managers</p>
-                <span class="stat-change">All Registered</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-mgr_total" onclick="toggleStatDropdown('mgr_total')">Total Managers</span>
+                    <div class="stat-dropdown" id="stat-dropdown-mgr_total">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('mgr_total', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('mgr_total', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('mgr_total', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-mgr_total"><?php echo $totalManagers; ?></h3>
+                <span class="stat-change" id="stat-subtitle-mgr_total">All Registered</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="mgr_pending">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $pendingCount; ?></h3>
-                <p class="stat-label">Awaiting Review</p>
-                <span class="stat-change">Pending Approvals</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-mgr_pending" onclick="toggleStatDropdown('mgr_pending')">Awaiting Review</span>
+                    <div class="stat-dropdown" id="stat-dropdown-mgr_pending">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('mgr_pending', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('mgr_pending', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('mgr_pending', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-mgr_pending"><?php echo $pendingCount; ?></h3>
+                <span class="stat-change" id="stat-subtitle-mgr_pending">Pending Approvals</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="mgr_approved">
             <div class="stat-icon">
                 <i class="fas fa-check"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $approvedCount; ?></h3>
-                <p class="stat-label">Currently Approved</p>
-                <span class="stat-change">Active Managers</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-mgr_approved" onclick="toggleStatDropdown('mgr_approved')">Currently Approved</span>
+                    <div class="stat-dropdown" id="stat-dropdown-mgr_approved">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('mgr_approved', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('mgr_approved', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('mgr_approved', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-mgr_approved"><?php echo $approvedCount; ?></h3>
+                <span class="stat-change" id="stat-subtitle-mgr_approved">Active Managers</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="mgr_rejected">
             <div class="stat-icon">
                 <i class="fas fa-times-circle"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $rejectedCount; ?></h3>
-                <p class="stat-label">Rejected</p>
-                <span class="stat-change">Declined Applications</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-mgr_rejected" onclick="toggleStatDropdown('mgr_rejected')">Rejected</span>
+                    <div class="stat-dropdown" id="stat-dropdown-mgr_rejected">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('mgr_rejected', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('mgr_rejected', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('mgr_rejected', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-mgr_rejected"><?php echo $rejectedCount; ?></h3>
+                <span class="stat-change" id="stat-subtitle-mgr_rejected">Declined Applications</span>
             </div>
         </div>
     </div>

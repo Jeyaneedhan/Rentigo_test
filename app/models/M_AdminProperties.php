@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_AdminProperties Model
  * This is the "Control Panel" for house listings. 
@@ -26,13 +27,13 @@ class M_AdminProperties
                   FROM properties p
                   LEFT JOIN users u ON p.landlord_id = u.id
                   LEFT JOIN users pm ON p.manager_id = pm.id";
-        
+
         // If a status is provided, filter by it (pending, approved, rejected)
         if ($status) {
             $query .= " WHERE p.approval_status = :status";
         }
         $query .= " ORDER BY p.created_at DESC";
-        
+
         $this->db->query($query);
         if ($status) {
             $this->db->bind(':status', $status);
@@ -43,15 +44,17 @@ class M_AdminProperties
 
     /**
      * Counts for the dashboard: How many houses are waiting to be checked?
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getPropertyCounts()
+    public function getPropertyCounts($period = 'all')
     {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
         $this->db->query("SELECT 
                             COUNT(*) as total,
                             SUM(CASE WHEN approval_status = 'pending' THEN 1 ELSE 0 END) as pending,
                             SUM(CASE WHEN approval_status = 'approved' THEN 1 ELSE 0 END) as approved,
                             SUM(CASE WHEN approval_status = 'rejected' THEN 1 ELSE 0 END) as rejected
-                          FROM properties");
+                          FROM properties WHERE " . $dateFilter);
         return $this->db->single();
     }
 

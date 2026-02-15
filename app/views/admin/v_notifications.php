@@ -18,47 +18,75 @@
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="notif_sent">
             <div class="stat-icon">
                 <i class="fas fa-bell"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['stats']->total_sent ?? 0; ?></h3>
-                <p class="stat-label">Total Sent</p>
-                <span class="stat-change">Last 30 days</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-notif_sent" onclick="toggleStatDropdown('notif_sent')">Total Sent</span>
+                    <div class="stat-dropdown" id="stat-dropdown-notif_sent">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('notif_sent', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('notif_sent', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('notif_sent', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-notif_sent"><?php echo $data['stats']->total_sent ?? 0; ?></h3>
+                <span class="stat-change" id="stat-subtitle-notif_sent">All time</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="notif_recipients">
             <div class="stat-icon">
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['stats']->total_recipients ?? 0; ?></h3>
-                <p class="stat-label">Recipients</p>
-                <span class="stat-change">Unique (30 days)</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-notif_recipients" onclick="toggleStatDropdown('notif_recipients')">Recipients</span>
+                    <div class="stat-dropdown" id="stat-dropdown-notif_recipients">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('notif_recipients', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('notif_recipients', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('notif_recipients', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-notif_recipients"><?php echo $data['stats']->total_recipients ?? 0; ?></h3>
+                <span class="stat-change" id="stat-subtitle-notif_recipients">Unique (All time)</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="notif_read">
             <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['stats']->read_count ?? 0; ?></h3>
-                <p class="stat-label">Read</p>
-                <span class="stat-change positive">Read (30 days)</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-notif_read" onclick="toggleStatDropdown('notif_read')">Read</span>
+                    <div class="stat-dropdown" id="stat-dropdown-notif_read">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('notif_read', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('notif_read', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('notif_read', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-notif_read"><?php echo $data['stats']->read_count ?? 0; ?></h3>
+                <span class="stat-change positive" id="stat-subtitle-notif_read">Read (All time)</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="notif_unread">
             <div class="stat-icon">
                 <i class="fas fa-envelope"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['stats']->unread_count ?? 0; ?></h3>
-                <p class="stat-label">Unread</p>
-                <span class="stat-change">Unread (30 days)</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-notif_unread" onclick="toggleStatDropdown('notif_unread')">Unread</span>
+                    <div class="stat-dropdown" id="stat-dropdown-notif_unread">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('notif_unread', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('notif_unread', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('notif_unread', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-notif_unread"><?php echo $data['stats']->unread_count ?? 0; ?></h3>
+                <span class="stat-change" id="stat-subtitle-notif_unread">Unread (All time)</span>
             </div>
         </div>
     </div>

@@ -33,31 +33,24 @@ class Admin extends Controller
         $allPayments = $paymentModel->getAllPayments();
         $pendingPMs = $this->userModel->getPendingPMs();
 
-        // Calculate 30-day revenue
+        // Calculate all-time revenue (default for stat cards with dropdowns)
         // Platform earns 10% from rental payments + 100% from maintenance payments
-        $rentalRevenue = $paymentModel->getPlatformRentalIncome(30);
-        $maintenanceRevenue = $maintenanceQuotationModel->getTotalMaintenanceIncome(30);
-        $total30DayRevenue = $rentalRevenue + $maintenanceRevenue;
+        $rentalRevenue = $paymentModel->getPlatformRentalIncome('all');
+        $maintenanceRevenue = $maintenanceQuotationModel->getTotalMaintenanceIncome('all');
+        $totalRevenue = $rentalRevenue + $maintenanceRevenue;
 
-        // Count active tenants - these are bookings that are approved or active in the last 30 days
-        $activeBookings = array_filter($allBookings, function ($b) {
-            $isCorrectStatus = ($b->status === 'active' || $b->status === 'approved');
-            $isWithin30Days = strtotime($b->created_at) >= strtotime('-30 days');
-            return $isCorrectStatus && $isWithin30Days;
-        });
+        // Count all active tenants (all time)
+        $activeTenants = $bookingModel->getActiveTenantsCount('all');
 
-        // Filter properties created in the last 30 days
-        $propertiesLast30Days = array_filter($allProperties, function ($p) {
-            return strtotime($p->created_at) >= strtotime('-30 days');
-        });
+        // Get all properties count
+        $propertyCounts = $adminPropertyModel->getPropertyCounts('all');
+        $totalProperties = $propertyCounts->total ?? 0;
 
-        // Filter pending PM approvals from the last 30 days
-        $pendingApprovalsLast30Days = array_filter($pendingPMs, function ($pm) {
-            return strtotime($pm->created_at) >= strtotime('-30 days');
-        });
+        // Get manager stats for pending approvals
+        $managerStats = $this->userModel->getManagerStats('all');
+        $pendingApprovals = $managerStats->pending ?? 0;
 
-        // Get counts for Admin Attention Summary
-        $propertyCounts = $adminPropertyModel->getPropertyCounts();
+        // Get counts for Admin Attention Summary (always all-time)
         $pendingPropertyApprovals = $propertyCounts->pending ?? 0;
         $pendingPMApprovals = count($pendingPMs);
         $activePolicies = $policyModel->getActivePolicies();
@@ -142,10 +135,10 @@ class Admin extends Controller
         $data = [
             'title' => 'Admin Dashboard - Rentigo',
             'page' => 'dashboard',
-            'totalProperties' => count($propertiesLast30Days),
-            'activeTenants' => count($activeBookings),
-            'monthlyRevenue' => $total30DayRevenue,
-            'pendingApprovals' => count($pendingApprovalsLast30Days),
+            'totalProperties' => $totalProperties,
+            'activeTenants' => $activeTenants,
+            'monthlyRevenue' => $totalRevenue,
+            'pendingApprovals' => $pendingApprovals,
             'pendingPropertyApprovals' => $pendingPropertyApprovals,
             'pendingPMApprovals' => $pendingPMApprovals,
             'activePoliciesCount' => $activePoliciesCount,
@@ -186,53 +179,17 @@ class Admin extends Controller
         // Get all maintenance service payments
         $maintenancePayments = $maintenanceQuotationsModel->getAllMaintenancePayments();
 
-        // Initialize variables for calculating stats
-        // We're tracking revenue, collected amounts, pending, and overdue
-        $totalRevenue = 0;
-        $collected = 0;
-        $pending = 0;
-        $overdue = 0;
-        $pendingCount = 0;
-        $overdueCount = 0;
+        // Get all-time financial stats using the new model method
+        $financialStats = $paymentModel->getAdminFinancialStats('all');
+        $maintenanceRevenue = $maintenanceQuotationsModel->getTotalMaintenanceIncome('all');
 
-        // Calculate rental payment fees - platform takes 10% service fee
-        // Only count payments from the last 30 days for the stats
-        foreach ($allPayments as $payment) {
-            $date = $payment->payment_date ?? $payment->created_at;
-            if (strtotime($date) >= strtotime('-30 days')) {
-                // Platform earns 10% service fee from each rental payment
-                $totalRevenue += ($payment->amount * 0.10);
-                if ($payment->status === 'completed') {
-                    $collected += ($payment->amount * 0.10);
-                } elseif ($payment->status === 'pending') {
-                    $pending += ($payment->amount * 0.10);
-                    $pendingCount++;
-                } elseif ($payment->status === 'overdue') {
-                    $overdue += ($payment->amount * 0.10);
-                    $overdueCount++;
-                }
-            }
-        }
-
-        // Calculate maintenance payment income - platform gets 100% of these
-        // Only count payments from the last 30 days
-        foreach ($maintenancePayments as $payment) {
-            $date = $payment->payment_date ?? $payment->created_at;
-            if (strtotime($date) >= strtotime('-30 days')) {
-                // Platform receives full maintenance payment amount as income
-                $totalRevenue += $payment->amount;
-                if ($payment->status === 'completed') {
-                    $collected += $payment->amount;
-                } elseif ($payment->status === 'pending') {
-                    $pending += $payment->amount;
-                    $pendingCount++;
-                } elseif ($payment->status === 'failed') {
-                    // Treat failed payments as overdue for maintenance
-                    $overdue += $payment->amount;
-                    $overdueCount++;
-                }
-            }
-        }
+        // Stat card values (all-time by default, updated via AJAX)
+        $totalRevenue = ($financialStats->total_revenue ?? 0) + $maintenanceRevenue;
+        $collected = ($financialStats->collected ?? 0) + $maintenanceRevenue;
+        $pending = $financialStats->pending ?? 0;
+        $overdue = $financialStats->overdue ?? 0;
+        $pendingCount = $financialStats->pending_count ?? 0;
+        $overdueCount = $financialStats->overdue_count ?? 0;
 
         // Combine all transactions into one array for display
         $allTransactions = array_merge($allPayments, $maintenancePayments);
@@ -688,5 +645,190 @@ class Admin extends Controller
         ];
 
         $this->view('admin/v_inspections', $data);
+    }
+
+    /**
+     * AJAX endpoint for fetching stat card data by period
+     * Used by stat card dropdowns across all admin pages
+     */
+    public function getStatData()
+    {
+        // Ensure this is an AJAX request
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $statType = $input['statType'] ?? '';
+        $period = $input['period'] ?? 'all';
+
+        // Validate period
+        if (!in_array($period, ['all', 'month', 'year'])) {
+            $period = 'all';
+        }
+
+        $result = ['value' => 0, 'subtitle' => 'All time'];
+
+        // Set subtitle based on period
+        switch ($period) {
+            case 'month':
+                $result['subtitle'] = date('F Y');
+                break;
+            case 'year':
+                $result['subtitle'] = 'Year ' . date('Y');
+                break;
+            default:
+                $result['subtitle'] = 'All time';
+        }
+
+        // Load models as needed
+        $propertyModel = $this->model('M_AdminProperties');
+        $bookingModel = $this->model('M_Bookings');
+        $paymentModel = $this->model('M_Payments');
+        $maintenanceQuotationModel = $this->model('M_MaintenanceQuotations');
+        $notificationModel = $this->model('M_Notifications');
+        $policyModel = $this->model('M_Policies');
+        $providerModel = $this->model('M_ServiceProviders');
+
+        switch ($statType) {
+            // ===== DASHBOARD STATS =====
+            case 'admin_properties':
+                $counts = $propertyModel->getPropertyCounts($period);
+                $result['value'] = number_format($counts->total ?? 0);
+                break;
+
+            case 'admin_tenants':
+                $result['value'] = number_format($bookingModel->getActiveTenantsCount($period));
+                break;
+
+            case 'admin_income':
+                $rentalRevenue = $paymentModel->getPlatformRentalIncome($period);
+                $maintenanceRevenue = $maintenanceQuotationModel->getTotalMaintenanceIncome($period);
+                $result['value'] = 'LKR ' . number_format($rentalRevenue + $maintenanceRevenue, 0);
+                $result['subtitle'] = '10% rental + maintenance (' . ($period === 'all' ? 'All time' : $result['subtitle']) . ')';
+                break;
+
+            case 'admin_approvals':
+                $managerStats = $this->userModel->getManagerStats($period);
+                $result['value'] = $managerStats->pending ?? 0;
+                break;
+
+            // ===== FINANCIALS STATS =====
+            case 'fin_revenue':
+                $rentalRevenue = $paymentModel->getPlatformRentalIncome($period);
+                $maintenanceRevenue = $maintenanceQuotationModel->getTotalMaintenanceIncome($period);
+                $result['value'] = 'LKR ' . number_format($rentalRevenue + $maintenanceRevenue, 0);
+                break;
+
+            case 'fin_collected':
+                $stats = $paymentModel->getAdminFinancialStats($period);
+                $maintenanceRevenue = $maintenanceQuotationModel->getTotalMaintenanceIncome($period);
+                $result['value'] = 'LKR ' . number_format(($stats->collected ?? 0) + $maintenanceRevenue, 0);
+                break;
+
+            case 'fin_pending':
+                $stats = $paymentModel->getAdminFinancialStats($period);
+                $result['value'] = 'LKR ' . number_format($stats->pending ?? 0, 0);
+                $result['subtitle'] = ($stats->pending_count ?? 0) . ' pending (' . ($period === 'all' ? 'All time' : $result['subtitle']) . ')';
+                break;
+
+            case 'fin_overdue':
+                $stats = $paymentModel->getAdminFinancialStats($period);
+                $result['value'] = 'LKR ' . number_format($stats->overdue ?? 0, 0);
+                $result['subtitle'] = ($stats->overdue_count ?? 0) . ' overdue (' . ($period === 'all' ? 'All time' : $result['subtitle']) . ')';
+                break;
+
+            // ===== MANAGERS STATS =====
+            case 'mgr_total':
+                $stats = $this->userModel->getManagerStats($period);
+                $result['value'] = $stats->total ?? 0;
+                break;
+
+            case 'mgr_pending':
+                $stats = $this->userModel->getManagerStats($period);
+                $result['value'] = $stats->pending ?? 0;
+                break;
+
+            case 'mgr_approved':
+                $stats = $this->userModel->getManagerStats($period);
+                $result['value'] = $stats->approved ?? 0;
+                break;
+
+            case 'mgr_rejected':
+                $stats = $this->userModel->getManagerStats($period);
+                $result['value'] = $stats->rejected ?? 0;
+                break;
+
+            // ===== NOTIFICATIONS STATS =====
+            case 'notif_sent':
+                $stats = $notificationModel->getNotificationStats($period);
+                $result['value'] = $stats->total_sent ?? 0;
+                break;
+
+            case 'notif_recipients':
+                $stats = $notificationModel->getNotificationStats($period);
+                $result['value'] = $stats->total_recipients ?? 0;
+                break;
+
+            case 'notif_read':
+                $stats = $notificationModel->getNotificationStats($period);
+                $result['value'] = $stats->read_count ?? 0;
+                break;
+
+            case 'notif_unread':
+                $stats = $notificationModel->getNotificationStats($period);
+                $result['value'] = $stats->unread_count ?? 0;
+                break;
+
+            // ===== POLICIES STATS =====
+            case 'policy_total':
+                $stats = $policyModel->getPolicyStats($period);
+                $result['value'] = $stats['total'] ?? 0;
+                break;
+
+            case 'policy_active':
+                $stats = $policyModel->getPolicyStats($period);
+                $result['value'] = $stats['active'] ?? 0;
+                break;
+
+            case 'policy_draft':
+                $stats = $policyModel->getPolicyStats($period);
+                $result['value'] = $stats['draft'] ?? 0;
+                break;
+
+            // ===== PROVIDERS STATS =====
+            case 'prov_total':
+                $stats = $providerModel->getProviderCounts($period);
+                $result['value'] = $stats->total ?? 0;
+                break;
+
+            case 'prov_active':
+                $stats = $providerModel->getProviderCounts($period);
+                $result['value'] = $stats->active ?? 0;
+                break;
+
+            case 'prov_inactive':
+                $stats = $providerModel->getProviderCounts($period);
+                $result['value'] = $stats->inactive ?? 0;
+                break;
+
+            case 'prov_rating':
+                $stats = $providerModel->getProviderCounts($period);
+                $result['value'] = ($stats->average_rating && $stats->average_rating > 0)
+                    ? number_format($stats->average_rating, 1)
+                    : 'N/A';
+                $result['subtitle'] = ($stats->rated_providers ?? 0) > 0
+                    ? 'From ' . $stats->rated_providers . ' providers'
+                    : 'No ratings yet';
+                break;
+
+            default:
+                $result['error'] = 'Unknown stat type';
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($result);
     }
 }

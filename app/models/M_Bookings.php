@@ -273,6 +273,20 @@ class M_Bookings
     }
 
     /**
+     * Get active tenants count for admin dashboard
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getActiveTenantsCount($period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
+        $this->db->query('SELECT COUNT(DISTINCT tenant_id) as active_tenants
+                         FROM bookings
+                         WHERE (status = "active" OR status = "approved") AND ' . $dateFilter);
+        $result = $this->db->single();
+        return $result->active_tenants ?? 0;
+    }
+
+    /**
      * Fetch all bookings across a list of properties (useful for a Property Manager)
      */
     public function getBookingsByProperties($propertyIds)

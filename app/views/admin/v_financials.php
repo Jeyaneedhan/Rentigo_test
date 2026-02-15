@@ -17,47 +17,75 @@ AutoPaginate::init($data, 10);
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="fin_revenue">
             <div class="stat-icon">
                 <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number">LKR <?php echo number_format($data['totalRevenue'] ?? 0, 0); ?></h3>
-                <p class="stat-label">Platform Revenue</p>
-                <span class="stat-change">Fees from last 30 days</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-fin_revenue" onclick="toggleStatDropdown('fin_revenue')">Platform Revenue</span>
+                    <div class="stat-dropdown" id="stat-dropdown-fin_revenue">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('fin_revenue', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('fin_revenue', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('fin_revenue', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-fin_revenue">LKR <?php echo number_format($data['totalRevenue'] ?? 0, 0); ?></h3>
+                <span class="stat-change" id="stat-subtitle-fin_revenue">All time</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="fin_collected">
             <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number">LKR <?php echo number_format($data['collected'] ?? 0, 0); ?></h3>
-                <p class="stat-label">Collected Fees</p>
-                <span class="stat-change positive">Completed in last 30 days</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-fin_collected" onclick="toggleStatDropdown('fin_collected')">Collected Fees</span>
+                    <div class="stat-dropdown" id="stat-dropdown-fin_collected">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('fin_collected', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('fin_collected', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('fin_collected', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-fin_collected">LKR <?php echo number_format($data['collected'] ?? 0, 0); ?></h3>
+                <span class="stat-change positive" id="stat-subtitle-fin_collected">All time</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="fin_pending">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number">LKR <?php echo number_format($data['pending'] ?? 0, 0); ?></h3>
-                <p class="stat-label">Pending Fees</p>
-                <span class="stat-change"><?php echo $data['pendingCount'] ?? 0; ?> pending (30 days)</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-fin_pending" onclick="toggleStatDropdown('fin_pending')">Pending Fees</span>
+                    <div class="stat-dropdown" id="stat-dropdown-fin_pending">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('fin_pending', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('fin_pending', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('fin_pending', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-fin_pending">LKR <?php echo number_format($data['pending'] ?? 0, 0); ?></h3>
+                <span class="stat-change" id="stat-subtitle-fin_pending"><?php echo $data['pendingCount'] ?? 0; ?> pending (All time)</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="fin_overdue">
             <div class="stat-icon">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number">LKR <?php echo number_format($data['overdue'] ?? 0, 0); ?></h3>
-                <p class="stat-label">Overdue Fees</p>
-                <span class="stat-change negative"><?php echo $data['overdueCount'] ?? 0; ?> overdue (30 days)</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-fin_overdue" onclick="toggleStatDropdown('fin_overdue')">Overdue Fees</span>
+                    <div class="stat-dropdown" id="stat-dropdown-fin_overdue">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('fin_overdue', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('fin_overdue', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('fin_overdue', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-fin_overdue">LKR <?php echo number_format($data['overdue'] ?? 0, 0); ?></h3>
+                <span class="stat-change negative" id="stat-subtitle-fin_overdue"><?php echo $data['overdueCount'] ?? 0; ?> overdue (All time)</span>
             </div>
         </div>
     </div>

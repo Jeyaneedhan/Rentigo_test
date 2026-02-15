@@ -1147,6 +1147,118 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeBulkActions()
 })
 
+// ===== STAT CARD DROPDOWN FUNCTIONS =====
+
+/**
+ * Toggle stat dropdown visibility
+ * @param {string} statType - The stat type identifier
+ */
+function toggleStatDropdown(statType) {
+  const dropdown = document.getElementById(`stat-dropdown-${statType}`);
+  if (!dropdown) return;
+
+  // Close all other dropdowns first
+  closeAllStatDropdowns();
+
+  // Toggle this dropdown
+  dropdown.classList.toggle('active');
+
+  // Stop event propagation
+  event.stopPropagation();
+}
+
+/**
+ * Close all stat dropdowns
+ */
+function closeAllStatDropdowns() {
+  document.querySelectorAll('.stat-dropdown').forEach(dropdown => {
+    dropdown.classList.remove('active');
+  });
+}
+
+/**
+ * Handle stat period selection
+ * @param {string} statType - The stat type identifier
+ * @param {string} period - The period ('all', 'month', 'year')
+ * @param {Event} event - The click event
+ */
+function selectStatPeriod(statType, period, event) {
+  event.stopPropagation();
+
+  // Update selected state in dropdown
+  const dropdown = document.getElementById(`stat-dropdown-${statType}`);
+  if (dropdown) {
+    dropdown.querySelectorAll('.stat-dropdown-item').forEach(item => {
+      item.classList.remove('selected');
+    });
+    const selectedItem = dropdown.querySelector(`[data-period="${period}"]`);
+    if (selectedItem) {
+      selectedItem.classList.add('selected');
+    }
+  }
+
+  // Close dropdown
+  closeAllStatDropdowns();
+
+  // Fetch new data
+  fetchStatData(statType, period);
+}
+
+/**
+ * Fetch stat data from server via AJAX
+ * @param {string} statType - The stat type identifier
+ * @param {string} period - The period ('all', 'month', 'year')
+ */
+function fetchStatData(statType, period) {
+  const valueElement = document.getElementById(`stat-value-${statType}`);
+  const subtitleElement = document.getElementById(`stat-subtitle-${statType}`);
+
+  if (!valueElement) return;
+
+  // Add loading state
+  valueElement.classList.add('loading');
+
+  fetch(`${URLROOT}/admin/getStatData`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      statType: statType,
+      period: period
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Remove loading state
+    valueElement.classList.remove('loading');
+
+    if (data.error) {
+      console.error('Error fetching stat:', data.error);
+      return;
+    }
+
+    // Update the value
+    valueElement.textContent = data.value;
+
+    // Update subtitle if provided
+    if (subtitleElement && data.subtitle) {
+      subtitleElement.textContent = data.subtitle;
+    }
+  })
+  .catch(error => {
+    console.error('Error fetching stat data:', error);
+    valueElement.classList.remove('loading');
+  });
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.stat-header')) {
+    closeAllStatDropdowns();
+  }
+});
+
 // Global functions for window object (for backwards compatibility)
 window.adminJS = {
   // Manager functions
@@ -1172,6 +1284,12 @@ window.adminJS = {
   
   // Tab functions
   switchTab,
+  
+  // Stat dropdown functions
+  toggleStatDropdown,
+  closeAllStatDropdowns,
+  selectStatPeriod,
+  fetchStatData,
   
   // Utility functions
   showNotification,

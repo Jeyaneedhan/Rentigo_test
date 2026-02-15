@@ -226,3 +226,119 @@
   color: var(--text-muted);
   font-size: 1rem;
 }
+
+/* ===== STAT CARD DROPDOWN STYLES ===== */
+.stat-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-header .stat-label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+  color: var(--text-muted);
+  font-size: 0.813rem;
+  margin-bottom: 0;
+}
+
+.stat-header .stat-label:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.stat-header .stat-label::after {
+  content: '\f0d7';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 0.625rem;
+  margin-left: 0.25rem;
+  transition: transform 0.2s;
+}
+
+.stat-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+}
+
+.stat-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(4px);
+}
+
+.stat-dropdown-item {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.813rem;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.stat-dropdown-item:first-child {
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.stat-dropdown-item:last-child {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.stat-dropdown-item:hover {
+  background-color: var(--bg-light);
+}
+
+.stat-dropdown-item.selected {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.stat-dropdown-item.selected:hover {
+  background-color: var(--primary-color);
+}
+
+/* Loading state for stat values */
+.stat-number.loading,
+.stat-value.loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.stat-number.loading::after,
+.stat-value.loading::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60%;
+  height: 1.2em;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.25rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

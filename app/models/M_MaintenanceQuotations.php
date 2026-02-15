@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_MaintenanceQuotations Model
  * This model handles "Price Bids" or "Quotes" for fixing things.
@@ -166,10 +167,17 @@ class M_MaintenanceQuotations
         return $payment && $payment->status === 'completed';
     }
 
-    // Get total maintenance income in the last X days (for admin)
-    public function getTotalMaintenanceIncome($days = 30)
+    // Get total maintenance income (for admin)
+    // @param string|int $period 'all', 'month', 'year' or int for backward compat
+    public function getTotalMaintenanceIncome($period = 'all')
     {
-        $this->db->query('SELECT SUM(amount) as total_income FROM maintenance_payments WHERE status = "completed" AND ' . getDateRangeSql('payment_date', $days));
+        // Backward compatibility: if numeric, use old behavior
+        if (is_numeric($period)) {
+            $this->db->query('SELECT SUM(amount) as total_income FROM maintenance_payments WHERE status = "completed" AND ' . getDateRangeSql('payment_date', $period));
+        } else {
+            $dateFilter = getDateRangeByPeriod('payment_date', $period);
+            $this->db->query('SELECT SUM(amount) as total_income FROM maintenance_payments WHERE status = "completed" AND ' . $dateFilter);
+        }
         $result = $this->db->single();
         return $result->total_income ?? 0;
     }

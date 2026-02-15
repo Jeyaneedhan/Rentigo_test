@@ -391,11 +391,36 @@ class M_Payments
     /**
      * Rentigo's business model: We take a 10% cut from every rental payment.
      * This calculates how much the platform has earned.
+     * @param string $period 'all', 'month', or 'year' for date filtering (or int for backward compat)
      */
-    public function getPlatformRentalIncome($days = 30)
+    public function getPlatformRentalIncome($period = 'all')
     {
-        $this->db->query('SELECT SUM(amount * 0.10) as revenue FROM payments WHERE status = "completed" AND ' . getDateRangeSql('payment_date', $days));
+        // Backward compatibility: if numeric, use old behavior
+        if (is_numeric($period)) {
+            $this->db->query('SELECT SUM(amount * 0.10) as revenue FROM payments WHERE status = "completed" AND ' . getDateRangeSql('payment_date', $period));
+        } else {
+            $dateFilter = getDateRangeByPeriod('payment_date', $period);
+            $this->db->query('SELECT SUM(amount * 0.10) as revenue FROM payments WHERE status = "completed" AND ' . $dateFilter);
+        }
         $result = $this->db->single();
         return $result->revenue ?? 0;
+    }
+
+    /**
+     * Get financial stats for admin (revenue, collected, pending, overdue)
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getAdminFinancialStats($period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('payment_date', $period);
+        $this->db->query('SELECT
+            SUM(amount * 0.10) as total_revenue,
+            SUM(CASE WHEN status = "completed" THEN amount * 0.10 ELSE 0 END) as collected,
+            SUM(CASE WHEN status = "pending" THEN amount * 0.10 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = "failed" OR (status = "pending" AND due_date < CURDATE()) THEN amount * 0.10 ELSE 0 END) as overdue,
+            COUNT(CASE WHEN status = "pending" THEN 1 END) as pending_count,
+            COUNT(CASE WHEN status = "failed" OR (status = "pending" AND due_date < CURDATE()) THEN 1 END) as overdue_count
+        FROM payments WHERE ' . $dateFilter);
+        return $this->db->single();
     }
 }

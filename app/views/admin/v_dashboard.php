@@ -3,47 +3,75 @@
 <div class="dashboard-content">
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="admin_properties">
             <div class="stat-icon">
                 <i class="fas fa-home"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo number_format($data['totalProperties'] ?? 0); ?></h3>
-                <p class="stat-label">Total Properties</p>
-                <span class="stat-change">All properties in system</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-admin_properties" onclick="toggleStatDropdown('admin_properties')">Total Properties</span>
+                    <div class="stat-dropdown" id="stat-dropdown-admin_properties">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('admin_properties', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('admin_properties', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('admin_properties', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-admin_properties"><?php echo number_format($data['totalProperties'] ?? 0); ?></h3>
+                <span class="stat-change" id="stat-subtitle-admin_properties">All properties in system</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="admin_tenants">
             <div class="stat-icon">
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo number_format($data['activeTenants'] ?? 0); ?></h3>
-                <p class="stat-label">Active Tenants</p>
-                <span class="stat-change">Currently renting</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-admin_tenants" onclick="toggleStatDropdown('admin_tenants')">Active Tenants</span>
+                    <div class="stat-dropdown" id="stat-dropdown-admin_tenants">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('admin_tenants', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('admin_tenants', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('admin_tenants', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-admin_tenants"><?php echo number_format($data['activeTenants'] ?? 0); ?></h3>
+                <span class="stat-change" id="stat-subtitle-admin_tenants">Currently renting</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="admin_income">
             <div class="stat-icon">
                 <i class="fas fa-dollar-sign"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number">LKR <?php echo number_format($data['monthlyRevenue'] ?? 0, 0); ?></h3>
-                <p class="stat-label">Platform Income</p>
-                <span class="stat-change">10% from rental + full maintenance payments</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-admin_income" onclick="toggleStatDropdown('admin_income')">Platform Income</span>
+                    <div class="stat-dropdown" id="stat-dropdown-admin_income">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('admin_income', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('admin_income', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('admin_income', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-admin_income">LKR <?php echo number_format($data['monthlyRevenue'] ?? 0, 0); ?></h3>
+                <span class="stat-change" id="stat-subtitle-admin_income">10% from rental + full maintenance payments</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="admin_approvals">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['pendingApprovals'] ?? 0; ?></h3>
-                <p class="stat-label">Pending Approvals</p>
-                <span class="stat-change">Requires attention</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-admin_approvals" onclick="toggleStatDropdown('admin_approvals')">Pending Approvals</span>
+                    <div class="stat-dropdown" id="stat-dropdown-admin_approvals">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('admin_approvals', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('admin_approvals', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('admin_approvals', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-admin_approvals"><?php echo $data['pendingApprovals'] ?? 0; ?></h3>
+                <span class="stat-change" id="stat-subtitle-admin_approvals">Requires attention</span>
             </div>
         </div>
     </div>

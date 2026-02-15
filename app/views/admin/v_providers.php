@@ -33,45 +33,74 @@ AutoPaginate::init($data, 5);
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="prov_total">
             <div class="stat-icon">
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['counts']->total ?? 0; ?></h3>
-                <p class="stat-label">Total Providers</p>
-                <span class="stat-change">All registered providers</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-prov_total" onclick="toggleStatDropdown('prov_total')">Total Providers</span>
+                    <div class="stat-dropdown" id="stat-dropdown-prov_total">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('prov_total', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('prov_total', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('prov_total', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-prov_total"><?php echo $data['counts']->total ?? 0; ?></h3>
+                <span class="stat-change" id="stat-subtitle-prov_total">All registered providers</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="prov_active">
             <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['counts']->active ?? 0; ?></h3>
-                <p class="stat-label">Active Providers</p>
-                <span class="stat-change positive">Currently available</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-prov_active" onclick="toggleStatDropdown('prov_active')">Active Providers</span>
+                    <div class="stat-dropdown" id="stat-dropdown-prov_active">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('prov_active', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('prov_active', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('prov_active', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-prov_active"><?php echo $data['counts']->active ?? 0; ?></h3>
+                <span class="stat-change positive" id="stat-subtitle-prov_active">Currently available</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="prov_inactive">
             <div class="stat-icon">
                 <i class="fas fa-pause-circle"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['counts']->inactive ?? 0; ?></h3>
-                <p class="stat-label">Inactive Providers</p>
-                <span class="stat-change">Temporarily unavailable</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-prov_inactive" onclick="toggleStatDropdown('prov_inactive')">Inactive Providers</span>
+                    <div class="stat-dropdown" id="stat-dropdown-prov_inactive">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('prov_inactive', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('prov_inactive', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('prov_inactive', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-prov_inactive"><?php echo $data['counts']->inactive ?? 0; ?></h3>
+                <span class="stat-change" id="stat-subtitle-prov_inactive">Temporarily unavailable</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="prov_rating">
             <div class="stat-icon">
                 <i class="fas fa-star"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number">
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-prov_rating" onclick="toggleStatDropdown('prov_rating')">Average Rating</span>
+                    <div class="stat-dropdown" id="stat-dropdown-prov_rating">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('prov_rating', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('prov_rating', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('prov_rating', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-prov_rating">
                     <?php
                     if (isset($data['counts']->average_rating) && $data['counts']->average_rating > 0) {
                         echo number_format($data['counts']->average_rating, 1);
@@ -80,8 +109,7 @@ AutoPaginate::init($data, 5);
                     }
                     ?>
                 </h3>
-                <p class="stat-label">Average Rating</p>
-                <span class="stat-change positive">
+                <span class="stat-change positive" id="stat-subtitle-prov_rating">
                     <?php
                     if (isset($data['counts']->rated_providers) && $data['counts']->rated_providers > 0) {
                         echo "From " . $data['counts']->rated_providers . " providers";

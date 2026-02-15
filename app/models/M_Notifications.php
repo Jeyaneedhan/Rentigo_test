@@ -358,16 +358,18 @@ class M_Notifications
         return $this->db->resultSet();
     }
 
-    // Get notification statistics for admin (Last 30 Days)
-    public function getNotificationStats()
+    // Get notification statistics for admin
+    // @param string $period 'all', 'month', or 'year' for date filtering
+    public function getNotificationStats($period = 'all')
     {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
         $this->db->query("SELECT
                             COUNT(*) as total_sent,
                             COUNT(DISTINCT user_id) as total_recipients,
                             COUNT(CASE WHEN is_read = 1 THEN 1 END) as read_count,
                             COUNT(CASE WHEN is_read = 0 THEN 1 END) as unread_count
                          FROM notifications
-                         WHERE " . getDateRangeSql('created_at'));
+                         WHERE " . $dateFilter);
 
         return $this->db->single();
     }

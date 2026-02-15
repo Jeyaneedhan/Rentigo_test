@@ -25,36 +25,57 @@ AutoPaginate::init($data, 5);
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="policy_total">
             <div class="stat-icon">
                 <i class="fas fa-file-text"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['stats']['total']; ?></h3>
-                <p class="stat-label">Total Policies</p>
-                <span class="stat-change">All documents</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-policy_total" onclick="toggleStatDropdown('policy_total')">Total Policies</span>
+                    <div class="stat-dropdown" id="stat-dropdown-policy_total">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('policy_total', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('policy_total', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('policy_total', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-policy_total"><?php echo $data['stats']['total']; ?></h3>
+                <span class="stat-change" id="stat-subtitle-policy_total">All documents</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="policy_active">
             <div class="stat-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['stats']['active']; ?></h3>
-                <p class="stat-label">Active Policies</p>
-                <span class="stat-change positive">Currently enforced</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-policy_active" onclick="toggleStatDropdown('policy_active')">Active Policies</span>
+                    <div class="stat-dropdown" id="stat-dropdown-policy_active">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('policy_active', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('policy_active', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('policy_active', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-policy_active"><?php echo $data['stats']['active']; ?></h3>
+                <span class="stat-change positive" id="stat-subtitle-policy_active">Currently enforced</span>
             </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="policy_draft">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
             </div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['stats']['draft']; ?></h3>
-                <p class="stat-label">Draft Policies</p>
-                <span class="stat-change">Under development</span>
+                <div class="stat-header">
+                    <span class="stat-label" id="stat-label-policy_draft" onclick="toggleStatDropdown('policy_draft')">Draft Policies</span>
+                    <div class="stat-dropdown" id="stat-dropdown-policy_draft">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('policy_draft', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('policy_draft', 'year', event)">Current Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('policy_draft', 'month', event)">Current Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-policy_draft"><?php echo $data['stats']['draft']; ?></h3>
+                <span class="stat-change" id="stat-subtitle-policy_draft">Under development</span>
             </div>
         </div>
 

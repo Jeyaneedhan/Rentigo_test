@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_ServiceProviders Model
  * This is the platform's "Yellow Pages" or "Vendor Directory".
@@ -162,16 +163,18 @@ class M_ServiceProviders
 
     /**
      * Stats for the dashboard: How many active vendors do we have and are they any good?
+     * @param string $period 'all', 'month', or 'year' for date filtering
      */
-    public function getProviderCounts()
+    public function getProviderCounts($period = 'all')
     {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
         $this->db->query('SELECT 
                             COUNT(*) as total,
                             SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active,
                             SUM(CASE WHEN status = "inactive" THEN 1 ELSE 0 END) as inactive,
                             ROUND(AVG(CASE WHEN rating > 0 THEN rating ELSE NULL END), 1) as average_rating,
                             COUNT(CASE WHEN rating > 0 THEN 1 ELSE NULL END) as rated_providers
-                         FROM service_providers');
+                         FROM service_providers WHERE ' . $dateFilter);
         return $this->db->single();
     }
 
