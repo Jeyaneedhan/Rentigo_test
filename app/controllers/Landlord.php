@@ -221,9 +221,10 @@ class Landlord extends Controller
         // Get all payments for landlord (Full history for table)
         $payments = $this->paymentModel->getPaymentsByLandlord($_SESSION['user_id']);
 
-        // Get summary statistics for last 30 days
+        // Get summary statistics
         $totalIncome = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id']);
-        $paymentStats = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id']);
+        $paymentStatsAll = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id']); // For stat cards
+        $paymentStats = $this->paymentModel->getPaymentStatsByLandlordMonthly($_SESSION['user_id']); // For monthly table
 
         // Filter payments for 30-day stat cards
         $recentPayments = array_filter($payments, function ($p) {
@@ -237,8 +238,9 @@ class Landlord extends Controller
             'user_name' => $_SESSION['user_name'],
             'payments' => $payments, // Full history
             'recentPayments' => $recentPayments, // 30-day filtered for cards
-            'totalIncome' => (object)['total_income' => $totalIncome],
-            'paymentStats' => $paymentStats,
+            'totalIncome' => $totalIncome,
+            'paymentStatsAll' => $paymentStatsAll, // Single object for stat cards
+            'paymentStats' => $paymentStats, // Monthly breakdown for table
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('landlord/v_payment_history', $data);
