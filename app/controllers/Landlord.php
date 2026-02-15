@@ -221,12 +221,11 @@ class Landlord extends Controller
         // Get all payments for landlord (Full history for table)
         $payments = $this->paymentModel->getPaymentsByLandlord($_SESSION['user_id']);
 
-        // Get summary statistics (all time for stat cards)
+        // Get summary statistics for last 30 days
         $totalIncome = $this->paymentModel->getTotalIncomeByLandlord($_SESSION['user_id']);
-        $paymentStatsAll = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id'], 'all');
-        $paymentStatsMonthly = $this->paymentModel->getPaymentStatsByLandlordMonthly($_SESSION['user_id']);
+        $paymentStats = $this->paymentModel->getPaymentStatsByLandlord($_SESSION['user_id']);
 
-        // Filter payments for 30-day list
+        // Filter payments for 30-day stat cards
         $recentPayments = array_filter($payments, function ($p) {
             $date = $p->payment_date ?? $p->created_at;
             return strtotime($date) >= strtotime('-30 days');
@@ -238,9 +237,8 @@ class Landlord extends Controller
             'user_name' => $_SESSION['user_name'],
             'payments' => $payments, // Full history
             'recentPayments' => $recentPayments, // 30-day filtered for cards
-            'totalIncome' => $totalIncome,
-            'paymentStatsAll' => $paymentStatsAll,
-            'paymentStats' => $paymentStatsMonthly,
+            'totalIncome' => (object)['total_income' => $totalIncome],
+            'paymentStats' => $paymentStats,
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('landlord/v_payment_history', $data);
@@ -513,7 +511,7 @@ class Landlord extends Controller
             case 'maint_total_cost':
                 $stats = $this->maintenanceModel->getMaintenanceStats($_SESSION['user_id'], null, $period);
                 $value = $stats->total_cost ?? 0;
-                $formatted = 'LKR ' . number_format($value, 2);
+                $formatted = 'LKR ' . number_format($value, 0);
                 $subtitle = 'Maintenance expenses';
                 break;
 

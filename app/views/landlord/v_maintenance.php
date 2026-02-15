@@ -89,7 +89,7 @@ AutoPaginate::init($data, 5);
                     <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('maint_total_cost', 'month', event)">Current Month</div>
                 </div>
             </div>
-            <div class="stat-value" id="stat-value-maint_total_cost">LKR <?php echo number_format($data['maintenanceStats']->total_cost ?? 0, 2); ?></div>
+            <div class="stat-value" id="stat-value-maint_total_cost">LKR <?php echo number_format($data['maintenanceStats']->total_cost ?? 0); ?></div>
             <div class="stat-change" id="stat-subtitle-maint_total_cost">Maintenance expenses</div>
         </div>
     </div>
