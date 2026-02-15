@@ -18,37 +18,41 @@
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" data-stat-type="tenant_reviews_received">
                 <div class="stat-icon">
                     <i class="fas fa-comments"></i>
                 </div>
                 <div class="stat-info">
-                    <h3 class="stat-number"><?php echo count($data['reviewsAboutMe'] ?? []); ?></h3>
-                    <p class="stat-label">Reviews About You</p>
-                    <span class="stat-change">From landlords</span>
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_reviews_received" onclick="toggleStatDropdown('tenant_reviews_received')">Reviews About You</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_reviews_received">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_reviews_received', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_reviews_received', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_reviews_received', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h3 class="stat-number" id="stat-value-tenant_reviews_received"><?php echo $data['feedbackStats']->review_count ?? 0; ?></h3>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_reviews_received">From landlords</span>
                 </div>
             </div>
 
-            <div class="stat-card">
+            <div class="stat-card" data-stat-type="tenant_avg_rating_received">
                 <div class="stat-icon">
                     <i class="fas fa-star"></i>
                 </div>
                 <div class="stat-info">
-                    <h3 class="stat-number">
-                        <?php
-                        if (!empty($data['reviewsAboutMe'])) {
-                            $totalRating = 0;
-                            foreach ($data['reviewsAboutMe'] as $review) {
-                                $totalRating += $review->rating;
-                            }
-                            echo number_format($totalRating / count($data['reviewsAboutMe']), 1);
-                        } else {
-                            echo '0.0';
-                        }
-                        ?>
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_avg_rating_received" onclick="toggleStatDropdown('tenant_avg_rating_received')">Average Rating</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_avg_rating_received">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_avg_rating_received', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_avg_rating_received', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_avg_rating_received', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h3 class="stat-number" id="stat-value-tenant_avg_rating_received">
+                        <?php echo number_format($data['feedbackStats']->avg_rating ?? 0, 1); ?>
                     </h3>
-                    <p class="stat-label">Average Rating</p>
-                    <span class="stat-change">As a tenant</span>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_avg_rating_received">Your reputation</span>
                 </div>
             </div>
 

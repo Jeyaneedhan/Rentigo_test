@@ -53,38 +53,70 @@ AutoPaginate::init($data, 5);
     <!-- Issue Status Overview -->
     <div class="stats-grid">
         <!-- Pending Issues -->
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="tenant_issues_pending">
             <div class="stat-icon"><i class="fas fa-clock"></i></div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['pending_issues'] ?? 0; ?></h3>
-                <p class="stat-label">Pending Issues</p>
+                <div class="stat-header">
+                    <span class="stat-label-clickable" id="stat-label-tenant_issues_pending" onclick="toggleStatDropdown('tenant_issues_pending')">Pending Issues</span>
+                    <div class="stat-dropdown" id="stat-dropdown-tenant_issues_pending">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_issues_pending', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_issues_pending', 'year', event)">This Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_issues_pending', 'month', event)">This Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-tenant_issues_pending"><?php echo $data['pending_issues'] ?? 0; ?></h3>
+                <span class="stat-subtext" id="stat-subtitle-tenant_issues_pending">Awaiting response</span>
             </div>
         </div>
 
         <!-- In Progress -->
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="tenant_issues_progress">
             <div class="stat-icon"><i class="fas fa-tools"></i></div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['in_progress_issues'] ?? 0; ?></h3>
-                <p class="stat-label">In Progress</p>
+                <div class="stat-header">
+                    <span class="stat-label-clickable" id="stat-label-tenant_issues_progress" onclick="toggleStatDropdown('tenant_issues_progress')">In Progress</span>
+                    <div class="stat-dropdown" id="stat-dropdown-tenant_issues_progress">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_issues_progress', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_issues_progress', 'year', event)">This Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_issues_progress', 'month', event)">This Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-tenant_issues_progress"><?php echo $data['in_progress_issues'] ?? 0; ?></h3>
+                <span class="stat-subtext" id="stat-subtitle-tenant_issues_progress">Being worked on</span>
             </div>
         </div>
 
         <!-- Resolved -->
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="tenant_issues_resolved">
             <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo $data['resolved_issues'] ?? 0; ?></h3>
-                <p class="stat-label">Resolved</p>
+                <div class="stat-header">
+                    <span class="stat-label-clickable" id="stat-label-tenant_issues_resolved" onclick="toggleStatDropdown('tenant_issues_resolved')">Resolved</span>
+                    <div class="stat-dropdown" id="stat-dropdown-tenant_issues_resolved">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_issues_resolved', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_issues_resolved', 'year', event)">This Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_issues_resolved', 'month', event)">This Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-tenant_issues_resolved"><?php echo $data['resolved_issues'] ?? 0; ?></h3>
+                <span class="stat-subtext" id="stat-subtitle-tenant_issues_resolved">Completed</span>
             </div>
         </div>
 
         <!-- Average Days -->
-        <div class="stat-card">
+        <div class="stat-card" data-stat-type="tenant_issues_avg_days">
             <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
             <div class="stat-info">
-                <h3 class="stat-number"><?php echo number_format($averageDaysToResolve, 1); ?></h3>
-                <p class="stat-label">Avg. Days to Resolve</p>
+                <div class="stat-header">
+                    <span class="stat-label-clickable" id="stat-label-tenant_issues_avg_days" onclick="toggleStatDropdown('tenant_issues_avg_days')">Avg. Days to Resolve</span>
+                    <div class="stat-dropdown" id="stat-dropdown-tenant_issues_avg_days">
+                        <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_issues_avg_days', 'all', event)">All Time</div>
+                        <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_issues_avg_days', 'year', event)">This Year</div>
+                        <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_issues_avg_days', 'month', event)">This Month</div>
+                    </div>
+                </div>
+                <h3 class="stat-number" id="stat-value-tenant_issues_avg_days"><?php echo number_format($data['issueStats']->avg_resolution_days ?? 0, 1); ?></h3>
+                <span class="stat-subtext" id="stat-subtitle-tenant_issues_avg_days">Average resolution</span>
             </div>
         </div>
     </div>

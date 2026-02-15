@@ -11,36 +11,68 @@
 
     <!-- Booking Statistics -->
     <?php if (isset($data['bookingStats']) && $data['bookingStats']): ?>
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-            <div class="stat-content">
-                <h3><?php echo $data['bookingStats']->pending ?? 0; ?></h3>
-                <p>Pending</p>
+        <div class="stats-grid">
+            <div class="stat-card" data-stat-type="tenant_bookings_pending">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-content">
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_bookings_pending" onclick="toggleStatDropdown('tenant_bookings_pending')">Pending</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_bookings_pending">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_bookings_pending', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_bookings_pending', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_bookings_pending', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h3 id="stat-value-tenant_bookings_pending"><?php echo $data['bookingStats']->pending ?? 0; ?></h3>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_bookings_pending">Awaiting approval</span>
+                </div>
+            </div>
+            <div class="stat-card" data-stat-type="tenant_bookings_approved">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-content">
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_bookings_approved" onclick="toggleStatDropdown('tenant_bookings_approved')">Approved</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_bookings_approved">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_bookings_approved', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_bookings_approved', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_bookings_approved', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h3 id="stat-value-tenant_bookings_approved"><?php echo $data['bookingStats']->approved ?? 0; ?></h3>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_bookings_approved">Ready to proceed</span>
+                </div>
+            </div>
+            <div class="stat-card" data-stat-type="tenant_bookings_active">
+                <div class="stat-icon"><i class="fas fa-home"></i></div>
+                <div class="stat-content">
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_bookings_active" onclick="toggleStatDropdown('tenant_bookings_active')">Active</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_bookings_active">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_bookings_active', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_bookings_active', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_bookings_active', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h3 id="stat-value-tenant_bookings_active"><?php echo $data['bookingStats']->active ?? 0; ?></h3>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_bookings_active">Current rentals</span>
+                </div>
+            </div>
+            <div class="stat-card" data-stat-type="tenant_bookings_completed">
+                <div class="stat-icon"><i class="fas fa-history"></i></div>
+                <div class="stat-content">
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_bookings_completed" onclick="toggleStatDropdown('tenant_bookings_completed')">Completed</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_bookings_completed">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_bookings_completed', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_bookings_completed', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_bookings_completed', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h3 id="stat-value-tenant_bookings_completed"><?php echo $data['bookingStats']->completed ?? 0; ?></h3>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_bookings_completed">Past bookings</span>
+                </div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-content">
-                <h3><?php echo $data['bookingStats']->approved ?? 0; ?></h3>
-                <p>Approved</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-home"></i></div>
-            <div class="stat-content">
-                <h3><?php echo $data['bookingStats']->active ?? 0; ?></h3>
-                <p>Active</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-history"></i></div>
-            <div class="stat-content">
-                <h3><?php echo $data['bookingStats']->completed ?? 0; ?></h3>
-                <p>Completed</p>
-            </div>
-        </div>
-    </div>
     <?php endif; ?>
 
     <!-- Flash Message -->
@@ -54,7 +86,7 @@
 
         <?php if (!empty($data['bookings'])): ?>
             <?php
-            $activeBookings = array_filter($data['bookings'], function($booking) {
+            $activeBookings = array_filter($data['bookings'], function ($booking) {
                 return in_array($booking->status, ['pending', 'approved', 'active']);
             });
             ?>
@@ -83,13 +115,24 @@
                             <div class="booking-status">
                                 <?php
                                 $statusClass = '';
-                                switch($booking->status) {
-                                    case 'active': $statusClass = 'approved'; break;
-                                    case 'approved': $statusClass = 'approved'; break;
-                                    case 'pending': $statusClass = 'pending'; break;
-                                    case 'rejected': $statusClass = 'rejected'; break;
-                                    case 'cancelled': $statusClass = 'cancelled'; break;
-                                    default: $statusClass = '';
+                                switch ($booking->status) {
+                                    case 'active':
+                                        $statusClass = 'approved';
+                                        break;
+                                    case 'approved':
+                                        $statusClass = 'approved';
+                                        break;
+                                    case 'pending':
+                                        $statusClass = 'pending';
+                                        break;
+                                    case 'rejected':
+                                        $statusClass = 'rejected';
+                                        break;
+                                    case 'cancelled':
+                                        $statusClass = 'cancelled';
+                                        break;
+                                    default:
+                                        $statusClass = '';
                                 }
                                 ?>
                                 <span class="status-badge <?php echo $statusClass; ?>"><?php echo ucfirst($booking->status); ?></span>
@@ -151,14 +194,27 @@
                                 <td>
                                     <?php
                                     $statusClass = '';
-                                    switch($booking->status) {
-                                        case 'active': $statusClass = 'approved'; break;
-                                        case 'approved': $statusClass = 'approved'; break;
-                                        case 'pending': $statusClass = 'pending'; break;
-                                        case 'rejected': $statusClass = 'rejected'; break;
-                                        case 'completed': $statusClass = 'completed'; break;
-                                        case 'cancelled': $statusClass = 'cancelled'; break;
-                                        default: $statusClass = '';
+                                    switch ($booking->status) {
+                                        case 'active':
+                                            $statusClass = 'approved';
+                                            break;
+                                        case 'approved':
+                                            $statusClass = 'approved';
+                                            break;
+                                        case 'pending':
+                                            $statusClass = 'pending';
+                                            break;
+                                        case 'rejected':
+                                            $statusClass = 'rejected';
+                                            break;
+                                        case 'completed':
+                                            $statusClass = 'completed';
+                                            break;
+                                        case 'cancelled':
+                                            $statusClass = 'cancelled';
+                                            break;
+                                        default:
+                                            $statusClass = '';
                                     }
                                     ?>
                                     <span class="status-badge <?php echo $statusClass; ?>"><?php echo ucfirst($booking->status); ?></span>
@@ -238,24 +294,24 @@
 </div>
 
 <script>
-function cancelBooking(bookingId) {
-    const modal = document.getElementById('cancelBookingModal');
-    const form = document.getElementById('cancelBookingForm');
-    form.action = '<?php echo URLROOT; ?>/bookings/cancel/' + bookingId;
-    modal.style.display = 'block';
-}
-
-function closeCancelModal() {
-    document.getElementById('cancelBookingModal').style.display = 'none';
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('cancelBookingModal');
-    if (event.target == modal) {
-        modal.style.display = 'none';
+    function cancelBooking(bookingId) {
+        const modal = document.getElementById('cancelBookingModal');
+        const form = document.getElementById('cancelBookingForm');
+        form.action = '<?php echo URLROOT; ?>/bookings/cancel/' + bookingId;
+        modal.style.display = 'block';
     }
-}
+
+    function closeCancelModal() {
+        document.getElementById('cancelBookingModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('cancelBookingModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
 </script>
 
 <?php require APPROOT . '/views/inc/tenant_footer.php'; ?>

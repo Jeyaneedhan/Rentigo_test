@@ -444,4 +444,23 @@ class M_Payments
         $this->db->bind(':manager_id', $manager_id);
         return $this->db->single();
     }
+
+    /**
+     * Get payment statistics for a tenant with period filtering
+     * @param int $tenant_id The tenant's user ID
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getTenantPaymentStats($tenant_id, $period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('COALESCE(payment_date, due_date, created_at)', $period);
+        $this->db->query('SELECT
+            SUM(CASE WHEN status = "completed" THEN amount ELSE 0 END) as total_paid,
+            COUNT(CASE WHEN status = "completed" THEN 1 END) as completed_count,
+            COUNT(CASE WHEN status = "pending" THEN 1 END) as pending_count,
+            COUNT(CASE WHEN status = "pending" AND due_date < CURDATE() THEN 1 END) as overdue_count,
+            SUM(CASE WHEN status = "pending" THEN amount ELSE 0 END) as pending_amount
+        FROM payments WHERE tenant_id = :tenant_id AND ' . $dateFilter);
+        $this->db->bind(':tenant_id', $tenant_id);
+        return $this->db->single();
+    }
 }

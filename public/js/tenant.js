@@ -442,3 +442,124 @@ function reportAnother() {
     submitBtn.textContent = 'Report Issue'
     submitBtn.disabled = false}
   }
+
+// ==========================================
+// Stat Card Dropdown Functions
+// ==========================================
+
+/**
+ * Toggle the visibility of a stat dropdown
+ * @param {string} statType - The unique identifier for the stat card
+ */
+function toggleStatDropdown(statType) {
+  const dropdown = document.getElementById(`stat-dropdown-${statType}`);
+  if (!dropdown) return;
+  
+  // Close all other dropdowns first
+  closeAllStatDropdowns();
+  
+  // Toggle this dropdown
+  dropdown.classList.toggle('show');
+}
+
+/**
+ * Close all stat dropdowns
+ */
+function closeAllStatDropdowns() {
+  document.querySelectorAll('.stat-dropdown').forEach(dropdown => {
+    dropdown.classList.remove('show');
+  });
+}
+
+/**
+ * Handle selection of a period from the dropdown
+ * @param {string} statType - The unique identifier for the stat card
+ * @param {string} period - The selected period ('all', 'month', 'year')
+ * @param {Event} event - The click event
+ */
+function selectStatPeriod(statType, period, event) {
+  event.stopPropagation();
+  
+  const dropdown = document.getElementById(`stat-dropdown-${statType}`);
+  if (!dropdown) return;
+  
+  // Update selected state in dropdown
+  dropdown.querySelectorAll('.stat-dropdown-item').forEach(item => {
+    item.classList.remove('selected');
+    if (item.dataset.period === period) {
+      item.classList.add('selected');
+    }
+  });
+  
+  // Update the label text
+  const label = document.getElementById(`stat-label-${statType}`);
+  if (label) {
+    const originalText = label.dataset.originalText || label.textContent;
+    label.dataset.originalText = originalText;
+    
+    const periodLabels = {
+      'all': 'All Time',
+      'month': 'This Month',
+      'year': 'This Year'
+    };
+    
+    label.textContent = originalText;
+  }
+  
+  // Close dropdown
+  dropdown.classList.remove('show');
+  
+  // Fetch new data
+  fetchStatData(statType, period);
+}
+
+/**
+ * Fetch stat data from server via AJAX
+ * @param {string} statType - The unique identifier for the stat card
+ * @param {string} period - The period filter ('all', 'month', 'year')
+ */
+function fetchStatData(statType, period) {
+  // Determine the correct endpoint based on stat type
+  let endpoint = '/tenant/getStatData';
+  if (statType.startsWith('tenant_issues_')) {
+    endpoint = '/issues/getStatData';
+  }
+  
+  // Get the URLROOT from a data attribute or construct it
+  const urlRoot = document.body.dataset.urlroot || window.location.origin;
+  
+  fetch(urlRoot + endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      stat_type: statType,
+      period: period
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Update the stat value
+    const valueElement = document.getElementById(`stat-value-${statType}`);
+    if (valueElement) {
+      valueElement.textContent = data.value;
+    }
+    
+    // Update the subtitle if present
+    const subtitleElement = document.getElementById(`stat-subtitle-${statType}`);
+    if (subtitleElement && data.subtitle) {
+      subtitleElement.textContent = data.subtitle;
+    }
+  })
+  .catch(error => {
+    console.error('Error fetching stat data:', error);
+  });
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+  if (!event.target.closest('.stat-header')) {
+    closeAllStatDropdowns();
+  }
+});

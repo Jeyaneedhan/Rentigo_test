@@ -151,40 +151,26 @@ class Issues extends Controller
 
     public function track()
     {
-        $issues = $this->issueModel->getIssuesByTenant($_SESSION['user_id']);
+        $tenant_id = $_SESSION['user_id'];
+        $issues = $this->issueModel->getIssuesByTenant($tenant_id);
 
-        $pending_issues = 0;
-        $in_progress_issues = 0;
-        $resolved_issues = 0;
-
-        foreach ($issues as $issue) {
-            switch ($issue->status) {
-                case 'pending':
-                    $pending_issues++;
-                    break;
-                case 'in_progress':
-                case 'assigned':
-                    $in_progress_issues++;
-                    break;
-                case 'resolved':
-                    $resolved_issues++;
-                    break;
-            }
-        }
+        // Get issue stats using model method with 'all' period
+        $issueStats = $this->issueModel->getIssueStats($tenant_id, 'tenant', 'all');
 
         $data = [
             'page_title' => 'Track Issues - TenantHub',
             'page' => 'track_issues',
             'user_name' => $_SESSION['user_name'],
             'issues' => $issues,
-            'pending_issues' => $pending_issues,
-            'in_progress_issues' => $in_progress_issues,
-            'resolved_issues' => $resolved_issues
+            'issueStats' => $issueStats,
+            'pending_issues' => $issueStats->pending_count ?? 0,
+            'in_progress_issues' => $issueStats->in_progress_count ?? 0,
+            'resolved_issues' => $issueStats->resolved_count ?? 0
         ];
 
         $this->view('tenant/v_track_issues', $data);
     }
-    
+
     public function details($id = null)
     {
         if (!$id) {
@@ -244,19 +230,21 @@ class Issues extends Controller
         // 2. Get status updates from notifications
         $notificationModel = $this->model('M_Notifications');
         $allNotifications = $notificationModel->getNotificationsByUser($_SESSION['user_id']);
-        
+
         // Filter notifications related to this issue
         foreach ($allNotifications as $notification) {
-            if ($notification->type === 'issue_update' && 
-                strpos($notification->message, $issue->title) !== false) {
+            if (
+                $notification->type === 'issue_update' &&
+                strpos($notification->message, $issue->title) !== false
+            ) {
                 // Extract status from notification message
                 preg_match('/updated to: ([^"]+)/', $notification->message, $matches);
                 $statusText = $matches[1] ?? 'Updated';
-                
+
                 // Extract who updated it from message
                 preg_match('/by ([^"]+) on/', $notification->message, $updaterMatches);
                 $updaterName = $updaterMatches[1] ?? 'Property Manager';
-                
+
                 $statusHistory[] = [
                     'status' => strtolower(str_replace(' ', '_', $statusText)),
                     'status_text' => $statusText,
@@ -278,7 +266,7 @@ class Issues extends Controller
                     break;
                 }
             }
-            
+
             if (!$alreadyResolved) {
                 $statusHistory[] = [
                     'status' => 'resolved',
@@ -292,7 +280,7 @@ class Issues extends Controller
         }
 
         // Sort status history by date (oldest first)
-        usort($statusHistory, function($a, $b) {
+        usort($statusHistory, function ($a, $b) {
             return strtotime($a['date_time']) - strtotime($b['date_time']);
         });
 
@@ -488,5 +476,69 @@ class Issues extends Controller
             flash('issue_message', 'Something went wrong. Unable to delete issue.', 'alert alert-danger');
             redirect('issues/track');
         }
+    }
+
+    /**
+     * AJAX endpoint for getting issue stat card data by period
+     */
+    public function getStatData()
+    {
+        // Only accept POST requests
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            return;
+        }
+
+        // Get JSON data from request body
+        $input = json_decode(file_get_contents('php://input'), true);
+        $statType = $input['stat_type'] ?? '';
+        $period = $input['period'] ?? 'all';
+        $tenant_id = $_SESSION['user_id'];
+
+        // Validate period
+        if (!in_array($period, ['all', 'month', 'year'])) {
+            $period = 'all';
+        }
+
+        $value = 0;
+        $subtitle = '';
+
+        switch ($statType) {
+            case 'tenant_issues_pending':
+                $stats = $this->issueModel->getIssueStats($tenant_id, 'tenant', $period);
+                $value = $stats->pending_count ?? 0;
+                $subtitle = 'Awaiting response';
+                break;
+
+            case 'tenant_issues_progress':
+                $stats = $this->issueModel->getIssueStats($tenant_id, 'tenant', $period);
+                $value = $stats->in_progress_count ?? 0;
+                $subtitle = 'Being worked on';
+                break;
+
+            case 'tenant_issues_resolved':
+                $stats = $this->issueModel->getIssueStats($tenant_id, 'tenant', $period);
+                $value = $stats->resolved_count ?? 0;
+                $subtitle = 'Completed';
+                break;
+
+            case 'tenant_issues_avg_days':
+                $stats = $this->issueModel->getIssueStats($tenant_id, 'tenant', $period);
+                $avgDays = $stats->avg_resolution_days ?? 0;
+                $value = number_format($avgDays, 1);
+                $subtitle = 'Average resolution';
+                break;
+
+            default:
+                $value = 0;
+                $subtitle = 'Unknown stat type';
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'value' => $value,
+            'subtitle' => $subtitle
+        ]);
     }
 }

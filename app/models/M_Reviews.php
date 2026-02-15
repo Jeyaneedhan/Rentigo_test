@@ -289,4 +289,30 @@ class M_Reviews
         $this->db->bind(':tenant_id', $tenant_id);
         return $this->db->resultSet();
     }
+
+    /**
+     * Get review statistics for a user with period filtering
+     * @param int $user_id The user's ID
+     * @param string $type 'written' or 'received'
+     * @param string $period 'all', 'month', or 'year' for date filtering
+     */
+    public function getUserReviewStats($user_id, $type = 'written', $period = 'all')
+    {
+        $dateFilter = getDateRangeByPeriod('created_at', $period);
+
+        if ($type === 'written') {
+            $this->db->query('SELECT
+                COUNT(*) as review_count,
+                COALESCE(AVG(rating), 0) as avg_rating
+            FROM reviews WHERE reviewer_id = :user_id AND ' . $dateFilter);
+        } else {
+            $this->db->query('SELECT
+                COUNT(*) as review_count,
+                COALESCE(AVG(rating), 0) as avg_rating
+            FROM reviews WHERE reviewee_id = :user_id AND status = "approved" AND ' . $dateFilter);
+        }
+
+        $this->db->bind(':user_id', $user_id);
+        return $this->db->single();
+    }
 }

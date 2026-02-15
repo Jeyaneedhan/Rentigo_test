@@ -314,13 +314,14 @@ class M_Issue
             SELECT
                 COUNT(*) as total_issues,
                 SUM(CASE WHEN i.status = 'pending' THEN 1 ELSE 0 END) as pending_count,
-                SUM(CASE WHEN i.status = 'in_progress' THEN 1 ELSE 0 END) as in_progress_count,
+                SUM(CASE WHEN i.status = 'in_progress' OR i.status = 'assigned' THEN 1 ELSE 0 END) as in_progress_count,
                 SUM(CASE WHEN i.status = 'resolved' THEN 1 ELSE 0 END) as resolved_count,
                 SUM(CASE WHEN i.status = 'cancelled' THEN 1 ELSE 0 END) as cancelled_count,
                 SUM(CASE WHEN i.priority = 'emergency' THEN 1 ELSE 0 END) as emergency_count,
                 SUM(CASE WHEN i.priority = 'high' THEN 1 ELSE 0 END) as high_count,
                 SUM(CASE WHEN i.priority = 'medium' THEN 1 ELSE 0 END) as medium_count,
-                SUM(CASE WHEN i.priority = 'low' THEN 1 ELSE 0 END) as low_count
+                SUM(CASE WHEN i.priority = 'low' THEN 1 ELSE 0 END) as low_count,
+                AVG(CASE WHEN i.status = 'resolved' AND i.resolved_at IS NOT NULL THEN DATEDIFF(i.resolved_at, i.created_at) END) as avg_resolution_days
             FROM issues i
             $whereClause
         ");

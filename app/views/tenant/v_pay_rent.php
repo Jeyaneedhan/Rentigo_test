@@ -18,42 +18,74 @@ AutoPaginate::init($data, 5);
     <?php flash('payment_message'); ?>
 
     <!-- Payment Statistics -->
-    <?php if (isset($data['totalPayments'])): ?>
+    <?php if (isset($data['paymentStats'])): ?>
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" data-stat-type="tenant_total_paid">
                 <div class="stat-icon">
                     <i class="fas fa-money-bill-wave"></i>
                 </div>
                 <div class="stat-details">
-                    <h4>LKR <?php echo number_format(($data['totalPayments']->total_paid ?? 0) * 1.10, 2); ?></h4>
-                    <p>Total Paid (30 Days)</p>
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_total_paid" onclick="toggleStatDropdown('tenant_total_paid')">Total Paid</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_total_paid">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_total_paid', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_total_paid', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_total_paid', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h4 id="stat-value-tenant_total_paid">LKR <?php echo number_format($data['paymentStats']->total_paid ?? 0, 0); ?></h4>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_total_paid"><?php echo $data['paymentStats']->completed_count ?? 0; ?> payments</span>
                 </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-stat-type="tenant_payments_made">
                 <div class="stat-icon">
                     <i class="fas fa-receipt"></i>
                 </div>
                 <div class="stat-details">
-                    <h4><?php echo $data['totalPayments']->total_payments ?? 0; ?></h4>
-                    <p>Payments Made (30 Days)</p>
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_payments_made" onclick="toggleStatDropdown('tenant_payments_made')">Payments Made</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_payments_made">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_payments_made', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_payments_made', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_payments_made', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h4 id="stat-value-tenant_payments_made"><?php echo $data['paymentStats']->completed_count ?? 0; ?></h4>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_payments_made">Completed payments</span>
                 </div>
             </div>
-            <div class="stat-card <?php echo !empty($data['pendingPayments']) ? 'warning' : ''; ?>">
+            <div class="stat-card <?php echo ($data['paymentStats']->pending_count ?? 0) > 0 ? 'warning' : ''; ?>" data-stat-type="tenant_payments_pending">
                 <div class="stat-icon">
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="stat-details">
-                    <h4><?php echo $data['pendingCount30'] ?? 0; ?></h4>
-                    <p>Pending (30 Days)</p>
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_payments_pending" onclick="toggleStatDropdown('tenant_payments_pending')">Pending</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_payments_pending">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_payments_pending', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_payments_pending', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_payments_pending', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h4 id="stat-value-tenant_payments_pending"><?php echo $data['paymentStats']->pending_count ?? 0; ?></h4>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_payments_pending">LKR <?php echo number_format($data['paymentStats']->pending_amount ?? 0, 0); ?></span>
                 </div>
             </div>
-            <div class="stat-card <?php echo !empty($data['overduePayments']) ? 'danger' : ''; ?>">
+            <div class="stat-card <?php echo ($data['paymentStats']->overdue_count ?? 0) > 0 ? 'danger' : ''; ?>" data-stat-type="tenant_payments_overdue">
                 <div class="stat-icon">
                     <i class="fas fa-exclamation-circle"></i>
                 </div>
                 <div class="stat-details">
-                    <h4><?php echo $data['overdueCount30'] ?? 0; ?></h4>
-                    <p>Overdue (30 Days)</p>
+                    <div class="stat-header">
+                        <span class="stat-label-clickable" id="stat-label-tenant_payments_overdue" onclick="toggleStatDropdown('tenant_payments_overdue')">Overdue</span>
+                        <div class="stat-dropdown" id="stat-dropdown-tenant_payments_overdue">
+                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_payments_overdue', 'all', event)">All Time</div>
+                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_payments_overdue', 'year', event)">This Year</div>
+                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_payments_overdue', 'month', event)">This Month</div>
+                        </div>
+                    </div>
+                    <h4 id="stat-value-tenant_payments_overdue"><?php echo $data['paymentStats']->overdue_count ?? 0; ?></h4>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_payments_overdue"><?php echo ($data['paymentStats']->overdue_count ?? 0) > 0 ? 'Immediate attention' : 'Good standing'; ?></span>
                 </div>
             </div>
         </div>
@@ -79,7 +111,7 @@ AutoPaginate::init($data, 5);
                 <div class="rent-payment-card <?php echo $isOverdue ? 'overdue' : ''; ?>">
                     <div class="rent-details">
                         <h4><?php echo htmlspecialchars($payment->property_address ?? 'Property'); ?></h4>
-                        <div class="rent-amount">LKR <?php echo number_format($payment->amount * 1.10, 2); ?></div>
+                        <div class="rent-amount">LKR <?php echo number_format($payment->amount * 1.10, 0); ?></div>
                         <div class="due-date">
                             <i class="fas fa-calendar"></i>
                             Due: <?php echo date('F d, Y', strtotime($payment->due_date)); ?>
@@ -155,7 +187,7 @@ AutoPaginate::init($data, 5);
                                     ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($payment->property_address ?? 'N/A'); ?></td>
-                                <td>LKR <?php echo number_format($payment->amount * 1.10, 2); ?></td>
+                                <td>LKR <?php echo number_format($payment->amount * 1.10, 0); ?></td>
                                 <td><?php echo htmlspecialchars(ucfirst($payment->payment_method ?? 'N/A')); ?></td>
                                 <td>
                                     <?php if ($payment->transaction_id): ?>
