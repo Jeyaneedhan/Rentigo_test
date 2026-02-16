@@ -36,9 +36,16 @@ AutoPaginate::init($data, 6);
             <select class="form-select" id="statusFilter">
                 <option value="">All Status</option>
                 <option value="occupied">Occupied</option>
-                <option value="vacant">Vacant</option>
+                <option value="available">Available</option>
                 <option value="maintenance">Under Maintenance</option>
-                <option value="maintenance_only">Maintenance Only</option>
+            </select>
+        </div>
+        <div class="filter-dropdown-wrapper">
+            <select class="form-select" id="approvalFilter">
+                <option value="">All Approvals</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
             </select>
         </div>
         <div class="filter-dropdown-wrapper">
@@ -73,6 +80,7 @@ AutoPaginate::init($data, 6);
                 data-status="<?php echo isset($property->status) ? htmlspecialchars($property->status) : ''; ?>"
                 data-type="<?php echo isset($property->property_type) ? htmlspecialchars($property->property_type) : ''; ?>"
                 data-listing-type="<?php echo htmlspecialchars($listingType); ?>"
+                data-approval="<?php echo htmlspecialchars(strtolower($property->approval_status ?? 'pending')); ?>"
                 onclick="navigateToProperty(<?php echo $property->id; ?>)"
                 style="cursor: pointer;">
 
@@ -773,6 +781,7 @@ AutoPaginate::init($data, 6);
         initFilter('#statusFilter', '.property-card', null, 'data-status');
         initFilter('#typeFilter', '.property-card', null, 'data-type');
         initFilter('#listingTypeFilter', '.property-card', null, 'data-listing-type');
+        initFilter('#approvalFilter', '.property-card', null, 'data-approval');
 
         // Search functionality
         const searchInput = document.getElementById('propertySearch');
@@ -898,6 +907,7 @@ AutoPaginate::init($data, 6);
         document.getElementById('statusFilter').value = '';
         document.getElementById('typeFilter').value = '';
         document.getElementById('listingTypeFilter').value = '';
+        document.getElementById('approvalFilter').value = '';
         document.getElementById('propertySearch').value = '';
 
         document.querySelectorAll('.property-card').forEach(card => {
