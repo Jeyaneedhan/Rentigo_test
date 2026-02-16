@@ -160,7 +160,7 @@ class Properties extends Controller
             'address'       => trim($postData['address'] ?? ''),
             'property_type' => trim($postData['type'] ?? ''),
             'bedrooms'      => (int)($postData['bedrooms'] ?? 0),
-            'bathrooms'     => (float)($postData['bathrooms'] ?? 0),
+            'bathrooms'     => (int)($postData['bathrooms'] ?? 0),
             'sqft'          => !empty($postData['sqft']) ? (int)$postData['sqft'] : null,
             'rent'          => (float)($postData['rent'] ?? 0),
             'deposit'       => !empty($postData['deposit']) ? (float)$postData['deposit'] : null,
@@ -254,7 +254,7 @@ class Properties extends Controller
             'address'       => trim($postData['address'] ?? ''),
             'property_type' => trim($postData['type'] ?? ''),
             'bedrooms'      => (int)($postData['bedrooms'] ?? 0),
-            'bathrooms'     => (float)($postData['bathrooms'] ?? 1),
+            'bathrooms'     => (int)($postData['bathrooms'] ?? 1),
             'sqft'          => !empty($postData['sqft']) ? (int)$postData['sqft'] : null,
             'rent'          => 0,
             'deposit'       => null,
@@ -730,7 +730,7 @@ class Properties extends Controller
                 'address' => trim($_POST['address'] ?? ''),
                 'property_type' => trim($_POST['property_type'] ?? ''),
                 'bedrooms' => (int)($_POST['bedrooms'] ?? 0),
-                'bathrooms' => (float)($_POST['bathrooms'] ?? 0),
+                'bathrooms' => (int)($_POST['bathrooms'] ?? 0),
                 'sqft' => !empty($_POST['sqft']) ? (int)$_POST['sqft'] : null,
                 'parking' => trim($_POST['parking'] ?? '0'),
                 'pet_policy' => trim($_POST['pet_policy'] ?? 'no'),
@@ -762,6 +762,29 @@ class Properties extends Controller
 
     public function edit($id)
     {
+        // First, check if property exists and user has permission to edit
+        $existingProperty = $this->propertyModel->getPropertyById($id);
+
+        if (!$existingProperty) {
+            flash('property_message', 'Property not found', 'alert alert-danger');
+            redirect('properties/index');
+            return;
+        }
+
+        // Check ownership - landlord can only edit their own properties
+        if ($existingProperty->landlord_id != $_SESSION['user_id']) {
+            flash('property_message', 'Unauthorized: You can only edit your own properties', 'alert alert-danger');
+            redirect('properties/index');
+            return;
+        }
+
+        // Check if property is approved - approved properties cannot be edited
+        if (strtolower($existingProperty->approval_status ?? '') === 'approved') {
+            flash('property_message', 'This property has been approved by admin and cannot be edited. Please contact support if changes are needed.', 'alert alert-warning');
+            redirect('properties/index');
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // ============================================
             // FORM SUBMISSION
@@ -776,14 +799,6 @@ class Properties extends Controller
 
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
 
-            $existingProperty = $this->propertyModel->getPropertyById($id);
-
-            if (!$existingProperty) {
-                flash('property_message', 'Property not found');
-                redirect('properties/index');
-                return;
-            }
-
             $validator = new Validator();
 
             if ($existingProperty->listing_type === 'maintenance') {
@@ -792,7 +807,7 @@ class Properties extends Controller
                     'address' => trim($_POST['address'] ?? ''),
                     'property_type' => trim($_POST['property_type'] ?? ''),
                     'bedrooms' => (int)($existingProperty->bedrooms ?? 0),
-                    'bathrooms' => (float)($existingProperty->bathrooms ?? 1),
+                    'bathrooms' => (int)($existingProperty->bathrooms ?? 1),
                     'sqft' => !empty($_POST['sqft']) ? (int)$_POST['sqft'] : null,
                     'rent' => 0,
                     'deposit' => null,
@@ -823,7 +838,7 @@ class Properties extends Controller
                     'address' => trim($_POST['address'] ?? ''),
                     'property_type' => trim($_POST['property_type'] ?? ''),
                     'bedrooms' => (int)($_POST['bedrooms'] ?? 0),
-                    'bathrooms' => (float)($_POST['bathrooms'] ?? 0),
+                    'bathrooms' => (int)($_POST['bathrooms'] ?? 0),
                     'sqft' => !empty($_POST['sqft']) ? (int)$_POST['sqft'] : null,
                     'rent' => (float)($_POST['rent'] ?? 0),
                     'deposit' => !empty($_POST['deposit']) ? (float)$_POST['deposit'] : null,
@@ -917,12 +932,8 @@ class Properties extends Controller
             // DISPLAY FORM
             // ============================================
 
-            $property = $this->propertyModel->getPropertyById($id);
-
-            if (!$property) {
-                flash('property_message', 'Property not found');
-                redirect('properties/index');
-            }
+            // Use the already fetched property from the top of the method
+            $property = $existingProperty;
 
             $property->images = $this->getPropertyImages($id);
             $property->documents = $this->getPropertyDocuments($id);
@@ -1042,15 +1053,71 @@ class Properties extends Controller
         exit;
     }
 
+    /**
+     * View property details
+     */
+    public function details($id)
+    {
+        $property = $this->propertyModel->getPropertyById($id);
+
+        if (!$property) {
+            flash('property_message', 'Property not found', 'alert alert-danger');
+            redirect('properties/index');
+            return;
+        }
+
+        // Check ownership - landlord can only view their own properties
+        if ($property->landlord_id != $_SESSION['user_id']) {
+            flash('property_message', 'Unauthorized: You can only view your own properties', 'alert alert-danger');
+            redirect('properties/index');
+            return;
+        }
+
+        // Load images and documents
+        $property->images = $this->getPropertyImages($id);
+        $property->documents = $this->getPropertyDocuments($id);
+
+        $data = [
+            'title' => 'Property Details',
+            'property' => $property
+        ];
+
+        $this->view('landlord/v_property_details', $data);
+    }
+
     public function delete($id)
     {
+        // First, check if property exists
+        $property = $this->propertyModel->getPropertyById($id);
+
+        if (!$property) {
+            flash('property_message', 'Property not found', 'alert alert-danger');
+            redirect('properties/index');
+            return;
+        }
+
+        // Check ownership - landlord can only delete their own properties
+        if ($property->landlord_id != $_SESSION['user_id']) {
+            flash('property_message', 'Unauthorized: You can only delete your own properties', 'alert alert-danger');
+            redirect('properties/index');
+            return;
+        }
+
+        // Check if property is approved - approved properties cannot be deleted
+        if (strtolower($property->approval_status ?? '') === 'approved') {
+            flash('property_message', 'This property has been approved by admin and cannot be deleted. Please contact support if removal is needed.', 'alert alert-warning');
+            redirect('properties/index');
+            return;
+        }
+
         $this->deletePropertyImages($id);
 
         if ($this->propertyModel->deleteProperty($id)) {
-            flash('property_message', 'Property and all associated images removed');
+            flash('property_message', 'Property and all associated images removed', 'alert alert-success');
             redirect('properties/index');
         } else {
-            die('Something went wrong');
+            flash('property_message', 'Something went wrong while deleting the property', 'alert alert-danger');
+            redirect('properties/index');
         }
     }
 

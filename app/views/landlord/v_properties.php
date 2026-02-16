@@ -72,7 +72,9 @@ AutoPaginate::init($data, 6);
             <div class="property-card"
                 data-status="<?php echo isset($property->status) ? htmlspecialchars($property->status) : ''; ?>"
                 data-type="<?php echo isset($property->property_type) ? htmlspecialchars($property->property_type) : ''; ?>"
-                data-listing-type="<?php echo htmlspecialchars($listingType); ?>">
+                data-listing-type="<?php echo htmlspecialchars($listingType); ?>"
+                onclick="navigateToProperty(<?php echo $property->id; ?>)"
+                style="cursor: pointer;">
 
                 <!-- Property Image with Gallery -->
                 <div class="property-image-container">
@@ -187,10 +189,21 @@ AutoPaginate::init($data, 6);
 
                     <!-- Property Actions -->
                     <div class="property-actions">
-                        <a href="<?php echo URLROOT; ?>/properties/edit/<?php echo $property->id; ?>"
-                            class="btn btn-primary btn-sm">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
+                        <?php
+                        // Check if property is approved - approved properties cannot be edited or deleted
+                        $isApproved = strtolower($property->approval_status ?? '') === 'approved';
+                        ?>
+
+                        <?php if (!$isApproved): ?>
+                            <a href="<?php echo URLROOT; ?>/properties/edit/<?php echo $property->id; ?>"
+                                class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        <?php else: ?>
+                            <span class="btn btn-secondary btn-sm btn-disabled" title="Approved properties cannot be edited">
+                                <i class="fas fa-lock"></i> Locked
+                            </span>
+                        <?php endif; ?>
 
                         <!-- View Images Button -->
                         <?php if (isset($property->images) && count($property->images) > 0): ?>
@@ -200,12 +213,14 @@ AutoPaginate::init($data, 6);
                             </button>
                         <?php endif; ?>
 
-                        <!-- Delete button -->
-                        <a href="<?php echo URLROOT; ?>/properties/delete/<?php echo $property->id; ?>"
-                            class="btn btn-danger btn-sm"
-                            onclick="return confirm('Are you sure you want to delete this property and all its images?');">
-                            <i class="fas fa-trash"></i> Delete
-                        </a>
+                        <?php if (!$isApproved): ?>
+                            <!-- Delete button -->
+                            <a href="<?php echo URLROOT; ?>/properties/delete/<?php echo $property->id; ?>"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Are you sure you want to delete this property and all its images?');">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -406,6 +421,47 @@ AutoPaginate::init($data, 6);
     .badge-secondary {
         background: linear-gradient(135deg, #6b7280, #4b5563);
         color: white;
+    }
+
+    /* Disabled/Locked Button Styles */
+    .btn-disabled {
+        cursor: not-allowed !important;
+        opacity: 0.7;
+        pointer-events: auto;
+        background: linear-gradient(135deg, #9ca3af, #6b7280) !important;
+        border: none;
+    }
+
+    .btn-disabled:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .btn-disabled i {
+        margin-right: 0.25rem;
+    }
+
+    /* Clickable Property Card */
+    .property-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .property-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Prevent buttons from triggering card click */
+    .property-actions {
+        position: relative;
+        z-index: 10;
+    }
+
+    .property-actions a,
+    .property-actions button,
+    .property-actions span {
+        position: relative;
+        z-index: 10;
     }
 
     /* No Properties Styles */
@@ -956,6 +1012,18 @@ AutoPaginate::init($data, 6);
 
     // URL constants
     const URLROOT = '<?php echo URLROOT; ?>';
+
+    // Navigate to property details
+    function navigateToProperty(propertyId) {
+        window.location.href = `${URLROOT}/properties/details/${propertyId}`;
+    }
+
+    // Prevent action buttons from triggering card click
+    document.querySelectorAll('.property-actions a, .property-actions button, .property-actions span, .property-image, .dot, .image-counter').forEach(el => {
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
 </script>
 
 <?php require APPROOT . '/views/inc/landlord_footer.php'; ?>
