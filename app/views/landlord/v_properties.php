@@ -173,7 +173,7 @@ AutoPaginate::init($data, 6);
                         <?php endif; ?>
 
                         <?php if (!$isMaintenanceProperty): ?>
-                            <p><strong>Bathrooms:</strong> <?php echo $property->bathrooms ?? '-'; ?></p>
+                            <p><strong>Bathrooms:</strong> <?php echo isset($property->bathrooms) ? (int)$property->bathrooms : '-'; ?></p>
                         <?php endif; ?>
 
                         <!-- Square Footage -->

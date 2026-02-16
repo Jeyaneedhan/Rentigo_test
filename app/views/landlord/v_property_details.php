@@ -107,7 +107,7 @@
                             </div>
                             <div class="info-item">
                                 <label>Bathrooms:</label>
-                                <span><?php echo $property->bathrooms ?? 'N/A'; ?></span>
+                                <span><?php echo isset($property->bathrooms) ? (int)$property->bathrooms : 'N/A'; ?></span>
                             </div>
                             <div class="info-item">
                                 <label>Square Footage:</label>
