@@ -107,7 +107,7 @@
   display: flex;
   gap: 0.75rem;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .search-input-wrapper {
