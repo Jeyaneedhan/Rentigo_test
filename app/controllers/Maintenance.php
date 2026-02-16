@@ -38,7 +38,7 @@ class Maintenance extends Controller
 
         // ==================== APPLY FILTERS ====================
         $filteredMaintenanceRequests = $allMaintenanceRequests;
-        
+
         // Get filter parameters
         $filterStatus = $_GET['filter_status'] ?? '';
         $filterPriority = $_GET['filter_priority'] ?? '';
@@ -47,23 +47,23 @@ class Maintenance extends Controller
 
         // Apply Status Filter
         if (!empty($filterStatus)) {
-            $filteredMaintenanceRequests = array_filter($filteredMaintenanceRequests, function($request) use ($filterStatus) {
+            $filteredMaintenanceRequests = array_filter($filteredMaintenanceRequests, function ($request) use ($filterStatus) {
                 return strtolower($request->status) === strtolower($filterStatus);
             });
         }
 
         // Apply Priority Filter
         if (!empty($filterPriority)) {
-            $filteredMaintenanceRequests = array_filter($filteredMaintenanceRequests, function($request) use ($filterPriority) {
+            $filteredMaintenanceRequests = array_filter($filteredMaintenanceRequests, function ($request) use ($filterPriority) {
                 return strtolower($request->priority) === strtolower($filterPriority);
             });
         }
 
         // Apply Date Range Filter (on created_at)
         if (!empty($filterDateFrom) || !empty($filterDateTo)) {
-            $filteredMaintenanceRequests = array_filter($filteredMaintenanceRequests, function($request) use ($filterDateFrom, $filterDateTo) {
+            $filteredMaintenanceRequests = array_filter($filteredMaintenanceRequests, function ($request) use ($filterDateFrom, $filterDateTo) {
                 $createdDate = strtotime($request->created_at);
-                
+
                 // Check FROM date
                 if (!empty($filterDateFrom)) {
                     $fromDate = strtotime($filterDateFrom);
@@ -71,7 +71,7 @@ class Maintenance extends Controller
                         return false;
                     }
                 }
-                
+
                 // Check TO date
                 if (!empty($filterDateTo)) {
                     $toDate = strtotime($filterDateTo . ' 23:59:59'); // End of day
@@ -79,7 +79,7 @@ class Maintenance extends Controller
                         return false;
                     }
                 }
-                
+
                 return true;
             });
         }
@@ -93,7 +93,7 @@ class Maintenance extends Controller
             'user_name' => $_SESSION['user_name'],
             'maintenanceRequests' => $filteredMaintenanceRequests,
             'maintenanceStats' => $maintenanceStats,
-            
+
             // Pass filter values back to view for persistence
             'filter_status' => $filterStatus,
             'filter_priority' => $filterPriority,
@@ -193,6 +193,93 @@ class Maintenance extends Controller
         }
     }
 
+    // Edit maintenance request (with 5-minute time restriction)
+    public function edit($id)
+    {
+        // Only landlords can edit their own maintenance requests
+        if (!isLoggedIn() || $_SESSION['user_type'] !== 'landlord') {
+            flash('maintenance_message', 'Unauthorized access', 'alert alert-danger');
+            redirect('maintenance/index');
+        }
+
+        // Get maintenance request
+        $maintenance = $this->maintenanceModel->getMaintenanceById($id);
+
+        if (!$maintenance) {
+            flash('maintenance_message', 'Maintenance request not found', 'alert alert-danger');
+            redirect('maintenance/index');
+        }
+
+        // Check ownership
+        if ($maintenance->landlord_id != $_SESSION['user_id']) {
+            flash('maintenance_message', 'Unauthorized access', 'alert alert-danger');
+            redirect('maintenance/index');
+        }
+
+        // Check if status is pending (can only edit pending requests)
+        if ($maintenance->status !== 'pending') {
+            flash('maintenance_message', 'Cannot edit - request is already ' . $maintenance->status, 'alert alert-danger');
+            redirect('maintenance/index');
+        }
+
+        // Check 5-minute time restriction
+        $createdTime = strtotime($maintenance->created_at);
+        $currentTime = time();
+        $minutesElapsed = ($currentTime - $createdTime) / 60;
+
+        if ($minutesElapsed > 5) {
+            flash('maintenance_message', 'Edit period expired - you can only edit within 5 minutes of creation', 'alert alert-danger');
+            redirect('maintenance/index');
+        }
+
+        // Get landlord's properties
+        $properties = $this->propertyModel->getPropertiesByLandlord($_SESSION['user_id']);
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Sanitize POST data
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            // Prepare update data
+            $data = [
+                'title' => trim($_POST['title']),
+                'description' => trim($_POST['description']),
+                'category' => trim($_POST['category']),
+                'priority' => trim($_POST['priority']),
+                'estimated_cost' => trim($_POST['estimated_cost']) ?: null,
+                'notes' => trim($_POST['notes']) ?: ''
+            ];
+
+            // Validate required fields
+            if (empty($data['title']) || empty($data['description']) || empty($data['category']) || empty($data['priority'])) {
+                flash('maintenance_message', 'Please fill in all required fields', 'alert alert-danger');
+                redirect('maintenance/edit/' . $id);
+            }
+
+            // Update maintenance request
+            if ($this->maintenanceModel->updateMaintenance($id, $data)) {
+                flash('maintenance_message', 'Maintenance request updated successfully', 'alert alert-success');
+                redirect('maintenance/index');
+            } else {
+                flash('maintenance_message', 'Failed to update maintenance request', 'alert alert-danger');
+                redirect('maintenance/edit/' . $id);
+            }
+        } else {
+            // Calculate remaining time in seconds
+            $remainingSeconds = 300 - ($currentTime - $createdTime); // 300 seconds = 5 minutes
+
+            $data = [
+                'page' => 'maintenance',
+                'title' => 'Edit Maintenance Request',
+                'user_name' => $_SESSION['user_name'],
+                'maintenance' => $maintenance,
+                'properties' => $properties,
+                'remaining_seconds' => max(0, $remainingSeconds)
+            ];
+
+            $this->view('landlord/v_edit_maintenance', $data);
+        }
+    }
+
     // View maintenance request details
     public function details($id)
     {
@@ -255,70 +342,70 @@ class Maintenance extends Controller
         }
     }
 
-       // Update maintenance status
-       public function updateStatus($id)
-       {
-           if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-               $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-   
-               $status = trim($_POST['status']);
-   
-               // Get maintenance request details
-               $maintenance = $this->maintenanceModel->getMaintenanceById($id);
-   
-               if (!$maintenance) {
-                   flash('maintenance_message', 'Maintenance request not found', 'alert alert-danger');
-                   redirect('maintenance/index');
-               }
-   
-               // Verify Property Manager has permission (if user is PM)
-               if ($_SESSION['user_type'] === 'property_manager') {
-                   $propertyModel = $this->model('M_Properties');
-                   $property = $propertyModel->getPropertyById($maintenance->property_id);
-                   
-                   if (!$property || $property->manager_id != $_SESSION['user_id']) {
-                       flash('maintenance_message', 'Unauthorized access', 'alert alert-danger');
-                       redirect('maintenance/index');
-                   }
-               }
-   
-               if ($this->maintenanceModel->updateMaintenanceStatus($id, $status)) {
-                   // Send notification to landlord if user is Property Manager
-                   if ($_SESSION['user_type'] === 'property_manager' && $maintenance->landlord_id) {
-                       $statusText = ucfirst(str_replace('_', ' ', $status));
-                       
-                       // Get current date/time
-                      $updateDateTime = date('F j, Y \a\t g:i A');
-                       
-                       // Get Property Manager name
-                       $pmName = $_SESSION['user_name'] ?? 'Property Manager';
-                       
-                       // Create notification message
-                       $notificationMessage = sprintf(
-                           'Your maintenance request "%s" has been updated to: %s by %s on %s',
-                           $maintenance->title,
-                           $statusText,
-                           $pmName,
-                           $updateDateTime
-                       );
-   
-                       $this->notificationModel->createNotification([
-                           'user_id' => $maintenance->landlord_id,
-                           'type' => 'maintenance_update',
-                           'title' => 'Maintenance Request Status Updated',
-                           'message' => $notificationMessage,
-                           'link' => 'maintenance/details/' . $id
-                       ]);
-                   }
-   
-                   flash('maintenance_message', 'Status updated successfully', 'alert alert-success');
-               } else {
-                   flash('maintenance_message', 'Failed to update status', 'alert alert-danger');
-               }
-   
-               redirect('maintenance/details/' . $id);
-           }
-       }
+    // Update maintenance status
+    public function updateStatus($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            $status = trim($_POST['status']);
+
+            // Get maintenance request details
+            $maintenance = $this->maintenanceModel->getMaintenanceById($id);
+
+            if (!$maintenance) {
+                flash('maintenance_message', 'Maintenance request not found', 'alert alert-danger');
+                redirect('maintenance/index');
+            }
+
+            // Verify Property Manager has permission (if user is PM)
+            if ($_SESSION['user_type'] === 'property_manager') {
+                $propertyModel = $this->model('M_Properties');
+                $property = $propertyModel->getPropertyById($maintenance->property_id);
+
+                if (!$property || $property->manager_id != $_SESSION['user_id']) {
+                    flash('maintenance_message', 'Unauthorized access', 'alert alert-danger');
+                    redirect('maintenance/index');
+                }
+            }
+
+            if ($this->maintenanceModel->updateMaintenanceStatus($id, $status)) {
+                // Send notification to landlord if user is Property Manager
+                if ($_SESSION['user_type'] === 'property_manager' && $maintenance->landlord_id) {
+                    $statusText = ucfirst(str_replace('_', ' ', $status));
+
+                    // Get current date/time
+                    $updateDateTime = date('F j, Y \a\t g:i A');
+
+                    // Get Property Manager name
+                    $pmName = $_SESSION['user_name'] ?? 'Property Manager';
+
+                    // Create notification message
+                    $notificationMessage = sprintf(
+                        'Your maintenance request "%s" has been updated to: %s by %s on %s',
+                        $maintenance->title,
+                        $statusText,
+                        $pmName,
+                        $updateDateTime
+                    );
+
+                    $this->notificationModel->createNotification([
+                        'user_id' => $maintenance->landlord_id,
+                        'type' => 'maintenance_update',
+                        'title' => 'Maintenance Request Status Updated',
+                        'message' => $notificationMessage,
+                        'link' => 'maintenance/details/' . $id
+                    ]);
+                }
+
+                flash('maintenance_message', 'Status updated successfully', 'alert alert-success');
+            } else {
+                flash('maintenance_message', 'Failed to update status', 'alert alert-danger');
+            }
+
+            redirect('maintenance/details/' . $id);
+        }
+    }
 
     // Complete maintenance request
     public function complete($id)
@@ -344,6 +431,30 @@ class Maintenance extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            // Get maintenance request
+            $maintenance = $this->maintenanceModel->getMaintenanceById($id);
+
+            if (!$maintenance) {
+                flash('maintenance_message', 'Maintenance request not found', 'alert alert-danger');
+                redirect('maintenance/index');
+            }
+
+            // Check ownership (landlords can only cancel their own requests)
+            if ($_SESSION['user_type'] === 'landlord' && $maintenance->landlord_id != $_SESSION['user_id']) {
+                flash('maintenance_message', 'Unauthorized access', 'alert alert-danger');
+                redirect('maintenance/index');
+            }
+
+            // Check 5-minute time restriction
+            $createdTime = strtotime($maintenance->created_at);
+            $currentTime = time();
+            $minutesElapsed = ($currentTime - $createdTime) / 60;
+
+            if ($minutesElapsed > 5) {
+                flash('maintenance_message', 'Cannot cancel - you can only cancel within 5 minutes of creation', 'alert alert-danger');
+                redirect('maintenance/index');
+            }
 
             $cancellation_reason = trim($_POST['cancellation_reason']);
 

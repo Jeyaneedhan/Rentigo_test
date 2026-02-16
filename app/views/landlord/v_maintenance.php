@@ -148,6 +148,12 @@ AutoPaginate::init($data, 5);
             default:
                 $priorityClass = '';
         }
+
+        // Calculate time elapsed since creation (for 5-minute edit window)
+        $createdTime = strtotime($request->created_at);
+        $currentTime = time();
+        $minutesElapsed = ($currentTime - $createdTime) / 60;
+        $canEdit = ($minutesElapsed <= 5);
         ?>
         <div class="request-card <?php echo $priorityClass; ?>" data-status="<?php echo $request->status; ?>">
             <div class="request-header">
@@ -213,15 +219,35 @@ AutoPaginate::init($data, 5);
                     </a>
 
                     <?php if ($request->status === 'pending'): ?>
-                        <button class="btn btn-outline btn-sm" onclick="editRequest(<?php echo $request->id; ?>)">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
+                        <?php if ($canEdit): ?>
+                            <button class="btn btn-outline btn-sm"
+                                onclick="editRequest(<?php echo $request->id; ?>, '<?php echo $request->created_at; ?>')"
+                                data-created="<?php echo $request->created_at; ?>">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        <?php else: ?>
+                            <button class="btn btn-outline btn-sm btn-disabled"
+                                title="Edit period expired (5 minutes)"
+                                disabled>
+                                <i class="fas fa-lock"></i> Edit Locked
+                            </button>
+                        <?php endif; ?>
                     <?php endif; ?>
 
                     <?php if ($request->status !== 'completed' && $request->status !== 'cancelled'): ?>
-                        <button class="btn btn-danger btn-sm" onclick="cancelRequest(<?php echo $request->id; ?>)">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
+                        <?php if ($canEdit): ?>
+                            <button class="btn btn-danger btn-sm"
+                                onclick="cancelRequest(<?php echo $request->id; ?>, '<?php echo $request->created_at; ?>')"
+                                data-created="<?php echo $request->created_at; ?>">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        <?php else: ?>
+                            <button class="btn btn-secondary btn-sm btn-disabled"
+                                title="Cancel period expired (5 minutes)"
+                                disabled>
+                                <i class="fas fa-ban"></i> Cannot Cancel
+                            </button>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -343,6 +369,18 @@ AutoPaginate::init($data, 5);
         color: #991b1b;
     }
 
+    /* Disabled Button Styles */
+    .btn-disabled {
+        cursor: not-allowed !important;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .btn-disabled:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
     .required {
         color: #ef4444;
     }
@@ -409,11 +447,55 @@ AutoPaginate::init($data, 5);
 </style>
 
 <script>
-    function editRequest(requestId) {
+    // Helper function to check if request can be edited (within 5 minutes)
+    function canEditRequest(createdAt) {
+        const createdTime = new Date(createdAt).getTime();
+        const currentTime = new Date().getTime();
+        const minutesElapsed = (currentTime - createdTime) / 1000 / 60;
+        return minutesElapsed <= 5;
+    }
+
+    // Helper function to get remaining edit time
+    function getRemainingEditTime(createdAt) {
+        const createdTime = new Date(createdAt).getTime();
+        const currentTime = new Date().getTime();
+        const secondsElapsed = (currentTime - createdTime) / 1000;
+        const remainingSeconds = Math.max(0, 300 - secondsElapsed); // 300 seconds = 5 minutes
+
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = Math.floor(remainingSeconds % 60);
+
+        return {
+            total: remainingSeconds,
+            minutes: minutes,
+            seconds: seconds,
+            display: `${minutes}:${seconds.toString().padStart(2, '0')}`
+        };
+    }
+
+    function editRequest(requestId, createdAt) {
+        if (!canEditRequest(createdAt)) {
+            const timeRemaining = getRemainingEditTime(createdAt);
+            alert('Edit period expired. You can only edit within 5 minutes of creation.');
+            return;
+        }
+
+        const timeRemaining = getRemainingEditTime(createdAt);
+        if (timeRemaining.total < 60) {
+            if (!confirm(`Warning: Only ${Math.floor(timeRemaining.total)} seconds remaining to edit. Continue?`)) {
+                return;
+            }
+        }
+
         window.location.href = '<?php echo URLROOT; ?>/maintenance/edit/' + requestId;
     }
 
-    function cancelRequest(requestId) {
+    function cancelRequest(requestId, createdAt) {
+        if (!canEditRequest(createdAt)) {
+            alert('Cancel period expired. You can only cancel within 5 minutes of creation.');
+            return;
+        }
+
         const modal = document.getElementById('cancelModal');
         const form = document.getElementById('cancelForm');
         form.action = '<?php echo URLROOT; ?>/maintenance/cancel/' + requestId;
