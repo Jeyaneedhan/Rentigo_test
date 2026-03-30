@@ -138,9 +138,6 @@
                                 <span class="status-badge <?php echo $statusClass; ?>"><?php echo ucfirst($booking->status); ?></span>
                                 <div class="booking-actions">
                                     <a href="<?php echo URLROOT; ?>/bookings/details/<?php echo $booking->id; ?>" class="btn btn-primary btn-sm">View Details</a>
-                                    <?php if ($booking->status == 'pending'): ?>
-                                        <button onclick="cancelBooking(<?php echo $booking->id; ?>)" class="btn btn-danger btn-sm">Cancel</button>
-                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

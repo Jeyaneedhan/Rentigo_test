@@ -6,6 +6,7 @@ require_once '../app/helpers/helper.php';
 class Admin extends Controller
 {
     private $userModel;
+    private $adminPropertyModel;
 
     public function __construct()
     {
@@ -14,10 +15,15 @@ class Admin extends Controller
             redirect('users/login');
         }
         $this->userModel = $this->model('M_Users');
+        $this->adminPropertyModel = $this->model('M_AdminProperties');
 
         // Keep pending manager approval count available for sidebar badge.
         $pendingPMs = $this->userModel->getPendingPMs();
         $_SESSION['admin_pending_pm_count'] = is_array($pendingPMs) ? count($pendingPMs) : 0;
+
+        // Keep pending property approval count available for sidebar badge.
+        $propertyCounts = $this->adminPropertyModel->getPropertyCounts('all');
+        $_SESSION['admin_pending_property_count'] = (int)($propertyCounts->pending ?? 0);
     }
 
     // Main dashboard page - shows overview stats and recent activity

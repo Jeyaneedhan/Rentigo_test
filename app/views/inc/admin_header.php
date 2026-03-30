@@ -35,11 +35,15 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <?php $pendingPropertyCount = (int)($_SESSION['admin_pending_property_count'] ?? 0); ?>
                         <a href="<?php echo URLROOT; ?>/admin/properties"
                             class="nav-link <?php echo ($data['page'] ?? '') === 'properties' ? 'active' : ''; ?>"
                             data-tooltip="Properties">
                             <i class="fas fa-home"></i>
                             <span class="nav-text">Properties</span>
+                            <?php if ($pendingPropertyCount > 0): ?>
+                                <span class="nav-badge"><?php echo $pendingPropertyCount > 99 ? '99+' : $pendingPropertyCount; ?></span>
+                            <?php endif; ?>
                         </a>
                     </li>
                     <li class="nav-item">

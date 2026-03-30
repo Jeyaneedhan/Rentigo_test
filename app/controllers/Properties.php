@@ -5,6 +5,8 @@ class Properties extends Controller
 {
     private $propertyModel;
     private $rentOptimizer;
+    private $notificationModel;
+    private $userModel;
 
     public function __construct()
     {
@@ -14,6 +16,8 @@ class Properties extends Controller
 
         $this->propertyModel = $this->model('M_Properties');
         $this->rentOptimizer = $this->model('M_RentOptimizer');
+        $this->notificationModel = $this->model('M_Notifications');
+        $this->userModel = $this->model('M_Users');
     }
 
     public function index()
@@ -81,6 +85,21 @@ class Properties extends Controller
             $propertyId = $this->propertyModel->addPropertyAndReturnId($data);
 
             if ($propertyId) {
+                // Notify admins that a new property is pending approval.
+                $admins = $this->userModel->getAllUsersByType('admin');
+                if (!empty($admins)) {
+                    $message = 'New property at ' . ($data['address'] ?? 'Unknown address') . ' was submitted by ' . ($_SESSION['user_name'] ?? 'Landlord') . ' and is pending approval.';
+                    foreach ($admins as $admin) {
+                        $this->notificationModel->createNotification([
+                            'user_id' => $admin->id,
+                            'type' => 'system',
+                            'title' => 'New Property Registration',
+                            'message' => $message,
+                            'link' => 'admin/properties'
+                        ]);
+                    }
+                }
+
                 $imageUploadResult = $this->handleImageUploads($propertyId);
                 $documentUploadResult = $this->handleDocumentUploads($propertyId);
 
