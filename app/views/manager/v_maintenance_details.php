@@ -199,7 +199,15 @@
                     <div class="quotation-body">
                         <p><?php echo nl2br(htmlspecialchars($quotation->description)); ?></p>
                         <?php if ($quotation->quotation_file): ?>
-                            <a href="<?php echo URLROOT; ?>/public/uploads/quotations/<?php echo $quotation->quotation_file; ?>"
+                            <?php
+                                $quotationFile = $quotation->quotation_file;
+                                $primaryFilePath = APPROOT . '/../public/uploads/quotations/' . $quotationFile;
+                                $quotationFileUrl = URLROOT . '/uploads/quotations/' . rawurlencode($quotationFile);
+                                if (!file_exists($primaryFilePath)) {
+                                    $quotationFileUrl = URLROOT . '/public/uploads/quotations/' . rawurlencode($quotationFile);
+                                }
+                            ?>
+                            <a href="<?php echo $quotationFileUrl; ?>"
                                target="_blank" class="btn btn-sm btn-secondary">
                                 <i class="fas fa-file-pdf"></i> View Document
                             </a>

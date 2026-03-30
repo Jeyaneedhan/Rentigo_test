@@ -523,7 +523,7 @@ class Maintenance extends Controller
 
             // Handle file upload if provided
             if (isset($_FILES['quotation_file']) && $_FILES['quotation_file']['error'] == 0) {
-                $upload_dir = 'public/uploads/quotations/';
+                $upload_dir = APPROOT . '/../public/uploads/quotations/';
                 if (!is_dir($upload_dir)) {
                     mkdir($upload_dir, 0777, true);
                 }

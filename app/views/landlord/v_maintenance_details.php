@@ -48,10 +48,10 @@
                     <span><?php echo date('M d, Y', strtotime($m->created_at)); ?></span>
                 </div>
                 <?php if ($m->scheduled_date): ?>
-                <div class="info-item">
-                    <label>Scheduled Date:</label>
-                    <span><?php echo date('M d, Y', strtotime($m->scheduled_date)); ?></span>
-                </div>
+                    <div class="info-item">
+                        <label>Scheduled Date:</label>
+                        <span><?php echo date('M d, Y', strtotime($m->scheduled_date)); ?></span>
+                    </div>
                 <?php endif; ?>
             </div>
             <div class="info-section">
@@ -73,115 +73,123 @@
 
     <!-- Assigned Service Provider -->
     <?php if ($m->provider_id): ?>
-    <div class="content-card">
-        <div class="card-header">
-            <h2 class="card-title">Assigned Service Provider</h2>
-        </div>
-        <div class="card-body">
-            <div class="info-grid">
-                <div class="info-item">
-                    <label>Provider:</label>
-                    <span><?php echo htmlspecialchars($m->provider_name); ?></span>
-                </div>
-                <div class="info-item">
-                    <label>Phone:</label>
-                    <span><?php echo htmlspecialchars($m->provider_phone ?? 'N/A'); ?></span>
-                </div>
-                <div class="info-item">
-                    <label>Email:</label>
-                    <span><?php echo htmlspecialchars($m->provider_email ?? 'N/A'); ?></span>
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Assigned Service Provider</h2>
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Provider:</label>
+                        <span><?php echo htmlspecialchars($m->provider_name); ?></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Phone:</label>
+                        <span><?php echo htmlspecialchars($m->provider_phone ?? 'N/A'); ?></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Email:</label>
+                        <span><?php echo htmlspecialchars($m->provider_email ?? 'N/A'); ?></span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     <?php endif; ?>
 
     <!-- Quotations List -->
     <?php if (!empty($data['quotations'])): ?>
-    <div class="content-card">
-        <div class="card-header">
-            <h2 class="card-title">Quotations</h2>
-        </div>
-        <div class="card-body">
-            <?php foreach ($data['quotations'] as $quotation): ?>
-                <div class="quotation-card status-<?php echo $quotation->status; ?>">
-                    <div class="quotation-header">
-                        <div>
-                            <h4>LKR <?php echo number_format($quotation->amount, 2); ?></h4>
-                            <p><?php echo htmlspecialchars($quotation->provider_name); ?></p>
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Quotations</h2>
+            </div>
+            <div class="card-body">
+                <?php foreach ($data['quotations'] as $quotation): ?>
+                    <div class="quotation-card status-<?php echo $quotation->status; ?>">
+                        <div class="quotation-header">
+                            <div>
+                                <h4>LKR <?php echo number_format($quotation->amount, 2); ?></h4>
+                                <p><?php echo htmlspecialchars($quotation->provider_name); ?></p>
+                            </div>
+                            <span class="status-badge status-<?php echo $quotation->status; ?>">
+                                <?php echo ucfirst($quotation->status); ?>
+                            </span>
                         </div>
-                        <span class="status-badge status-<?php echo $quotation->status; ?>">
-                            <?php echo ucfirst($quotation->status); ?>
-                        </span>
-                    </div>
-                    <div class="quotation-body">
-                        <p><?php echo nl2br(htmlspecialchars($quotation->description)); ?></p>
-                        <?php if ($quotation->quotation_file): ?>
-                            <a href="<?php echo URLROOT; ?>/public/uploads/quotations/<?php echo $quotation->quotation_file; ?>"
-                               target="_blank" class="btn btn-sm btn-secondary">
-                                <i class="fas fa-file-pdf"></i> View Document
-                            </a>
+                        <div class="quotation-body">
+                            <p><?php echo nl2br(htmlspecialchars($quotation->description)); ?></p>
+                            <?php if ($quotation->quotation_file): ?>
+                                <?php
+                                $quotationFile = $quotation->quotation_file;
+                                $primaryFilePath = APPROOT . '/../public/uploads/quotations/' . $quotationFile;
+                                $quotationFileUrl = URLROOT . '/uploads/quotations/' . rawurlencode($quotationFile);
+                                if (!file_exists($primaryFilePath)) {
+                                    $quotationFileUrl = URLROOT . '/public/uploads/quotations/' . rawurlencode($quotationFile);
+                                }
+                                ?>
+                                <a href="<?php echo $quotationFileUrl; ?>"
+                                    target="_blank" class="btn btn-sm btn-secondary">
+                                    <i class="fas fa-file-pdf"></i> View Document
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                        <div class="quotation-footer">
+                            <small>Uploaded on <?php echo date('M d, Y', strtotime($quotation->created_at)); ?></small>
+                            <?php if ($quotation->status === 'approved'): ?>
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle"></i> Approved on <?php echo date('M d, Y', strtotime($quotation->approved_at)); ?>
+                                </small>
+                            <?php elseif ($quotation->status === 'rejected'): ?>
+                                <small class="text-danger">
+                                    <i class="fas fa-times-circle"></i> Rejected: <?php echo htmlspecialchars($quotation->rejection_reason); ?>
+                                </small>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Action buttons for pending quotations -->
+                        <?php if ($quotation->status === 'pending'): ?>
+                            <div class="quotation-actions">
+                                <button type="button" class="btn btn-success" onclick="approveQuotation(<?php echo $quotation->id; ?>)">
+                                    <i class="fas fa-check"></i> Approve Quotation
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="showRejectModal(<?php echo $quotation->id; ?>)">
+                                    <i class="fas fa-times"></i> Reject Quotation
+                                </button>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Payment button for approved quotations -->
+                        <?php if ($quotation->status === 'approved' && (empty($data['payment']) || !is_object($data['payment']))): ?>
+                            <div class="quotation-actions">
+                                <button type="button" class="btn btn-primary btn-lg" onclick="showPaymentModal(<?php echo $quotation->id; ?>, <?php echo $quotation->amount; ?>)">
+                                    <i class="fas fa-credit-card"></i> Make Payment (LKR <?php echo number_format($quotation->amount, 2); ?>)
+                                </button>
+                            </div>
                         <?php endif; ?>
                     </div>
-                    <div class="quotation-footer">
-                        <small>Uploaded on <?php echo date('M d, Y', strtotime($quotation->created_at)); ?></small>
-                        <?php if ($quotation->status === 'approved'): ?>
-                            <small class="text-success">
-                                <i class="fas fa-check-circle"></i> Approved on <?php echo date('M d, Y', strtotime($quotation->approved_at)); ?>
-                            </small>
-                        <?php elseif ($quotation->status === 'rejected'): ?>
-                            <small class="text-danger">
-                                <i class="fas fa-times-circle"></i> Rejected: <?php echo htmlspecialchars($quotation->rejection_reason); ?>
-                            </small>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- Action buttons for pending quotations -->
-                    <?php if ($quotation->status === 'pending'): ?>
-                        <div class="quotation-actions">
-                            <button type="button" class="btn btn-success" onclick="approveQuotation(<?php echo $quotation->id; ?>)">
-                                <i class="fas fa-check"></i> Approve Quotation
-                            </button>
-                            <button type="button" class="btn btn-danger" onclick="showRejectModal(<?php echo $quotation->id; ?>)">
-                                <i class="fas fa-times"></i> Reject Quotation
-                            </button>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- Payment button for approved quotations -->
-                    <?php if ($quotation->status === 'approved' && (empty($data['payment']) || !is_object($data['payment']))): ?>
-                        <div class="quotation-actions">
-                            <button type="button" class="btn btn-primary btn-lg" onclick="showPaymentModal(<?php echo $quotation->id; ?>, <?php echo $quotation->amount; ?>)">
-                                <i class="fas fa-credit-card"></i> Make Payment (LKR <?php echo number_format($quotation->amount, 2); ?>)
-                            </button>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
         </div>
-    </div>
     <?php elseif ($m->provider_id): ?>
-    <div class="content-card">
-        <div class="card-header">
-            <h2 class="card-title">Quotations</h2>
-        </div>
-        <div class="card-body">
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Waiting for the property manager to upload a quotation...
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Quotations</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Waiting for the property manager to upload a quotation...
+                </div>
             </div>
         </div>
-    </div>
     <?php else: ?>
-    <div class="content-card">
-        <div class="card-header">
-            <h2 class="card-title">Quotations</h2>
-        </div>
-        <div class="card-body">
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> Service provider needs to be assigned before quotations can be uploaded.
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Quotations</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Service provider needs to be assigned before quotations can be uploaded.
+                </div>
             </div>
         </div>
-    </div>
     <?php endif; ?>
 
     <!-- Payment Status -->
@@ -202,16 +210,16 @@
                         <span><?php echo ucfirst($payment->payment_method); ?></span>
                     </div>
                     <?php if ($payment->transaction_id): ?>
-                    <div class="info-item">
-                        <label>Transaction ID:</label>
-                        <span><?php echo htmlspecialchars($payment->transaction_id); ?></span>
-                    </div>
+                        <div class="info-item">
+                            <label>Transaction ID:</label>
+                            <span><?php echo htmlspecialchars($payment->transaction_id); ?></span>
+                        </div>
                     <?php endif; ?>
                     <?php if ($payment->notes): ?>
-                    <div class="info-item">
-                        <label>Notes:</label>
-                        <span><?php echo htmlspecialchars($payment->notes); ?></span>
-                    </div>
+                        <div class="info-item">
+                            <label>Notes:</label>
+                            <span><?php echo htmlspecialchars($payment->notes); ?></span>
+                        </div>
                     <?php endif; ?>
                 </div>
                 <p style="margin-top: 15px;">The property manager has been notified and will coordinate with the service provider to begin the work.</p>
@@ -235,7 +243,7 @@
                 <div class="form-group">
                     <label for="rejection_reason">Reason for Rejection <span class="required">*</span></label>
                     <textarea name="rejection_reason" id="rejection_reason" class="form-control" rows="4" required
-                              placeholder="Please explain why you are rejecting this quotation..."></textarea>
+                        placeholder="Please explain why you are rejecting this quotation..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -275,13 +283,13 @@
                 <div class="form-group">
                     <label for="transaction_id">Transaction ID / Reference Number</label>
                     <input type="text" name="transaction_id" id="transaction_id" class="form-control"
-                           placeholder="Optional: Enter transaction reference">
+                        placeholder="Optional: Enter transaction reference">
                 </div>
 
                 <div class="form-group">
                     <label for="notes">Payment Notes</label>
                     <textarea name="notes" id="notes" class="form-control" rows="3"
-                              placeholder="Optional: Add any notes about this payment"></textarea>
+                        placeholder="Optional: Add any notes about this payment"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -295,299 +303,314 @@
 </div>
 
 <style>
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
-}
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
 
-.info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
 
-.info-item label {
-    font-weight: 600;
-    color: #666;
-    font-size: 14px;
-}
+    .info-item label {
+        font-weight: 600;
+        color: #666;
+        font-size: 14px;
+    }
 
-.info-section {
-    margin-top: 20px;
-}
+    .info-section {
+        margin-top: 20px;
+    }
 
-.info-section label {
-    font-weight: 600;
-    color: #666;
-    font-size: 14px;
-    display: block;
-    margin-bottom: 8px;
-}
+    .info-section label {
+        font-weight: 600;
+        color: #666;
+        font-size: 14px;
+        display: block;
+        margin-bottom: 8px;
+    }
 
-.priority-low { color: #10b981; }
-.priority-medium { color: #f59e0b; }
-.priority-high { color: #ef4444; }
-.priority-emergency { color: #dc2626; font-weight: 700; }
+    .priority-low {
+        color: #10b981;
+    }
 
-.quotation-card {
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 15px;
-}
+    .priority-medium {
+        color: #f59e0b;
+    }
 
-.quotation-card.status-approved {
-    border-color: #10b981;
-    background: #f0fdf4;
-}
+    .priority-high {
+        color: #ef4444;
+    }
 
-.quotation-card.status-pending {
-    border-color: #f59e0b;
-    background: #fffbeb;
-}
+    .priority-emergency {
+        color: #dc2626;
+        font-weight: 700;
+    }
 
-.quotation-card.status-rejected {
-    border-color: #ef4444;
-    background: #fef2f2;
-}
+    .quotation-card {
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
 
-.quotation-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
+    .quotation-card.status-approved {
+        border-color: #10b981;
+        background: #f0fdf4;
+    }
 
-.quotation-header h4 {
-    margin: 0;
-    color: #45a9ea;
-    font-size: 24px;
-}
+    .quotation-card.status-pending {
+        border-color: #f59e0b;
+        background: #fffbeb;
+    }
 
-.quotation-header p {
-    margin: 5px 0 0 0;
-    color: #666;
-}
+    .quotation-card.status-rejected {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
 
-.quotation-body {
-    margin-bottom: 15px;
-}
+    .quotation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
 
-.quotation-footer {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 15px;
-    border-top: 1px solid #e5e7eb;
-    margin-bottom: 15px;
-}
+    .quotation-header h4 {
+        margin: 0;
+        color: #45a9ea;
+        font-size: 24px;
+    }
 
-.quotation-actions {
-    display: flex;
-    gap: 10px;
-    padding-top: 15px;
-    border-top: 1px solid #e5e7eb;
-    flex-wrap: wrap;
-}
+    .quotation-header p {
+        margin: 5px 0 0 0;
+        color: #666;
+    }
 
-.quotation-actions .btn-lg {
-    padding: 12px 24px;
-    font-size: 16px;
-    flex: 1;
-    min-width: 250px;
-}
+    .quotation-body {
+        margin-bottom: 15px;
+    }
 
-.required {
-    color: #ef4444;
-}
+    .quotation-footer {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 15px;
+        border-top: 1px solid #e5e7eb;
+        margin-bottom: 15px;
+    }
 
-.status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
+    .quotation-actions {
+        display: flex;
+        gap: 10px;
+        padding-top: 15px;
+        border-top: 1px solid #e5e7eb;
+        flex-wrap: wrap;
+    }
 
-.status-pending {
-    background: #fef3c7;
-    color: #92400e;
-}
+    .quotation-actions .btn-lg {
+        padding: 12px 24px;
+        font-size: 16px;
+        flex: 1;
+        min-width: 250px;
+    }
 
-.status-scheduled {
-    background: #dbeafe;
-    color: #1e40af;
-}
+    .required {
+        color: #ef4444;
+    }
 
-.status-in_progress {
-    background: #cffafe;
-    color: #155e75;
-}
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
 
-.status-completed {
-    background: #d1fae5;
-    color: #065f46;
-}
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
 
-.status-cancelled {
-    background: #fee2e2;
-    color: #991b1b;
-}
+    .status-scheduled {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-.status-approved {
-    background: #d1fae5;
-    color: #065f46;
-}
+    .status-in_progress {
+        background: #cffafe;
+        color: #155e75;
+    }
 
-.status-rejected {
-    background: #fee2e2;
-    color: #991b1b;
-}
+    .status-completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-.text-success {
-    color: #10b981;
-}
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-.text-danger {
-    color: #ef4444;
-}
+    .status-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
-}
+    .status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 5% auto;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+    .text-success {
+        color: #10b981;
+    }
 
-.modal-header {
-    padding: 20px;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    .text-danger {
+        color: #ef4444;
+    }
 
-.modal-header h3 {
-    margin: 0;
-    color: #333;
-}
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
 
-.close {
-    color: #aaa;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    line-height: 1;
-}
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-.close:hover,
-.close:focus {
-    color: #000;
-}
+    .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.modal-body {
-    padding: 20px;
-}
+    .modal-header h3 {
+        margin: 0;
+        color: #333;
+    }
 
-.modal-footer {
-    padding: 20px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
+    .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+    }
 
-.payment-amount {
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    margin-bottom: 20px;
-}
+    .close:hover,
+    .close:focus {
+        color: #000;
+    }
 
-.payment-amount label {
-    display: block;
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 5px;
-}
+    .modal-body {
+        padding: 20px;
+    }
 
-.payment-amount h2 {
-    margin: 0;
-    color: #45a9ea;
-    font-size: 32px;
-}
+    .modal-footer {
+        padding: 20px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .payment-amount {
+        background: #f9fafb;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .payment-amount label {
+        display: block;
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .payment-amount h2 {
+        margin: 0;
+        color: #45a9ea;
+        font-size: 32px;
+    }
 </style>
 
 <script>
-// Approve quotation
-function approveQuotation(quotationId) {
-    if (confirm('Are you sure you want to approve this quotation?')) {
-        window.location.href = '<?php echo URLROOT; ?>/maintenance/approveQuotation/' + quotationId;
+    // Approve quotation
+    function approveQuotation(quotationId) {
+        if (confirm('Are you sure you want to approve this quotation?')) {
+            window.location.href = '<?php echo URLROOT; ?>/maintenance/approveQuotation/' + quotationId;
+        }
     }
-}
 
-// Show reject modal
-function showRejectModal(quotationId) {
-    const modal = document.getElementById('rejectModal');
-    const form = document.getElementById('rejectForm');
-    form.action = '<?php echo URLROOT; ?>/maintenance/rejectQuotation/' + quotationId;
-    modal.style.display = 'block';
-}
-
-// Close reject modal
-function closeRejectModal() {
-    const modal = document.getElementById('rejectModal');
-    modal.style.display = 'none';
-    document.getElementById('rejection_reason').value = '';
-}
-
-// Show payment modal
-function showPaymentModal(quotationId, amount) {
-    const modal = document.getElementById('paymentModal');
-    const form = document.getElementById('paymentForm');
-    const amountDisplay = document.getElementById('paymentAmount');
-
-    form.action = '<?php echo URLROOT; ?>/maintenance/payQuotation/' + quotationId;
-    amountDisplay.textContent = 'LKR ' + parseFloat(amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    modal.style.display = 'block';
-}
-
-// Close payment modal
-function closePaymentModal() {
-    const modal = document.getElementById('paymentModal');
-    modal.style.display = 'none';
-    document.getElementById('paymentForm').reset();
-}
-
-// Close modal when clicking outside of it
-window.onclick = function(event) {
-    const rejectModal = document.getElementById('rejectModal');
-    const paymentModal = document.getElementById('paymentModal');
-
-    if (event.target == rejectModal) {
-        closeRejectModal();
+    // Show reject modal
+    function showRejectModal(quotationId) {
+        const modal = document.getElementById('rejectModal');
+        const form = document.getElementById('rejectForm');
+        form.action = '<?php echo URLROOT; ?>/maintenance/rejectQuotation/' + quotationId;
+        modal.style.display = 'block';
     }
-    if (event.target == paymentModal) {
-        closePaymentModal();
+
+    // Close reject modal
+    function closeRejectModal() {
+        const modal = document.getElementById('rejectModal');
+        modal.style.display = 'none';
+        document.getElementById('rejection_reason').value = '';
     }
-}
+
+    // Show payment modal
+    function showPaymentModal(quotationId, amount) {
+        const modal = document.getElementById('paymentModal');
+        const form = document.getElementById('paymentForm');
+        const amountDisplay = document.getElementById('paymentAmount');
+
+        form.action = '<?php echo URLROOT; ?>/maintenance/payQuotation/' + quotationId;
+        amountDisplay.textContent = 'LKR ' + parseFloat(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        modal.style.display = 'block';
+    }
+
+    // Close payment modal
+    function closePaymentModal() {
+        const modal = document.getElementById('paymentModal');
+        modal.style.display = 'none';
+        document.getElementById('paymentForm').reset();
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const rejectModal = document.getElementById('rejectModal');
+        const paymentModal = document.getElementById('paymentModal');
+
+        if (event.target == rejectModal) {
+            closeRejectModal();
+        }
+        if (event.target == paymentModal) {
+            closePaymentModal();
+        }
+    }
 </script>
 
 <?php require APPROOT . '/views/inc/landlord_footer.php'; ?>
