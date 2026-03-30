@@ -4,7 +4,9 @@
 
 <script>
     const URLROOT = '<?php echo URLROOT; ?>';
+    const STAT_ENDPOINT = URLROOT + '/manager/getStatData';
 </script>
+<script src="<?php echo URLROOT; ?>/js/shared.js"></script>
 <script src="<?php echo URLROOT; ?>/js/manager.js"></script>
 <script>
     // Initialize sidebar functionality
