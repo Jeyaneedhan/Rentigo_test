@@ -294,7 +294,7 @@ class Properties extends Controller
         }
 
         // Validate property type
-        $validTypes = ['apartment', 'house', 'condo', 'townhouse', 'commercial', 'land', 'other'];
+        $validTypes = ['apartment', 'house', 'condo', 'townhouse'];
         if ($validator->required('type', $data['property_type'], 'Property type is required')) {
             $validator->inArray('type', $data['property_type'], $validTypes);
         }
@@ -843,7 +843,7 @@ class Properties extends Controller
                     $validator->minLength('address', $data['address'], 5);
                 }
 
-                $validTypes = ['apartment', 'house', 'condo', 'townhouse', 'commercial', 'land', 'other'];
+                $validTypes = ['apartment', 'house', 'condo', 'townhouse'];
                 if ($validator->required('property_type', $data['property_type'], 'Property type is required')) {
                     $validator->inArray('property_type', $data['property_type'], $validTypes);
                 }

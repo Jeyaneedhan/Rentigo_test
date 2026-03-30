@@ -74,9 +74,6 @@ $isMaintenanceProperty = ($listingType === 'maintenance');
               <option value="house" <?php echo ($data['property']->property_type ?? '') == 'house' ? 'selected' : ''; ?>>House</option>
               <option value="condo" <?php echo ($data['property']->property_type ?? '') == 'condo' ? 'selected' : ''; ?>>Condo</option>
               <option value="townhouse" <?php echo ($data['property']->property_type ?? '') == 'townhouse' ? 'selected' : ''; ?>>Townhouse</option>
-              <option value="commercial" <?php echo ($data['property']->property_type ?? '') == 'commercial' ? 'selected' : ''; ?>>Commercial</option>
-              <option value="land" <?php echo ($data['property']->property_type ?? '') == 'land' ? 'selected' : ''; ?>>Land</option>
-              <option value="other" <?php echo ($data['property']->property_type ?? '') == 'other' ? 'selected' : ''; ?>>Other</option>
             </select>
             <?php if (!empty($data['type_err'])): ?>
               <span class="error-message"><?php echo $data['type_err']; ?></span>
