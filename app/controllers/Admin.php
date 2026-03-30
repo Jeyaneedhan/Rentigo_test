@@ -2,7 +2,6 @@
 require_once '../app/helpers/helper.php';
 
 // Admin controller - handles all admin-related pages and actions
-// Only admins can access these methods
 class Admin extends Controller
 {
     private $userModel;
@@ -10,7 +9,6 @@ class Admin extends Controller
 
     public function __construct()
     {
-        // Make sure only admins can access this controller
         if (!isLoggedIn() || $_SESSION['user_type'] !== 'admin') {
             redirect('users/login');
         }
@@ -26,7 +24,7 @@ class Admin extends Controller
         $_SESSION['admin_pending_property_count'] = (int)($propertyCounts->pending ?? 0);
     }
 
-    // Main dashboard page - shows overview stats and recent activity
+    // Main dashboard page 
     public function index()
     {
         // Load all the models we need for dashboard data
