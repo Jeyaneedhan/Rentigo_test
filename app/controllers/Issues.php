@@ -32,6 +32,9 @@ class Issues extends Controller
             $validator = new Validator();
 
             $validator->required('property', $data['property_id'], 'Please select a property');
+            if (!empty($data['property_id']) && !$this->issueModel->isPropertyBookedByTenant($_SESSION['user_id'], $data['property_id'])) {
+                $validator->custom('property', false, 'Please select a property you have booked');
+            }
 
             if ($validator->required('title', $data['issue_title'])) {
                 $validator->minLength('title', $data['issue_title'], 5);
@@ -115,7 +118,7 @@ class Issues extends Controller
                 $data['category_err'] = $errors['category'] ?? '';
                 $data['priority_err'] = $errors['priority'] ?? '';
 
-                $data['properties'] = $this->issueModel->getProperties();
+                $data['properties'] = $this->issueModel->getBookedPropertiesByTenant($_SESSION['user_id']);
                 $data['recentIssues'] = $this->issueModel->getRecentIssuesByTenant($_SESSION['user_id'], 2);
                 $data['page_title'] = 'Report Issues - TenantHub';
                 $data['page'] = 'report_issue';
@@ -124,7 +127,7 @@ class Issues extends Controller
                 $this->view('tenant/v_report_issue', $data);
             }
         } else {
-            $properties = $this->issueModel->getProperties();
+            $properties = $this->issueModel->getBookedPropertiesByTenant($_SESSION['user_id']);
             $recentIssues = $this->issueModel->getRecentIssuesByTenant($_SESSION['user_id'], 2);
 
             $data = [
@@ -345,6 +348,9 @@ class Issues extends Controller
             $validator = new Validator();
 
             $validator->required('property', $data['property_id'], 'Please select a property');
+            if (!empty($data['property_id']) && !$this->issueModel->isPropertyBookedByTenant($_SESSION['user_id'], $data['property_id'])) {
+                $validator->custom('property', false, 'Please select a property you have booked');
+            }
 
             if ($validator->required('title', $data['issue_title'])) {
                 $validator->minLength('title', $data['issue_title'], 5);
@@ -409,7 +415,7 @@ class Issues extends Controller
                 $data['priority_err'] = $errors['priority'] ?? '';
 
                 $data['issue'] = $issue;
-                $data['properties'] = $this->issueModel->getProperties();
+                $data['properties'] = $this->issueModel->getBookedPropertiesByTenant($_SESSION['user_id']);
                 $data['page_title'] = 'Edit Issue - TenantHub';
                 $data['page'] = 'edit_issue';
                 $data['user_name'] = $_SESSION['user_name'];
@@ -417,7 +423,7 @@ class Issues extends Controller
                 $this->view('tenant/v_edit_issue', $data);
             }
         } else {
-            $properties = $this->issueModel->getProperties();
+            $properties = $this->issueModel->getBookedPropertiesByTenant($_SESSION['user_id']);
 
             $data = [
                 'page_title' => 'Edit Issue - TenantHub',

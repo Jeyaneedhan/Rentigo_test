@@ -116,6 +116,41 @@ class M_Issue
         return $this->db->resultSet();
     }
 
+    /**
+     * Get only properties that the tenant has actually booked.
+     * Excludes bookings that were rejected/cancelled.
+     */
+    public function getBookedPropertiesByTenant($tenantId)
+    {
+        $this->db->query("SELECT DISTINCT p.id, p.address, p.property_type, p.bedrooms, p.bathrooms, p.rent
+                          FROM properties p
+                          INNER JOIN bookings b ON b.property_id = p.id
+                          WHERE b.tenant_id = :tenant_id
+                            AND b.status IN ('pending', 'approved', 'active', 'completed')
+                          ORDER BY p.address");
+
+        $this->db->bind(':tenant_id', $tenantId);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Verify tenant-booking ownership for server-side validation.
+     */
+    public function isPropertyBookedByTenant($tenantId, $propertyId)
+    {
+        $this->db->query("SELECT COUNT(*) as count
+                          FROM bookings
+                          WHERE tenant_id = :tenant_id
+                            AND property_id = :property_id
+                            AND status IN ('pending', 'approved', 'active', 'completed')");
+
+        $this->db->bind(':tenant_id', $tenantId);
+        $this->db->bind(':property_id', $propertyId);
+
+        $result = $this->db->single();
+        return ($result && (int)$result->count > 0);
+    }
+
     public function getRecentIssuesByTenant($tenantId, $limit = 2)
     {
         $this->db->query("
