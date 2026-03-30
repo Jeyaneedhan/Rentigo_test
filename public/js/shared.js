@@ -102,6 +102,7 @@ function toggleStatDropdown(statType) {
 
     closeAllStatDropdowns();
     dropdown.classList.toggle('active');
+    dropdown.classList.toggle('show');
 
     if (typeof event !== 'undefined') event.stopPropagation();
 }
@@ -112,6 +113,7 @@ function toggleStatDropdown(statType) {
 function closeAllStatDropdowns() {
     document.querySelectorAll('.stat-dropdown').forEach(d => {
         d.classList.remove('active');
+        d.classList.remove('show');
     });
 }
 
@@ -157,7 +159,12 @@ async function fetchStatData(statType, period) {
     valueEl.classList.add('loading');
 
     try {
-        const response = await fetch(STAT_ENDPOINT, {
+        // Tenant issue stat cards are served by Issues controller.
+        const endpoint = String(statType).startsWith('tenant_issues_')
+            ? `${URLROOT}/issues/getStatData`
+            : STAT_ENDPOINT;
+
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ stat_type: statType, period: period })
