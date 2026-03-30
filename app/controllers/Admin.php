@@ -14,6 +14,10 @@ class Admin extends Controller
             redirect('users/login');
         }
         $this->userModel = $this->model('M_Users');
+
+        // Keep pending manager approval count available for sidebar badge.
+        $pendingPMs = $this->userModel->getPendingPMs();
+        $_SESSION['admin_pending_pm_count'] = is_array($pendingPMs) ? count($pendingPMs) : 0;
     }
 
     // Main dashboard page - shows overview stats and recent activity

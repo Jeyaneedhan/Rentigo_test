@@ -157,9 +157,28 @@
   overflow: hidden;
 }
 
+.nav-badge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
 .sidebar.collapsed .nav-text {
   opacity: 0;
   width: 0;
+  display: none;
+}
+
+.sidebar.collapsed .nav-badge {
   display: none;
 }
 

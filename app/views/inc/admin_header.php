@@ -43,11 +43,15 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <?php $pendingPmCount = (int)($_SESSION['admin_pending_pm_count'] ?? 0); ?>
                         <a href="<?php echo URLROOT; ?>/admin/managers"
                             class="nav-link <?php echo ($data['page'] ?? '') === 'managers' ? 'active' : ''; ?>"
                             data-tooltip="Property Managers">
                             <i class="fas fa-users"></i>
                             <span class="nav-text">Property Managers</span>
+                            <?php if ($pendingPmCount > 0): ?>
+                                <span class="nav-badge"><?php echo $pendingPmCount > 99 ? '99+' : $pendingPmCount; ?></span>
+                            <?php endif; ?>
                         </a>
                     </li>
                     <li class="nav-item">

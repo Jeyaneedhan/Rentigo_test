@@ -261,6 +261,23 @@ class Users extends Controller
 
                 // Register the PM - their account will be pending until admin approves
                 if ($this->userModel->registerPM($data)) {
+                    // Notify all active admins about the new PM registration.
+                    $notificationModel = $this->model('M_Notifications');
+                    $admins = $this->userModel->getAllUsersByType('admin');
+
+                    if (!empty($admins)) {
+                        $message = 'New Property Manager ' . $data['name'] . ' (' . $data['email'] . ') is pending approval.';
+                        foreach ($admins as $admin) {
+                            $notificationModel->createNotification([
+                                'user_id' => $admin->id,
+                                'type' => 'system',
+                                'title' => 'New Property Manager Registration',
+                                'message' => $message,
+                                'link' => 'admin/managers'
+                            ]);
+                        }
+                    }
+
                     unset($_SESSION['selected_user_type']);
                     flash('reg_flash', 'Registration successful! Your account is pending approval. You will be notified once verified.');
                     redirect('users/login');
@@ -771,4 +788,3 @@ class Users extends Controller
         }
     }
 }
-
