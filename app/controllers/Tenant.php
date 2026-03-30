@@ -325,7 +325,7 @@ class Tenant extends Controller
             // Pay Rent stats
             case 'tenant_total_paid':
                 $stats = $this->paymentModel->getTenantPaymentStats($tenant_id, $period);
-                $value = 'LKR ' . number_format($stats->total_paid ?? 0, 0);
+                $value = 'LKR ' . number_format(($stats->total_paid ?? 0) * 1.10, 0);
                 $subtitle = ($stats->completed_count ?? 0) . ' payments';
                 break;
 

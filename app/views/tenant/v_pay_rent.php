@@ -33,7 +33,7 @@ AutoPaginate::init($data, 5);
                             <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_total_paid', 'month', event)">This Month</div>
                         </div>
                     </div>
-                    <h4 id="stat-value-tenant_total_paid">LKR <?php echo number_format($data['paymentStats']->total_paid ?? 0, 0); ?></h4>
+                    <h4 id="stat-value-tenant_total_paid">LKR <?php echo number_format(($data['paymentStats']->total_paid ?? 0) * 1.10, 0); ?></h4>
                     <span class="stat-subtext" id="stat-subtitle-tenant_total_paid"><?php echo $data['paymentStats']->completed_count ?? 0; ?> payments</span>
                 </div>
             </div>
