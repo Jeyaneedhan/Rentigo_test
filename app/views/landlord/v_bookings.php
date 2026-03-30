@@ -190,18 +190,6 @@ AutoPaginate::init($data, 5);
                                             class="btn btn-sm btn-outline">
                                             <i class="fas fa-eye"></i> View
                                         </a>
-                                        <?php if ($booking->status === 'pending'): ?>
-                                            <a href="<?php echo URLROOT; ?>/bookings/approve/<?php echo $booking->id; ?>"
-                                                class="btn btn-sm btn-success"
-                                                onclick="return confirm('Approve this booking request?')">
-                                                <i class="fas fa-check"></i> Approve
-                                            </a>
-                                            <a href="<?php echo URLROOT; ?>/bookings/reject/<?php echo $booking->id; ?>"
-                                                class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Reject this booking request?')">
-                                                <i class="fas fa-times"></i> Reject
-                                            </a>
-                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>

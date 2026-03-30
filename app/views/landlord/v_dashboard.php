@@ -89,57 +89,6 @@
         </div>
     </div>
 
-    <!-- Pending Bookings Alert -->
-    <?php if (!empty($data['recentBookings']) && ($data['pendingBookings'] ?? 0) > 0): ?>
-        <div class="content-card">
-            <div class="card-header">
-                <h2 class="card-title">Pending Booking Requests</h2>
-                <a href="<?php echo URLROOT; ?>/landlord/bookings" class="btn btn-primary btn-sm">View All</a>
-            </div>
-            <div class="card-body">
-                <div class="bookings-list">
-                    <?php
-                    $pendingCount = 0;
-                    foreach ($data['recentBookings'] as $booking):
-                        if ($booking->status === 'pending' && $pendingCount < 5):
-                            $pendingCount++;
-                    ?>
-                            <div class="booking-request-item">
-                                <div class="booking-icon">
-                                    <i class="fas fa-calendar-check"></i>
-                                </div>
-                                <div class="booking-info">
-                                    <h5><?php echo htmlspecialchars($booking->tenant_name ?? 'Tenant'); ?></h5>
-                                    <p>
-                                        <strong><?php echo htmlspecialchars($booking->address ?? 'Property'); ?></strong><br>
-                                        Move-in: <?php echo date('M d, Y', strtotime($booking->move_in_date)); ?> |
-                                        LKR <?php echo number_format($booking->monthly_rent, 2); ?>/month
-                                    </p>
-                                    <span class="booking-date">
-                                        <i class="fas fa-clock"></i>
-                                        Requested <?php echo date('M d, Y', strtotime($booking->created_at)); ?>
-                                    </span>
-                                </div>
-                                <div class="booking-actions">
-                                    <a href="<?php echo URLROOT; ?>/bookings/approve/<?php echo $booking->id; ?>"
-                                        class="btn btn-success btn-sm">
-                                        <i class="fas fa-check"></i> Approve
-                                    </a>
-                                    <a href="<?php echo URLROOT; ?>/bookings/reject/<?php echo $booking->id; ?>"
-                                        class="btn btn-danger btn-sm">
-                                        <i class="fas fa-times"></i> Reject
-                                    </a>
-                                </div>
-                            </div>
-                    <?php
-                        endif;
-                    endforeach;
-                    ?>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
-
     <!-- Recent Payments -->
     <?php if (!empty($data['recentPayments'])): ?>
         <div class="content-card">
