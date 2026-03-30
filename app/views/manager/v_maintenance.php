@@ -147,7 +147,9 @@ AutoPaginate::init($data, 5);
                 <tbody>
                     <?php if (!empty($data['maintenanceRequests'])): ?>
                         <?php foreach ($data['maintenanceRequests'] as $request): ?>
-                            <tr data-status="<?php echo $request->status; ?>">
+                            <tr data-status="<?php echo $request->status; ?>"
+                                class="clickable-row"
+                                onclick="window.location.href='<?php echo URLROOT; ?>/maintenance/details/<?php echo $request->id; ?>'">
                                 <td class="font-medium">MNT-<?php echo str_pad($request->id, 3, '0', STR_PAD_LEFT); ?></td>
                                 <td><?php echo htmlspecialchars(substr($request->property_address ?? 'N/A', 0, 30)); ?></td>
                                 <td><?php echo htmlspecialchars($request->landlord_name ?? 'N/A'); ?></td>
@@ -201,7 +203,8 @@ AutoPaginate::init($data, 5);
                                 </td>
                                 <td>
                                     <a href="<?php echo URLROOT; ?>/maintenance/details/<?php echo $request->id; ?>"
-                                        class="btn btn-sm btn-primary">
+                                        class="btn btn-sm btn-primary"
+                                        onclick="event.stopPropagation();">
                                         <i class="fas fa-eye"></i> View
                                     </a>
                                 </td>
@@ -341,6 +344,14 @@ AutoPaginate::init($data, 5);
         padding: 1rem 0.75rem;
         border-bottom: 1px solid #e5e7eb;
         font-size: 0.875rem;
+    }
+
+    .data-table .clickable-row {
+        cursor: pointer;
+    }
+
+    .data-table .clickable-row:hover {
+        background: #f9fafb;
     }
 
     .font-medium {
