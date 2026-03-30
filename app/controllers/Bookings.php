@@ -277,6 +277,9 @@ class Bookings extends Controller
             $rejection_reason = trim($_POST['rejection_reason']);
 
             if ($this->bookingModel->updateBookingStatus($id, 'rejected', $rejection_reason)) {
+                // Rejected bookings should release reserved properties back to available.
+                $this->propertyModel->updatePropertyStatus($booking->property_id, 'available');
+
                 // Create notification for tenant
                 $this->notificationModel->notifyBookingRejected(
                     $booking->tenant_id,
