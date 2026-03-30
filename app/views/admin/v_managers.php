@@ -242,7 +242,7 @@ AutoPaginate::init($data, 5);
 
         console.log('✓ Button found:', button);
         button.disabled = true;
-        button.innerHTML = '<i class=" fas fa-spinner fa-spin"></i> Processing...';
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         const url = '<?php echo URLROOT; ?>/admin/approvePM/' + managerId;
         console.log('Fetch URL:', url);
@@ -288,7 +288,7 @@ AutoPaginate::init($data, 5);
                     console.error('❌ Server returned success=false');
                     alert('Error: ' + (data.message || 'Failed to approve manager'));
                     button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-check"></i> Approve';
+                    button.innerHTML = '<i class="fas fa-check"></i>';
                 }
             })
             .catch(error => {
@@ -296,7 +296,7 @@ AutoPaginate::init($data, 5);
                 console.error('Error:', error);
                 alert('An error occurred: ' + error.message);
                 button.disabled = false;
-                button.innerHTML = '<i class="fas fa-check"></i> Approve';
+                button.innerHTML = '<i class="fas fa-check"></i>';
             });
     }
 
@@ -319,7 +319,7 @@ AutoPaginate::init($data, 5);
 
         console.log('✓ Button found:', button);
         button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rejecting...';
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         const url = '<?php echo URLROOT; ?>/admin/rejectPM/' + managerId;
         console.log('Fetch URL:', url);
@@ -365,7 +365,7 @@ AutoPaginate::init($data, 5);
                     console.error('❌ Server returned success=false');
                     alert('Error: ' + (data.message || 'Failed to reject manager'));
                     button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-times"></i> Reject';
+                    button.innerHTML = '<i class="fas fa-times"></i>';
                 }
             })
             .catch(error => {
@@ -373,7 +373,7 @@ AutoPaginate::init($data, 5);
                 console.error('Error:', error);
                 alert('An error occurred: ' + error.message);
                 button.disabled = false;
-                button.innerHTML = '<i class="fas fa-times"></i> Reject';
+                button.innerHTML = '<i class="fas fa-times"></i>';
             });
     }
 
