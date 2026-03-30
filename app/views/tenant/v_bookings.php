@@ -291,13 +291,6 @@
 </div>
 
 <script>
-    function cancelBooking(bookingId) {
-        const modal = document.getElementById('cancelBookingModal');
-        const form = document.getElementById('cancelBookingForm');
-        form.action = '<?php echo URLROOT; ?>/bookings/cancel/' + bookingId;
-        modal.style.display = 'block';
-    }
-
     function closeCancelModal() {
         document.getElementById('cancelBookingModal').style.display = 'none';
     }

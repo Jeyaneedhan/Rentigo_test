@@ -113,7 +113,7 @@ AutoPaginate::init($data, 5);
             <input type="text" class="search-input" placeholder="Search managers..." id="searchManagers">
         </div>
         <div class="filter-container">
-            <select class="filter-select" id="filterManagers" onchange="filterManagersByStatus()">
+            <select class="filter-select" id="filterManagers" onchange="applyFilters()">
                 <option value="">All Managers</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
@@ -475,11 +475,6 @@ AutoPaginate::init($data, 5);
                 row.style.display = 'none';
             }
         });
-    }
-
-    // Filter managers by status
-    function filterManagersByStatus() {
-        applyFilters();
     }
 
     // Search managers
