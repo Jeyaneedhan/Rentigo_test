@@ -320,42 +320,6 @@ AutoPaginate::init($data, 10);
         }
     }
 
-    function approveTransaction(transactionId) {
-        if (confirm('Are you sure you want to approve this transaction?')) {
-            const row = event.target.closest('tr')
-            const statusCell = row.querySelector('.status-badge')
-            const actionsCell = row.querySelector('.transaction-actions')
-
-            // Update status
-            statusCell.textContent = 'Approved'
-            statusCell.className = 'status-badge approved'
-
-            // Update actions - remove approve/reject, keep view only
-            actionsCell.innerHTML = `
-                <button class="action-btn view-btn" onclick="viewTransaction('${transactionId}', event)" title="View">
-                    <i class="fas fa-eye"></i>
-                </button>
-            `
-
-            showNotification('Transaction approved successfully!', 'success')
-            updateFinancialStats()
-        }
-    }
-
-    function rejectTransaction(transactionId) {
-        if (confirm('Are you sure you want to reject this transaction?')) {
-            const row = event.target.closest('tr')
-            const statusCell = row.querySelector('.status-badge')
-
-            // Update status
-            statusCell.textContent = 'Rejected'
-            statusCell.className = 'status-badge rejected'
-
-            showNotification('Transaction rejected.', 'warning')
-            updateFinancialStats()
-        }
-    }
-
     // Initialize basic functionality
     document.addEventListener('DOMContentLoaded', function() {
         // Any initialization code can go here
