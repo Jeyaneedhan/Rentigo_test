@@ -26,7 +26,8 @@
                     <option value="">All Types</option>
                     <option value="Apartment">Apartment</option>
                     <option value="House">House</option>
-                    <option value="Studio">Studio</option>
+                    <option value="Condo">Condo</option>
+                    <option value="Townhouse">Townhouse</option>
                 </select>
             </div>
             <button type="button" class="btn btn-secondary" id="searchBtn">
