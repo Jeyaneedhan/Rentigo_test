@@ -260,28 +260,6 @@ AutoPaginate::init($data, 5);
                     </select>
                 </div>
 
-                <div id="cardFields" class="card-fields" style="display: none;">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Card Number</label>
-                            <input type="text" name="card_number" placeholder="1234 5678 9012 3456" class="form-input" maxlength="19">
-                        </div>
-                        <div class="form-group">
-                            <label>Expiry Date</label>
-                            <input type="text" name="expiry_date" placeholder="MM/YY" class="form-input" maxlength="5">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>CVV</label>
-                            <input type="text" name="cvv" placeholder="123" class="form-input" maxlength="4">
-                        </div>
-                        <div class="form-group">
-                            <label>Cardholder Name</label>
-                            <input type="text" name="cardholder_name" placeholder="John Doe" class="form-input">
-                        </div>
-                    </div>
-                </div>
 
                 <div class="form-group">
                     <label>Payment Notes (Optional)</label>
@@ -317,24 +295,6 @@ AutoPaginate::init($data, 5);
         document.getElementById('paymentModal').style.display = 'none';
         document.getElementById('paymentForm').reset();
     }
-
-    // Show/hide card fields based on payment method
-    document.addEventListener('DOMContentLoaded', function() {
-        const paymentMethodSelect = document.getElementById('payment_method');
-        const cardFields = document.getElementById('cardFields');
-
-        if (paymentMethodSelect) {
-            paymentMethodSelect.addEventListener('change', function() {
-                if (this.value === 'credit_card' || this.value === 'debit_card') {
-                    cardFields.style.display = 'block';
-                    cardFields.querySelectorAll('input').forEach(input => input.required = true);
-                } else {
-                    cardFields.style.display = 'none';
-                    cardFields.querySelectorAll('input').forEach(input => input.required = false);
-                }
-            });
-        }
-    });
 
     // Close modal when clicking outside
     window.onclick = function(event) {
