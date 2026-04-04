@@ -195,9 +195,6 @@
                                 Due: <?php echo date('M d, Y', strtotime($payment->due_date)); ?>
                             </p>
                         </div>
-                        <a href="<?php echo URLROOT; ?>/tenant/pay_rent" class="btn btn-sm <?php echo $isOverdue ? 'btn-danger' : 'btn-primary'; ?>">
-                            <?php echo $isOverdue ? 'Overdue' : 'Pay'; ?>
-                        </a>
                     </div>
                 <?php endforeach; ?>
             </div>
