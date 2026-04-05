@@ -254,7 +254,20 @@ class AdminProperties extends Controller
     public function unassign($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $property = $this->adminPropertyModel->getPropertyById($id);
+            $managerId = $property->manager_id ?? null;
+
             if ($this->adminPropertyModel->unassignProperty($id)) {
+                if (!empty($managerId)) {
+                    $this->notificationModel->createNotification([
+                        'user_id' => $managerId,
+                        'type' => 'property',
+                        'title' => 'Property Unassigned',
+                        'message' => 'You have been unassigned from the property at "' . substr($property->address ?? 'Property', 0, 50) . '..."',
+                        'link' => 'managerproperties/index'
+                    ]);
+                }
+
                 flash('admin_property_message', 'Property unassigned successfully!', 'alert alert-success');
                 redirect('adminproperties/propertyDetails/' . $id);
             } else {
