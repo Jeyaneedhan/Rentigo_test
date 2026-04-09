@@ -111,7 +111,7 @@ class Inspections extends Controller
                 }
             }
 
-            // ✅ FIXED: Validate date with correct logic
+            //  FIXED: Validate date with correct logic
             if ($validator->required('date', $data['date'], 'Inspection date is required')) {
                 // Check if date is valid format
                 $dateTime = DateTime::createFromFormat('Y-m-d', $data['date']);
@@ -120,7 +120,7 @@ class Inspections extends Controller
                 if (!$isValidDate) {
                     $validator->custom('date', false, 'Please enter a valid date');
                 } else {
-                    // ✅ FIXED: Check if date is today or in the future
+                    //  FIXED: Check if date is today or in the future
                     $selectedDate = strtotime($data['date'] . ' 00:00:00');
                     $today = strtotime(date('Y-m-d') . ' 00:00:00');
 
@@ -317,7 +317,7 @@ class Inspections extends Controller
                 }
             }
 
-            // ✅ FIXED: Validate date
+            //  FIXED: Validate date
             if ($validator->required('date', $data['date'], 'Inspection date is required')) {
                 // Check if date is valid format
                 $dateTime = DateTime::createFromFormat('Y-m-d', $data['date']);
@@ -433,7 +433,7 @@ class Inspections extends Controller
             }
         } else {
             flash('inspection_message', 'Invalid request method', 'alert alert-danger');
-            // ✅ FIXED: Typo corrected from 'inspectiosn' to 'inspections'
+            //  FIXED: Typo corrected from 'inspectiosn' to 'inspections'
             redirect('inspections/index');
         }
     }

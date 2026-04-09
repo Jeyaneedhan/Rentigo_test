@@ -178,7 +178,7 @@ class M_ServiceProviders
         return $this->db->single();
     }
 
-    // ✅ VALIDATION - Check if email exists
+    //  VALIDATION - Check if email exists
     /**
      * Check if email already exists in database
      * @param string $email - Email to check
@@ -204,7 +204,7 @@ class M_ServiceProviders
         return $row ? true : false;
     }
 
-    // ✅ VALIDATION - Check if phone exists
+    //  VALIDATION - Check if phone exists
     /**
      * Check if phone number already exists in database
      * @param string $phone - Phone number to check
@@ -230,7 +230,7 @@ class M_ServiceProviders
         return $row ? true : false;
     }
 
-    // ✅ VALIDATION - Check if company name exists
+    //  VALIDATION - Check if company name exists
     /**
      * Check if company name already exists in database
      * @param string $company - Company name to check

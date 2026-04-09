@@ -146,7 +146,7 @@
             loadIssues(propertyId);
         });
 
-        // ✅ FIXED: Enable issue select before form submission
+        //  FIXED: Enable issue select before form submission
         form.addEventListener('submit', function(e) {
             // Enable the issue select so its value gets submitted
             if (issueSelect.disabled) {
@@ -211,7 +211,7 @@
                         issueHelper.style.color = '#28a745';
                     } else {
                         issueSelect.innerHTML = '<option value="">No issues found for this property</option>';
-                        issueSelect.disabled = false; // ✅ Enable even when no issues
+                        issueSelect.disabled = false; //  Enable even when no issues
                         issueHelper.textContent = 'No pending issues found for this property';
                         issueHelper.style.color = '#6c757d';
                     }
@@ -220,7 +220,7 @@
                     console.error('Error fetching issues:', error);
                     issueLoader.style.display = 'none';
                     issueSelect.innerHTML = '<option value="">Error loading issues</option>';
-                    issueSelect.disabled = false; // ✅ Enable on error too
+                    issueSelect.disabled = false; //  Enable on error too
                     issueHelper.textContent = 'Error loading issues. Please try again.';
                     issueHelper.style.color = '#dc3545';
                 });

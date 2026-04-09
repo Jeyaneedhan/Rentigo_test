@@ -972,7 +972,7 @@ class Properties extends Controller
         }
     }
 
-    // ✅ NEW METHOD: Delete existing image
+    //  NEW METHOD: Delete existing image
     public function deleteImage()
     {
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {
@@ -1030,7 +1030,7 @@ class Properties extends Controller
         exit;
     }
 
-    // ✅ NEW METHOD: Delete existing document
+    //  NEW METHOD: Delete existing document
     public function deleteDocument()
     {
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {

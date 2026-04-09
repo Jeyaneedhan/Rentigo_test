@@ -295,7 +295,7 @@ $isMaintenanceProperty = ($listingType === 'maintenance');
                 <div class="existing-image-item" id="existing-image-<?php echo $index; ?>">
                   <img src="<?php echo $image['url']; ?>" alt="Property Image">
 
-                  <!-- ✅ DELETE BUTTON -->
+                  <!--  DELETE BUTTON -->
                   <button type="button"
                     class="delete-existing-btn"
                     onclick="deleteExistingImage('<?php echo $image['name']; ?>', <?php echo $data['property']->id; ?>, <?php echo $index; ?>)"
@@ -374,7 +374,7 @@ $isMaintenanceProperty = ($listingType === 'maintenance');
                   </div>
 
                   <div class="document-info">
-                    <!-- ✅ ADDED title ATTRIBUTE FOR TOOLTIP -->
+                    <!--  ADDED title ATTRIBUTE FOR TOOLTIP -->
                     <span class="document-name" title="<?php echo htmlspecialchars($document['name']); ?>">
                       <?php echo htmlspecialchars($document['name']); ?>
                     </span>
@@ -384,7 +384,7 @@ $isMaintenanceProperty = ($listingType === 'maintenance');
                         <i class="fas fa-external-link-alt"></i> View
                       </a>
 
-                      <!-- ✅ DELETE BUTTON -->
+                      <!--  DELETE BUTTON -->
                       <button type="button"
                         class="btn-delete-doc"
                         onclick="deleteExistingDocument('<?php echo $document['name']; ?>', <?php echo $data['property']->id; ?>, <?php echo $index; ?>)"
@@ -653,7 +653,7 @@ $isMaintenanceProperty = ($listingType === 'maintenance');
     color: #e5e7eb;
   }
 
-  /* ✅ UPDATED DOCUMENTS GRID */
+  /*  UPDATED DOCUMENTS GRID */
   .existing-documents-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -661,7 +661,7 @@ $isMaintenanceProperty = ($listingType === 'maintenance');
     margin-bottom: 1rem;
   }
 
-  /* ✅ UPDATED DOCUMENT ITEM */
+  /*  UPDATED DOCUMENT ITEM */
   .existing-document-item {
     display: flex;
     align-items: center;
@@ -708,14 +708,14 @@ $isMaintenanceProperty = ($listingType === 'maintenance');
     color: #10b981;
   }
 
-  /* ✅ UPDATED DOCUMENT INFO */
+  /*  UPDATED DOCUMENT INFO */
   .document-info {
     flex: 1;
     min-width: 0;
     overflow: hidden;
   }
 
-  /* ✅ UPDATED DOCUMENT NAME WITH TOOLTIP */
+  /*  UPDATED DOCUMENT NAME WITH TOOLTIP */
   .document-name {
     display: block;
     text-overflow: ellipsis;
@@ -728,7 +728,7 @@ $isMaintenanceProperty = ($listingType === 'maintenance');
     color: #374151;
   }
 
-  /* ✅ TOOLTIP ON HOVER */
+  /*  TOOLTIP ON HOVER */
   .document-name:hover::after {
     content: attr(title);
     position: absolute;
