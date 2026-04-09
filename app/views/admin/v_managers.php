@@ -225,27 +225,20 @@ AutoPaginate::init($data, 5);
 <script>
     // Approve Manager Function
     function approveManagerCustom(managerId) {
-        console.log('=== APPROVE MANAGER FUNCTION CALLED ===');
-        console.log('Manager ID:', managerId);
-
         if (!confirm('Are you sure you want to approve this manager?')) {
-            console.log('User cancelled the operation');
             return;
         }
 
         const button = document.getElementById('approve-btn-' + managerId);
         if (!button) {
-            console.error('❌ Button not found for manager ID:', managerId);
             alert('Error: Button not found');
             return;
         }
 
-        console.log('✓ Button found:', button);
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         const url = '<?php echo URLROOT; ?>/admin/approvePM/' + managerId;
-        console.log('Fetch URL:', url);
 
         fetch(url, {
                 method: 'POST',
@@ -254,46 +247,18 @@ AutoPaginate::init($data, 5);
                 },
                 credentials: 'same-origin'
             })
-            .then(response => {
-                console.log('=== RESPONSE RECEIVED ===');
-                console.log('Status:', response.status);
-
-                return response.clone().text().then(text => {
-                    console.log('Raw response text:', text);
-
-                    try {
-                        const data = JSON.parse(text);
-                        return {
-                            data,
-                            status: response.status
-                        };
-                    } catch (e) {
-                        console.error('❌ JSON parse error:', e);
-                        throw new Error('Server did not return valid JSON. Response: ' + text.substring(0, 200));
-                    }
-                });
-            })
-            .then(({
-                data,
-                status
-            }) => {
-                console.log('=== PARSED JSON DATA ===');
-                console.log('Success:', data.success);
-                console.log('Message:', data.message);
-
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
                     alert(data.message || 'Manager approved successfully!');
                     location.reload();
                 } else {
-                    console.error('❌ Server returned success=false');
                     alert('Error: ' + (data.message || 'Failed to approve manager'));
                     button.disabled = false;
                     button.innerHTML = '<i class="fas fa-check"></i>';
                 }
             })
             .catch(error => {
-                console.error('=== FETCH ERROR ===');
-                console.error('Error:', error);
                 alert('An error occurred: ' + error.message);
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-check"></i>';
@@ -302,27 +267,20 @@ AutoPaginate::init($data, 5);
 
     // Reject Manager Function
     function rejectManagerCustom(managerId) {
-        console.log('=== REJECT MANAGER FUNCTION CALLED ===');
-        console.log('Manager ID:', managerId);
-
         if (!confirm('Are you sure you want to reject this property manager application?')) {
-            console.log('User cancelled the operation');
             return;
         }
 
         const button = document.getElementById('reject-btn-' + managerId);
         if (!button) {
-            console.error('❌ Button not found for manager ID:', managerId);
             alert('Error: Button not found');
             return;
         }
 
-        console.log('✓ Button found:', button);
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         const url = '<?php echo URLROOT; ?>/admin/rejectPM/' + managerId;
-        console.log('Fetch URL:', url);
 
         fetch(url, {
                 method: 'POST',
@@ -331,46 +289,18 @@ AutoPaginate::init($data, 5);
                 },
                 credentials: 'same-origin'
             })
-            .then(response => {
-                console.log('=== RESPONSE RECEIVED ===');
-                console.log('Status:', response.status);
-
-                return response.clone().text().then(text => {
-                    console.log('Raw response text:', text);
-
-                    try {
-                        const data = JSON.parse(text);
-                        return {
-                            data,
-                            status: response.status
-                        };
-                    } catch (e) {
-                        console.error('❌ JSON parse error:', e);
-                        throw new Error('Server did not return valid JSON. Response: ' + text.substring(0, 200));
-                    }
-                });
-            })
-            .then(({
-                data,
-                status
-            }) => {
-                console.log('=== PARSED JSON DATA ===');
-                console.log('Success:', data.success);
-                console.log('Message:', data.message);
-
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
                     alert(data.message || 'Manager application rejected successfully!');
                     location.reload();
                 } else {
-                    console.error('❌ Server returned success=false');
                     alert('Error: ' + (data.message || 'Failed to reject manager'));
                     button.disabled = false;
                     button.innerHTML = '<i class="fas fa-times"></i>';
                 }
             })
             .catch(error => {
-                console.error('=== FETCH ERROR ===');
-                console.error('Error:', error);
                 alert('An error occurred: ' + error.message);
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-times"></i>';
@@ -379,27 +309,20 @@ AutoPaginate::init($data, 5);
 
     // Remove Manager Function
     function removeManagerCustom(managerId) {
-        console.log('=== REMOVE MANAGER FUNCTION CALLED ===');
-        console.log('Manager ID:', managerId);
-
         if (!confirm('Are you sure you want to remove this property manager? This action cannot be undone.')) {
-            console.log('User cancelled the operation');
             return;
         }
 
         const button = document.getElementById('remove-btn-' + managerId);
         if (!button) {
-            console.error('❌ Button not found for manager ID:', managerId);
             alert('Error: Button not found');
             return;
         }
 
-        console.log('✓ Button found:', button);
         button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Removing...';
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         const url = '<?php echo URLROOT; ?>/admin/removePropertyManager/' + managerId;
-        console.log('Fetch URL:', url);
 
         fetch(url, {
                 method: 'POST',
@@ -408,49 +331,21 @@ AutoPaginate::init($data, 5);
                 },
                 credentials: 'same-origin'
             })
-            .then(response => {
-                console.log('=== RESPONSE RECEIVED ===');
-                console.log('Status:', response.status);
-
-                return response.clone().text().then(text => {
-                    console.log('Raw response text:', text);
-
-                    try {
-                        const data = JSON.parse(text);
-                        return {
-                            data,
-                            status: response.status
-                        };
-                    } catch (e) {
-                        console.error('❌ JSON parse error:', e);
-                        throw new Error('Server did not return valid JSON. Response: ' + text.substring(0, 200));
-                    }
-                });
-            })
-            .then(({
-                data,
-                status
-            }) => {
-                console.log('=== PARSED JSON DATA ===');
-                console.log('Success:', data.success);
-                console.log('Message:', data.message);
-
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
                     alert(data.message || 'Manager removed successfully!');
                     location.reload();
                 } else {
-                    console.error('❌ Server returned success=false');
                     alert('Error: ' + (data.message || 'Failed to remove manager'));
                     button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-trash"></i> Remove';
+                    button.innerHTML = '<i class="fas fa-trash"></i>';
                 }
             })
             .catch(error => {
-                console.error('=== FETCH ERROR ===');
-                console.error('Error:', error);
                 alert('An error occurred: ' + error.message);
                 button.disabled = false;
-                button.innerHTML = '<i class="fas fa-trash"></i> Remove';
+                button.innerHTML = '<i class="fas fa-trash"></i>';
             });
     }
 
