@@ -459,6 +459,20 @@ class Maintenance extends Controller
             $cancellation_reason = trim($_POST['cancellation_reason']);
 
             if ($this->maintenanceModel->cancelMaintenance($id, $cancellation_reason)) {
+                if ($_SESSION['user_type'] === 'landlord') {
+                    $property = $this->propertyModel->getPropertyById($maintenance->property_id);
+
+                    if ($property && !empty($property->manager_id)) {
+                        $this->notificationModel->createNotification([
+                            'user_id' => $property->manager_id,
+                            'type' => 'maintenance_cancelled',
+                            'title' => 'Maintenance Request Cancelled',
+                            'message' => 'The maintenance request "' . $maintenance->title . '" has been cancelled by the landlord.',
+                            'link' => 'maintenance/details/' . $id
+                        ]);
+                    }
+                }
+
                 flash('maintenance_message', 'Maintenance request cancelled', 'alert alert-success');
             } else {
                 flash('maintenance_message', 'Failed to cancel maintenance request', 'alert alert-danger');
