@@ -516,10 +516,22 @@ class Admin extends Controller
                 exit();
             }
 
+            $user = $this->userModel->getUserById($userId);
+
             if ($this->userModel->removePropertyManager($userId)) {
+                $emailWarning = '';
+                if ($user && !empty($user->email)) {
+                    $emailSent = sendPMRemovalEmail($user->email, $user->name);
+                    if (!$emailSent) {
+                        global $smtp_error;
+                        $emailWarning = ' However, the notification email could not be sent.';
+                        error_log("Failed to send PM removal email to: " . $user->email . " Error: " . $smtp_error);
+                    }
+                }
+
                 echo json_encode([
                     'success' => true,
-                    'message' => 'Property Manager removed successfully'
+                    'message' => 'Property Manager removed successfully' . $emailWarning
                 ]);
             } else {
                 echo json_encode([

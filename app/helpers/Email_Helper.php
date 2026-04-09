@@ -112,6 +112,38 @@ function sendPMRejectionEmail($to, $name)
 }
 
 /**
+ * Send PM Removal Email
+ */
+function sendPMRemovalEmail($to, $name)
+{
+    $subject = "Rentigo - Property Manager Account Removed";
+
+    $message = "
+    <html>
+    <head>
+    <title>Rentigo PM Account Removal</title>
+    </head>
+    <body>
+    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px;'>
+        <h2 style='color: #45a9ea; text-align: center;'>Rentigo</h2>
+        <p>Hello $name,</p>
+        <p>We are writing to inform you that your Property Manager account has been <strong style='color: #dc2626;'>removed</strong> by an administrator.</p>
+        <div style='background: #fef2f2; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0; border: 1px solid #fecaca;'>
+            <h3 style='color: #dc2626; margin: 0;'>Account Removal Notice</h3>
+            <p style='color: #991b1b; margin: 10px 0 0 0;'>You no longer have access to the Property Manager dashboard.</p>
+        </div>
+        <p>If you believe this was an error or need more information, please contact our support team.</p>
+        <hr style='border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;'>
+        <p style='font-size: 12px; color: #64748b; text-align: center;'>&copy; " . date('Y') . " Rentigo. All rights reserved.</p>
+    </div>
+    </body>
+    </html>
+    ";
+
+    return sendSMTP($to, $subject, $message);
+}
+
+/**
  * Basic SMTP client for Outlook
  */
 $smtp_error = "";
