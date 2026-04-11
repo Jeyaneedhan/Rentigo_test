@@ -505,7 +505,7 @@ class AutoPaginate
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo $baseUrl; ?>? page=<?php echo $total; ?>" class="pagination-btn last-btn" title="Go to last page">
+                            <a href="<?php echo $baseUrl; ?>?page=<?php echo $total; ?>" class="pagination-btn last-btn" title="Go to last page">
                                 Last <i class="fas fa-step-forward"></i>
                             </a>
                         </li>
