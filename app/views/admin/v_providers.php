@@ -170,6 +170,15 @@ AutoPaginate::init($data, 5);
         </div>
 
         <div class="table-container">
+            <style>
+                .providers-table .provider-row {
+                    cursor: pointer;
+                }
+
+                .providers-table .provider-row:hover {
+                    background: #f8fafc;
+                }
+            </style>
             <?php if (!empty($data['providers'])): ?>
                 <table class="data-table providers-table">
                     <thead>
@@ -184,7 +193,7 @@ AutoPaginate::init($data, 5);
                     </thead>
                     <tbody>
                         <?php foreach ($data['providers'] as $provider): ?>
-                            <tr data-provider-id="<?php echo $provider->id; ?>">
+                            <tr class="provider-row" data-provider-id="<?php echo $provider->id; ?>">
                                 <td>
                                     <div class="provider-info">
                                         <div class="provider-icon">
@@ -408,6 +417,23 @@ AutoPaginate::init($data, 5);
                     alert.remove();
                 }, 300);
             }, 5000);
+        });
+
+        const rows = document.querySelectorAll('.provider-row');
+        rows.forEach(row => {
+            row.addEventListener('click', () => {
+                const providerId = row.getAttribute('data-provider-id');
+                if (providerId) {
+                    window.location.href = `<?php echo URLROOT; ?>/providers/show/${providerId}`;
+                }
+            });
+        });
+
+        const actionButtons = document.querySelectorAll('.provider-actions .action-btn');
+        actionButtons.forEach(button => {
+            button.addEventListener('click', event => {
+                event.stopPropagation();
+            });
         });
     });
 </script>
