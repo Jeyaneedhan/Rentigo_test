@@ -155,33 +155,6 @@
                 <div class="form-group">
                     <label for="policy_content">Policy Content <span class="required">*</span></label>
 
-                    <!-- Editor Toolbar -->
-                    <div class="editor-toolbar">
-                        <button type="button" onclick="formatText('bold')" class="editor-btn" title="Bold">
-                            <i class="fas fa-bold"></i>
-                        </button>
-                        <button type="button" onclick="formatText('italic')" class="editor-btn" title="Italic">
-                            <i class="fas fa-italic"></i>
-                        </button>
-                        <button type="button" onclick="formatText('underline')" class="editor-btn" title="Underline">
-                            <i class="fas fa-underline"></i>
-                        </button>
-                        <span class="toolbar-divider"></span>
-                        <button type="button" onclick="insertHeading('h3')" class="editor-btn" title="Heading 3">
-                            H3
-                        </button>
-                        <button type="button" onclick="insertHeading('h4')" class="editor-btn" title="Heading 4">
-                            H4
-                        </button>
-                        <span class="toolbar-divider"></span>
-                        <button type="button" onclick="insertList('ul')" class="editor-btn" title="Bullet List">
-                            <i class="fas fa-list-ul"></i>
-                        </button>
-                        <button type="button" onclick="insertList('ol')" class="editor-btn" title="Numbered List">
-                            <i class="fas fa-list-ol"></i>
-                        </button>
-                    </div>
-
                     <!-- Content Editor -->
                     <div id="policy_content_editor"
                         contenteditable="true"
@@ -521,51 +494,6 @@
 </style>
 
 <script>
-    // Rich Text Editor Functions
-    function formatText(command) {
-        document.execCommand(command, false, null);
-        document.getElementById('policy_content_editor').focus();
-    }
-
-    function insertHeading(tag) {
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            const selectedText = range.toString();
-
-            if (selectedText) {
-                const heading = document.createElement(tag);
-                heading.textContent = selectedText;
-                range.deleteContents();
-                range.insertNode(heading);
-
-                // Clear selection and position cursor after heading
-                selection.removeAllRanges();
-                const newRange = document.createRange();
-                newRange.setStartAfter(heading);
-                newRange.collapse(true);
-                selection.addRange(newRange);
-            } else {
-                // If no text selected, insert empty heading
-                const heading = document.createElement(tag);
-                heading.innerHTML = 'Heading&nbsp;';
-                range.insertNode(heading);
-
-                // Place cursor inside heading
-                const newRange = document.createRange();
-                newRange.selectNodeContents(heading);
-                selection.removeAllRanges();
-                selection.addRange(newRange);
-            }
-        }
-        document.getElementById('policy_content_editor').focus();
-    }
-
-    function insertList(listType) {
-        document.execCommand('insert' + (listType === 'ul' ? 'UnorderedList' : 'OrderedList'), false, null);
-        document.getElementById('policy_content_editor').focus();
-    }
-
     // Sync editor content with hidden textarea
     document.getElementById('policy_content_editor').addEventListener('input', function() {
         document.getElementById('policy_content').value = this.innerHTML;
