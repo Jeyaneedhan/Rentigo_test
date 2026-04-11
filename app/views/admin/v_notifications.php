@@ -100,18 +100,18 @@
         <!-- Tabs -->
         <div class="tabs-container">
             <div class="tabs-header">
-                <button class="tab-button active" data-tab="admin-sent">
+                <button class="tab-button <?php echo ($data['active_tab'] ?? 'admin-sent') === 'admin-sent' ? 'active' : ''; ?>" data-tab="admin-sent">
                     <i class="fas fa-user-shield"></i>
                     Admin Sent (<?php echo count($data['adminNotifications'] ?? []); ?>)
                 </button>
-                <button class="tab-button" data-tab="other-notifications">
+                <button class="tab-button <?php echo ($data['active_tab'] ?? 'admin-sent') === 'other-notifications' ? 'active' : ''; ?>" data-tab="other-notifications">
                     <i class="fas fa-bell"></i>
                     Other Notifications (<?php echo count($data['otherNotifications'] ?? []); ?>)
                 </button>
             </div>
 
             <!-- Tab 1: Admin Sent Notifications -->
-            <div class="tab-content active" id="admin-sent">
+            <div class="tab-content <?php echo ($data['active_tab'] ?? 'admin-sent') === 'admin-sent' ? 'active' : ''; ?>" id="admin-sent">
                 <div class="table-container">
                     <table class="data-table notifications-table">
                         <thead>
@@ -168,10 +168,11 @@
                         </tbody>
                     </table>
                 </div>
+                <?php echo AutoPaginate::renderWithParam($data['_pagination_admin'] ?? [], 'admin_page', ['tab' => 'admin-sent']); ?>
             </div>
 
             <!-- Tab 2: Other Notifications -->
-            <div class="tab-content" id="other-notifications">
+            <div class="tab-content <?php echo ($data['active_tab'] ?? 'admin-sent') === 'other-notifications' ? 'active' : ''; ?>" id="other-notifications">
                 <div class="table-container">
                     <table class="data-table notifications-table">
                         <thead>
@@ -251,6 +252,7 @@
                         </tbody>
                     </table>
                 </div>
+                <?php echo AutoPaginate::renderWithParam($data['_pagination_other'] ?? [], 'other_page', ['tab' => 'other-notifications']); ?>
             </div>
         </div>
     </div>
