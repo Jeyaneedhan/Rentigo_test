@@ -289,6 +289,44 @@ class Admin extends Controller
         $this->view('admin/v_financials', $data);
     }
 
+    // View a single financial transaction
+    public function view_financial($transactionId)
+    {
+        $paymentModel = $this->model('M_Payments');
+        $maintenanceModel = $this->model('M_MaintenanceQuotations');
+
+        $transaction = null;
+        $type = '';
+
+        if (strpos($transactionId, 'MAIN') === 0) {
+            $id = substr($transactionId, 4);
+            $transaction = $maintenanceModel->getMaintenancePaymentById($id);
+            $type = 'maintenance';
+        } elseif (strpos($transactionId, 'TXN') === 0) {
+            $id = substr($transactionId, 3);
+            $transaction = $paymentModel->getPaymentById($id);
+            $type = 'rental';
+        } else {
+            $transaction = $paymentModel->getPaymentById($transactionId);
+            $type = 'rental';
+        }
+
+        if (!$transaction) {
+            flash('financial_message', 'Transaction not found!', 'alert alert-danger');
+            redirect('admin/financials');
+        }
+
+        $data = [
+            'title' => 'Transaction Details - Rentigo Admin',
+            'page' => 'financials',
+            'transaction' => $transaction,
+            'transaction_id' => $transactionId,
+            'transaction_type' => $type
+        ];
+
+        $this->view('admin/v_view_financial', $data);
+    }
+
     public function providers()
     {
         redirect('providers/index');
