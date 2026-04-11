@@ -231,6 +231,25 @@ class M_MaintenanceQuotations
         return $this->db->resultSet();
     }
 
+    // Get maintenance payment by ID with details
+    public function getMaintenancePaymentById($id)
+    {
+        $this->db->query('SELECT
+            mp.*,
+            mr.title as maintenance_title,
+            p.address as property_address,
+            u.name as landlord_name,
+            "maintenance" as payment_type
+            FROM maintenance_payments mp
+            LEFT JOIN maintenance_quotations mq ON mp.quotation_id = mq.id
+            LEFT JOIN maintenance_requests mr ON mq.request_id = mr.id
+            LEFT JOIN properties p ON mr.property_id = p.id
+            LEFT JOIN users u ON mr.landlord_id = u.id
+            WHERE mp.id = :id');
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
+
     // Get maintenance payments for a specific manager's properties
     public function getManagerMaintenancePayments($manager_id)
     {
