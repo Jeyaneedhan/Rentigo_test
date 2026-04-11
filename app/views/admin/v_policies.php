@@ -291,78 +291,7 @@ AutoPaginate::init($data, 5);
 <script>
     // Policy Management Functions
     function viewPolicy(policyId) {
-        const modal = document.getElementById('viewPolicyModal');
-        const title = document.getElementById('modalPolicyTitle');
-        const content = document.getElementById('modalPolicyContent');
-
-        // Show loading state
-        title.textContent = 'Loading...';
-        content.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin"></i> Loading policy...</div>';
-        modal.classList.remove('hidden');
-
-        // Fetch policy data
-        fetch(`<?php echo URLROOT; ?>/policies/view_policy/${policyId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const policy = data.policy;
-                    title.textContent = policy.policy_name;
-
-                    content.innerHTML = `
-                <div class="policy-details">
-                    <div class="detail-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                        <div class="detail-item">
-                            <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Category</label>
-                            <span class="category-badge ${policy.policy_category}">${policy.policy_category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Version</label>
-                            <span>${policy.policy_version}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Status</label>
-                            <span class="status-badge ${policy.policy_status}">${policy.policy_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Effective Date</label>
-                            <span>${new Date(policy.effective_date).toLocaleDateString()}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Created By</label>
-                            <span>${policy.created_by_name}</span>
-                        </div>
-                        <div class="detail-item">
-                            <label style="display: block; font-weight: 600; margin-bottom: 0.25rem; color: #64748b;">Last Updated</label>
-                            <span>${new Date(policy.updated_at).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                    <div class="detail-section">
-                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #64748b;">Description</label>
-                        <p style="margin-bottom: 1.5rem; color: #334155;">${policy.policy_description}</p>
-                    </div>
-                    <div class="detail-section">
-                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #64748b;">Policy Content</label>
-                        <div style="border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; background: #f8fafc;">
-                            ${policy.policy_content}
-                        </div>
-                    </div>
-                </div>
-            `;
-                } else {
-                    title.textContent = 'Error';
-                    content.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load policy details.</div>';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                title.textContent = 'Error';
-                content.innerHTML = '<div style="text-align: center; padding: 2rem; color: #ef4444;">Failed to load policy details.</div>';
-            });
+        window.location.href = `<?php echo URLROOT; ?>/policies/view_policy/${policyId}`;
     }
 
     function closeViewPolicyModal() {
