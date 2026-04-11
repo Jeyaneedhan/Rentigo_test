@@ -344,9 +344,19 @@ class Admin extends Controller
         // Load notification model
         $notificationModel = $this->model('M_Notifications');
 
+        require_once APPROOT . '/../app/helpers/AutoPaginate.php';
+
         // Get admin-sent notifications and other notifications separately
         $adminNotifications = $notificationModel->getAdminSentNotifications();
         $otherNotifications = $notificationModel->getOtherNotifications();
+
+        $activeTab = $_GET['tab'] ?? 'admin-sent';
+        if (!in_array($activeTab, ['admin-sent', 'other-notifications'], true)) {
+            $activeTab = 'admin-sent';
+        }
+
+        $adminPaged = AutoPaginate::paginate($adminNotifications, 'admin_page', 10);
+        $otherPaged = AutoPaginate::paginate($otherNotifications, 'other_page', 10);
 
         // Get statistics
         $stats = $notificationModel->getNotificationStats();
@@ -354,9 +364,12 @@ class Admin extends Controller
         $data = [
             'title' => 'Notifications - Rentigo Admin',
             'page' => 'notifications',
-            'adminNotifications' => $adminNotifications,
-            'otherNotifications' => $otherNotifications,
-            'stats' => $stats
+            'adminNotifications' => $adminPaged['items'],
+            'otherNotifications' => $otherPaged['items'],
+            'stats' => $stats,
+            'active_tab' => $activeTab,
+            '_pagination_admin' => $adminPaged['pagination'],
+            '_pagination_other' => $otherPaged['pagination']
         ];
         $this->view('admin/v_notifications', $data);
     }
