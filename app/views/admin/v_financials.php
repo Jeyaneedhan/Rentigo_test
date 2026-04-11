@@ -247,70 +247,7 @@ AutoPaginate::init($data, 10);
 <script>
     // Transaction management functions - Global scope for onclick handlers
     function viewTransaction(transactionId, event) {
-        const modal = document.getElementById('transactionModal')
-        const modalContent = document.getElementById('transactionModalContent')
-
-        // Get the row element from the clicked button
-        const row = event.target.closest('tr')
-
-        // Get all td elements
-        const cells = row.querySelectorAll('td')
-
-        // Extract data with safe fallbacks
-        const type = cells[0].querySelector('.type-label')?.textContent || 'N/A'
-        const description = cells[1].querySelector('.description-title')?.textContent || 'N/A'
-        const property = cells[2].querySelector('.property-name')?.textContent || 'N/A'
-        const totalAmount = cells[3]?.textContent?.trim() || 'N/A'
-        const platformFee = cells[4]?.textContent?.trim() || 'N/A'
-        const date = cells[5]?.textContent?.trim() || 'N/A'
-        const statusElement = cells[6].querySelector('.status-badge')
-        const status = statusElement?.textContent?.trim() || 'N/A'
-        const statusClass = statusElement?.className.split(' ')[1] || 'pending'
-
-        // Build modal content with real data
-        modalContent.innerHTML = `
-            <div class="transaction-details">
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Transaction ID</label>
-                        <span>${transactionId}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Type</label>
-                        <span>${type}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Description</label>
-                        <span>${description}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Property</label>
-                        <span>${property}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Total Payment</label>
-                        <span class="amount-large">${totalAmount}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Platform Fee (10%)</label>
-                        <span>${platformFee}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Date</label>
-                        <span>${date}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Status</label>
-                        <span class="status-badge ${statusClass}">${status}</span>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-primary" onclick="closeTransactionModal()">Close</button>
-                </div>
-            </div>
-        `
-
-        modal.classList.remove('hidden')
+        window.location.href = `<?php echo URLROOT; ?>/admin/view_financial/${transactionId}`
     }
 
     function closeTransactionModal() {
