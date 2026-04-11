@@ -41,6 +41,25 @@ class Providers extends Controller
         $this->view('admin/v_providers', $data);
     }
 
+    // READ - Service provider details page
+    public function show($id)
+    {
+        $provider = $this->serviceProviderModel->getProviderById($id);
+
+        if (!$provider) {
+            flash('provider_message', 'Service provider not found!', 'alert alert-danger');
+            redirect('providers/index');
+        }
+
+        $data = [
+            'title' => 'Service Provider Details - Rentigo Admin',
+            'page' => 'providers',
+            'provider' => $provider
+        ];
+
+        $this->view('admin/v_service_provider', $data);
+    }
+
     // CREATE - Add new service provider
     public function add()
     {
