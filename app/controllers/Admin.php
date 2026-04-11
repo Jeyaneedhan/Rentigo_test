@@ -732,7 +732,7 @@ class Admin extends Controller
         }
 
         $input = json_decode(file_get_contents('php://input'), true);
-        $statType = $input['statType'] ?? '';
+        $statType = $input['statType'] ?? $input['stat_type'] ?? '';
         $period = $input['period'] ?? 'all';
 
         // Validate period
