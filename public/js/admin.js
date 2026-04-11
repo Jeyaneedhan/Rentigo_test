@@ -26,67 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Table row selection
-  const selectAllCheckbox = document.querySelector(".select-all")
-  const rowCheckboxes = document.querySelectorAll(".row-select")
-
-  if (selectAllCheckbox) {
-    selectAllCheckbox.addEventListener("change", function () {
-      rowCheckboxes.forEach((checkbox) => {
-        checkbox.checked = this.checked
-      })
-    })
-  }
-
-  // Individual row selection
-  rowCheckboxes.forEach((checkbox) => {
-    checkbox.addEventListener("change", () => {
-      const checkedCount = document.querySelectorAll(".row-select:checked").length
-      const totalCount = rowCheckboxes.length
-
-      if (selectAllCheckbox) {
-        selectAllCheckbox.checked = checkedCount === totalCount
-        selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount
-      }
-    })
-  })
-
   // Initialize specific modules
   initializeManagerManagement()
   initializePropertiesManagement()
-  initializeFinancialManagement()
   initializeUI()
   initializeKeyboardShortcuts()
 })
 
-// Tab Switching Function - Global scope for onclick handlers
-function switchTab(tabName) {
-  // Hide all tab contents
-  const allTabs = document.querySelectorAll('.tab-content')
-  allTabs.forEach(tab => {
-    tab.classList.remove('active')
-  })
-
-  // Remove active class from all tab buttons
-  const allButtons = document.querySelectorAll('.tab-btn')
-  allButtons.forEach(btn => {
-    btn.classList.remove('active')
-  })
-
-  // Show selected tab content
-  const selectedTab = document.getElementById(tabName + '-tab')
-  if (selectedTab) {
-    selectedTab.classList.add('active')
-  }
-
-  // Add active class to clicked button
-  const clickedButton = document.getElementById(tabName + '-btn')
-  if (clickedButton) {
-    clickedButton.classList.add('active')
-  }
-
-  console.log('Switched to tab:', tabName)
-}
 
 // Manager Management Functions
 function initializeManagerManagement() {
@@ -164,11 +110,6 @@ function initializePropertiesManagement() {
   }
 }
 
-// Property actions are handled by server-side links in the views (Properties controller).
-// No JS override needed here.
-
-// Transaction approve/reject are handled by server-side PHP routes.
-
 // Search functionality for general use
 function performSearch(query) {
   console.log("Searching for:", query)
@@ -179,8 +120,6 @@ function performSearch(query) {
     row.style.display = text.includes(query.toLowerCase()) ? '' : 'none'
   })
 }
-
-// showNotification(), getNotificationIcon(), debounce() — moved to shared.js
 
 // Initialize tooltips and other UI enhancements
 function initializeUI() {
@@ -230,23 +169,6 @@ function initializeUI() {
     })
   })
 
-  // Initialize tab functionality if tabs exist
-  initializeTabFunctionality()
-}
-
-// Tab functionality initialization
-function initializeTabFunctionality() {
-  const tabButtons = document.querySelectorAll('.tab-btn')
-
-  tabButtons.forEach(button => {
-    // Only add event listener if button doesn't already have onclick
-    if (!button.onclick && !button.getAttribute('onclick')) {
-      button.addEventListener('click', function () {
-        const tabName = this.id.replace('-btn', '')
-        switchTab(tabName)
-      })
-    }
-  })
 }
 
 // Keyboard shortcuts
@@ -288,9 +210,6 @@ function initializeKeyboardShortcuts() {
 
 // Global functions for window object (for backwards compatibility)
 window.adminJS = {
-  // Tab functions
-  switchTab,
-
   // Stat dropdown functions (from shared.js)
   toggleStatDropdown,
   closeAllStatDropdowns,
