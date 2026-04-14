@@ -4,7 +4,7 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASSWORD', 'root');
-define('DB_NAME', 'rentigo_db');
+define('DB_NAME', 'rentigo_db_test');
 
 // App root - this gives us the path to the app folder so we can include files properly
 define('APPROOT', dirname(dirname(__FILE__))); // points to /Rentigo/app
