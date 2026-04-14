@@ -268,6 +268,19 @@ class M_Bookings
     }
 
     /**
+     * Auto-complete bookings once the move-out date has passed.
+     */
+    public function markCompletedBookings()
+    {
+        $this->db->query('UPDATE bookings
+                         SET status = "completed", updated_at = NOW()
+                         WHERE status IN ("approved", "active")
+                         AND move_out_date IS NOT NULL
+                         AND move_out_date <= CURDATE()');
+        return $this->db->execute();
+    }
+
+    /**
      * Global fetch for admin logs
      */
     public function getAllBookings()

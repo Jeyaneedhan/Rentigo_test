@@ -165,6 +165,9 @@ class Tenant extends Controller
     {
         $tenant_id = $_SESSION['user_id'];
 
+        // Ensure completed bookings are up to date before showing review prompts
+        $this->bookingModel->markCompletedBookings();
+
         // Get all reviews by the tenant
         $myReviews = $this->reviewModel->getReviewsByReviewer($tenant_id);
         $reviewableBookings = $this->reviewModel->getReviewableBookings($tenant_id);

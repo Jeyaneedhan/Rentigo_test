@@ -278,15 +278,42 @@ class M_Reviews
      */
     public function getReviewableBookings($tenant_id)
     {
-        $this->db->query('SELECT b.*, p.address, p.id as property_id, l.id as landlord_id, l.name as landlord_name,
-                         (SELECT COUNT(*) FROM reviews WHERE booking_id = b.id AND reviewer_id = :tenant_id) as already_reviewed
+        $this->db->query('SELECT b.*, p.address, p.id as property_id, l.id as landlord_id, l.name as landlord_name
                          FROM bookings b
                          LEFT JOIN properties p ON b.property_id = p.id
                          LEFT JOIN users l ON b.landlord_id = l.id
                          WHERE b.tenant_id = :tenant_id
                          AND b.status = "completed"
+                         AND NOT EXISTS (
+                             SELECT 1 FROM reviews r
+                             WHERE r.booking_id = b.id
+                             AND r.reviewer_id = :tenant_id
+                             AND r.review_type = "property"
+                         )
                          ORDER BY b.updated_at DESC');
         $this->db->bind(':tenant_id', $tenant_id);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Find bookings where the landlord can now leave a tenant review.
+     */
+    public function getReviewableBookingsForLandlord($landlord_id)
+    {
+        $this->db->query('SELECT b.*, p.address, p.id as property_id, t.id as tenant_id, t.name as tenant_name
+                         FROM bookings b
+                         LEFT JOIN properties p ON b.property_id = p.id
+                         LEFT JOIN users t ON b.tenant_id = t.id
+                         WHERE b.landlord_id = :landlord_id
+                         AND b.status = "completed"
+                         AND NOT EXISTS (
+                             SELECT 1 FROM reviews r
+                             WHERE r.booking_id = b.id
+                             AND r.reviewer_id = :landlord_id
+                             AND r.review_type = "tenant"
+                         )
+                         ORDER BY b.updated_at DESC');
+        $this->db->bind(':landlord_id', $landlord_id);
         return $this->db->resultSet();
     }
 

@@ -138,6 +138,39 @@ class Reviews extends Controller
             redirect('users/login');
         }
 
+        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+            $booking_id = $_GET['booking_id'] ?? null;
+
+            if (!$booking_id) {
+                flash('review_message', 'Invalid booking', 'alert alert-danger');
+                redirect('landlord/feedback');
+                return;
+            }
+
+            $booking = $this->bookingModel->getBookingById($booking_id);
+
+            if (!$booking || $booking->landlord_id != $_SESSION['user_id']) {
+                flash('review_message', 'Booking not found or unauthorized', 'alert alert-danger');
+                redirect('landlord/feedback');
+                return;
+            }
+
+            if ($this->reviewModel->hasUserReviewed($_SESSION['user_id'], null, $booking->tenant_id, 'tenant')) {
+                flash('review_message', 'You have already reviewed this tenant', 'alert alert-info');
+                redirect('landlord/feedback');
+                return;
+            }
+
+            $data = [
+                'title' => 'Write Tenant Review - TenantHub',
+                'page' => 'feedback',
+                'booking' => $booking
+            ];
+
+            $this->view('landlord/v_create_tenant_review', $data);
+            return;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Sanitize POST data
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
@@ -198,12 +231,14 @@ class Reviews extends Controller
     // Update review
     public function update($id)
     {
+        $redirectPath = isTenant() ? 'tenant/my_reviews' : 'landlord/feedback';
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $review = $this->reviewModel->getReviewById($id);
 
             if (!$review || $review->reviewer_id != $_SESSION['user_id']) {
                 flash('review_message', 'Unauthorized access', 'alert alert-danger');
-                redirect('tenant/my_reviews');
+                redirect($redirectPath);
             }
 
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
@@ -217,11 +252,22 @@ class Reviews extends Controller
                 flash('review_message', 'Failed to update review', 'alert alert-danger');
             }
 
-            if (isTenant()) {
-                redirect('tenant/my_reviews');
-            } else {
-                redirect('landlord/feedback');
+            redirect($redirectPath);
+        } else {
+            $review = $this->reviewModel->getReviewById($id);
+
+            if (!$review || $review->reviewer_id != $_SESSION['user_id']) {
+                flash('review_message', 'Unauthorized access', 'alert alert-danger');
+                redirect($redirectPath);
             }
+
+            $data = [
+                'title' => 'Edit Review - TenantHub',
+                'page' => 'my_reviews',
+                'review' => $review
+            ];
+
+            $this->view('tenant/v_edit_review', $data);
         }
     }
 

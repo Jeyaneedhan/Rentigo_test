@@ -77,6 +77,60 @@
     </div>
 </div>
 
+<!-- Tenants to Review -->
+<div class="content-card">
+    <div class="card-header">
+        <h2 class="card-title">Tenants Awaiting Your Review</h2>
+    </div>
+    <div class="card-body">
+        <?php if (!empty($data['reviewableBookings'])): ?>
+            <div class="feedback-container">
+                <?php foreach ($data['reviewableBookings'] as $booking): ?>
+                    <div class="feedback-item">
+                        <div class="feedback-header">
+                            <div class="tenant-info">
+                                <div class="tenant-avatar">
+                                    <?php
+                                    $name = $booking->tenant_name ?? 'T';
+                                    $initials = strtoupper(substr($name, 0, 1));
+                                    if (strpos($name, ' ') !== false) {
+                                        $parts = explode(' ', $name);
+                                        $initials = strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1));
+                                    }
+                                    echo $initials;
+                                    ?>
+                                </div>
+                                <div>
+                                    <h4><?php echo htmlspecialchars($booking->tenant_name ?? 'Tenant'); ?></h4>
+                                    <p><?php echo htmlspecialchars($booking->address ?? 'Property'); ?></p>
+                                </div>
+                            </div>
+                            <div class="feedback-meta">
+                                <span class="feedback-date">
+                                    <?php echo date('M d, Y', strtotime($booking->move_in_date)); ?> -
+                                    <?php echo $booking->move_out_date ? date('M d, Y', strtotime($booking->move_out_date)) : 'Present'; ?>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="feedback-actions">
+                            <a href="<?php echo URLROOT; ?>/reviews/createTenantReview?booking_id=<?php echo $booking->id; ?>"
+                                class="btn btn-sm btn-secondary">
+                                <i class="fas fa-star"></i> Write Review
+                            </a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="empty-state">
+                <i class="fas fa-check-circle"></i>
+                <p>No pending tenant reviews</p>
+                <span>Completed bookings awaiting your review will appear here.</span>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
 <!-- Reviews About You (From Tenants) -->
 <div class="content-card">
     <div class="card-header">

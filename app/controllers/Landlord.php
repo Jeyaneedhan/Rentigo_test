@@ -248,9 +248,13 @@ class Landlord extends Controller
 
     public function feedback()
     {
+        // Ensure completed bookings are up to date before showing review prompts
+        $this->bookingModel->markCompletedBookings();
+
         // Get all reviews about landlord's properties
         $myReviews = $this->reviewModel->getReviewsByReviewer($_SESSION['user_id']);
         $reviewsAboutMe = $this->reviewModel->getReviewsAboutUser($_SESSION['user_id'], 'tenant');
+        $reviewableBookings = $this->reviewModel->getReviewableBookingsForLandlord($_SESSION['user_id']);
 
         $data = [
             'title' => 'Tenant Feedback',
@@ -258,6 +262,7 @@ class Landlord extends Controller
             'user_name' => $_SESSION['user_name'],
             'myReviews' => $myReviews,
             'reviewsAboutMe' => $reviewsAboutMe,
+            'reviewableBookings' => $reviewableBookings,
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('landlord/v_feedback', $data);
