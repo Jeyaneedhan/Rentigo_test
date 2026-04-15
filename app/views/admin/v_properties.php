@@ -13,19 +13,29 @@ AutoPaginate::init($data, 10);
             <p>Manage, approve, and oversee all property listings</p>
         </div>
     </div>
-    <div class="search-filter-content">
-        <div class="search-input-wrapper">
-            <input type="text" class="form-input" placeholder="Search properties..." id="searchProperties">
+    <form method="GET" action="<?php echo URLROOT; ?>/adminproperties/index">
+        <div class="search-filter-content">
+            <div class="search-input-wrapper">
+                <input type="text"
+                    class="form-input"
+                    name="search"
+                    placeholder="Search properties..."
+                    value="<?php echo htmlspecialchars($data['search'] ?? ''); ?>">
+            </div>
+            <div class="filter-dropdown-wrapper">
+                <select class="form-select" name="status">
+                    <option value="" <?php echo (empty($data['status_filter'])) ? 'selected' : ''; ?>>All Properties</option>
+                    <option value="pending" <?php echo (($data['status_filter'] ?? '') === 'pending') ? 'selected' : ''; ?>>Pending</option>
+                    <option value="approved" <?php echo (($data['status_filter'] ?? '') === 'approved') ? 'selected' : ''; ?>>Approved</option>
+                    <option value="rejected" <?php echo (($data['status_filter'] ?? '') === 'rejected') ? 'selected' : ''; ?>>Rejected</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-secondary">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <a href="<?php echo URLROOT; ?>/adminproperties/index" class="btn btn-outline">Reset</a>
         </div>
-        <div class="filter-dropdown-wrapper">
-            <select class="form-select" id="filterProperties" onchange="window.location.href='?filter=' + this.value;">
-                <option value="" <?php echo (($data['current_filter'] ?? 'all') === 'all' || ($data['current_filter'] ?? '') === '') ? 'selected' : ''; ?>>All Properties</option>
-                <option value="pending" <?php echo (($data['current_filter'] ?? '') === 'pending') ? 'selected' : ''; ?>>Pending</option>
-                <option value="approved" <?php echo (($data['current_filter'] ?? '') === 'approved') ? 'selected' : ''; ?>>Approved</option>
-                <option value="rejected" <?php echo (($data['current_filter'] ?? '') === 'rejected') ? 'selected' : ''; ?>>Rejected</option>
-            </select>
-        </div>
-    </div>
+    </form>
     <div class="dashboard-section">
         <div class="section-header">
             <h3>Property Listings (<?php echo count($data['properties'] ?? []); ?>)</h3>
@@ -117,21 +127,6 @@ AutoPaginate::init($data, 10);
 </div>
 
 <!-- ADD PAGINATION HERE - Render at bottom -->
-<?php echo AutoPaginate::render($data['_pagination']); ?>
+<?php echo AutoPaginate::renderWithParam($data['_pagination']); ?>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('searchProperties');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                const rows = document.querySelectorAll('.properties-table tbody tr');
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
-    });
-</script>
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>

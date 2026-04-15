@@ -107,23 +107,23 @@ AutoPaginate::init($data, 5);
                     class="form-input"
                     name="search"
                     placeholder="Search policies..."
-                    value="<?php echo isset($data['filters']['search']) ? htmlspecialchars($data['filters']['search']) : ''; ?>">
+                    value="<?php echo htmlspecialchars($data['search'] ?? ''); ?>">
             </div>
             <div class="filter-dropdown-wrapper">
                 <select class="form-select" name="status">
-                    <option value="">All Statuses</option>
-                    <option value="active" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
-                    <option value="draft" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'draft') ? 'selected' : ''; ?>>Draft</option>
-                    <option value="inactive" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
-                    <option value="archived" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'archived') ? 'selected' : ''; ?>>Archived</option>
-                    <option value="under_review" <?php echo (isset($data['filters']['status']) && $data['filters']['status'] == 'under_review') ? 'selected' : ''; ?>>Under Review</option>
+                    <option value="" <?php echo empty($data['status_filter']) ? 'selected' : ''; ?>>All Statuses</option>
+                    <option value="active" <?php echo (($data['status_filter'] ?? '') == 'active') ? 'selected' : ''; ?>>Active</option>
+                    <option value="draft" <?php echo (($data['status_filter'] ?? '') == 'draft') ? 'selected' : ''; ?>>Draft</option>
+                    <option value="inactive" <?php echo (($data['status_filter'] ?? '') == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                    <option value="archived" <?php echo (($data['status_filter'] ?? '') == 'archived') ? 'selected' : ''; ?>>Archived</option>
+                    <option value="under_review" <?php echo (($data['status_filter'] ?? '') == 'under_review') ? 'selected' : ''; ?>>Under Review</option>
                 </select>
             </div>
             <div class="filter-dropdown-wrapper">
                 <select class="form-select" name="category">
-                    <option value="">All Categories</option>
+                    <option value="" <?php echo empty($data['category_filter']) ? 'selected' : ''; ?>>All Categories</option>
                     <?php foreach ($data['categories'] as $key => $value): ?>
-                        <option value="<?php echo $key; ?>" <?php echo (isset($data['filters']['category']) && $data['filters']['category'] == $key) ? 'selected' : ''; ?>>
+                        <option value="<?php echo $key; ?>" <?php echo (($data['category_filter'] ?? '') == $key) ? 'selected' : ''; ?>>
                             <?php echo $value; ?>
                         </option>
                     <?php endforeach; ?>
@@ -256,7 +256,7 @@ AutoPaginate::init($data, 5);
                 <i class="fas fa-file-text" style="font-size: 3rem; color: #e2e8f0; margin-bottom: 1rem;"></i>
                 <h3 style="color: #64748b; margin-bottom: 0.5rem;">No Policies Found</h3>
                 <p style="color: #94a3b8; margin-bottom: 2rem;">
-                    <?php if (!empty($data['filters'])): ?>
+                    <?php if (!empty($data['search']) || !empty($data['category_filter']) || !empty($data['status_filter'])): ?>
                         No policies match your current filters. Try adjusting your search criteria.
                     <?php else: ?>
                         Get started by creating your first policy document.
@@ -389,47 +389,7 @@ AutoPaginate::init($data, 5);
         }
     });
 
-    // Auto-submit filter form on change
-    document.addEventListener('DOMContentLoaded', function() {
-        const filterForm = document.getElementById('filterForm');
-
-        if (!filterForm) {
-            console.error('Filter form not found');
-            return;
-        }
-
-        const statusSelect = filterForm.querySelector('select[name="status"]');
-        const categorySelect = filterForm.querySelector('select[name="category"]');
-        const searchInput = filterForm.querySelector('input[name="search"]');
-
-        // Add change listener to status dropdown
-        if (statusSelect) {
-            statusSelect.addEventListener('change', function() {
-                console.log('Status changed to:', this.value);
-                filterForm.submit();
-            });
-        }
-
-        // Add change listener to category dropdown
-        if (categorySelect) {
-            categorySelect.addEventListener('change', function() {
-                console.log('Category changed to:', this.value);
-                filterForm.submit();
-            });
-        }
-
-        // Debounce search input
-        if (searchInput) {
-            let searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    console.log('Search submitted:', this.value);
-                    filterForm.submit();
-                }, 500);
-            });
-        }
-    });
+    // Filters submit only via the button.
 </script>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>

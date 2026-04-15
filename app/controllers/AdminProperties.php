@@ -15,16 +15,13 @@ class AdminProperties extends Controller
 
     public function index()
     {
-        $filter = $_GET['filter'] ?? 'all';
-        $validFilters = ['all', 'pending', 'approved', 'rejected'];
-        if (!in_array($filter, $validFilters)) {
-            $filter = 'all';
-        }
+        $searchTerm = $_GET['search'] ?? '';
+        $status = $_GET['status'] ?? '';
 
-        if ($filter === 'all') {
-            $properties = $this->adminPropertyModel->getAllProperties();
+        if (!empty($searchTerm) || !empty($status)) {
+            $properties = $this->adminPropertyModel->searchProperties($searchTerm, $status);
         } else {
-            $properties = $this->adminPropertyModel->getAllProperties($filter);
+            $properties = $this->adminPropertyModel->getAllProperties();
         }
 
         $counts = $this->adminPropertyModel->getPropertyCounts();
@@ -34,7 +31,8 @@ class AdminProperties extends Controller
             'page' => 'properties',
             'properties' => is_array($properties) ? $properties : [],
             'counts' => $counts,
-            'current_filter' => $filter ?? 'all',
+            'search' => $searchTerm,
+            'status_filter' => $status,
             'user_name' => $_SESSION['user_name']
         ];
 

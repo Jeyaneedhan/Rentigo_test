@@ -164,12 +164,21 @@ class Admin extends Controller
     // Property managers page
     public function managers()
     {
-        $allManagers = $this->userModel->getAllPropertyManagers();
+        $searchTerm = $_GET['search'] ?? '';
+        $status = $_GET['status'] ?? '';
+
+        if (!empty($searchTerm) || !empty($status)) {
+            $managers = $this->userModel->searchPropertyManagers($searchTerm, $status);
+        } else {
+            $managers = $this->userModel->getAllPropertyManagers();
+        }
 
         $data = [
             'title' => 'Property Managers - Rentigo Admin',
             'page' => 'managers',
-            'allManagers' => $allManagers
+            'managers' => $managers,
+            'search' => $searchTerm,
+            'status_filter' => $status
         ];
         $this->view('admin/v_managers', $data);
     }

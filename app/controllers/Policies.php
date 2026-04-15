@@ -21,12 +21,7 @@ class Policies extends Controller
         $status = $_GET['status'] ?? '';
 
         if (!empty($searchTerm) || !empty($category) || !empty($status)) {
-            $filters = [
-                'search' => $searchTerm,
-                'category' => $category,
-                'status' => $status
-            ];
-            $policies = $this->policyModel->getAllPolicies($filters);
+            $policies = $this->policyModel->searchPolicies($searchTerm, $category, $status);
         } else {
             $policies = $this->policyModel->getAllPolicies();
         }
@@ -39,11 +34,9 @@ class Policies extends Controller
             'page' => 'policies',
             'policies' => $policies,
             'stats' => $stats,
-            'filters' => [
-                'search' => $searchTerm,
-                'category' => $category,
-                'status' => $status
-            ],
+            'search' => $searchTerm,
+            'category_filter' => $category,
+            'status_filter' => $status,
             'categories' => $this->getCategories(),
             'statuses' => $this->getStatuses()
         ];
@@ -55,34 +48,18 @@ class Policies extends Controller
     public function add()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // Sanitize POST data
-            $sanitized = filter_input_array(INPUT_POST, [
-                'policy_name' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_category' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_version' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_status' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_type' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_description' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_content' => FILTER_UNSAFE_RAW, // Keep HTML for rich text
-                'effective_date' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'expiry_date' => FILTER_SANITIZE_SPECIAL_CHARS
-            ]);
-
-            // If filter_input_array fails, fall back to $_POST
-            if ($sanitized === null || $sanitized === false) {
-                $sanitized = $_POST;
-            }
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
 
             $data = [
-                'policy_name' => trim($sanitized['policy_name'] ?? ''),
-                'policy_category' => trim($sanitized['policy_category'] ?? ''),
-                'policy_version' => trim($sanitized['policy_version'] ?? ''),
-                'policy_status' => trim($sanitized['policy_status'] ?? ''),
-                'policy_type' => trim($sanitized['policy_type'] ?? ''),
-                'policy_description' => trim($sanitized['policy_description'] ?? ''),
-                'policy_content' => $sanitized['policy_content'] ?? '', // Don't trim HTML content
-                'effective_date' => trim($sanitized['effective_date'] ?? ''),
-                'expiry_date' => !empty($sanitized['expiry_date']) ? trim($sanitized['expiry_date']) : null,
+                'policy_name' => trim($_POST['policy_name'] ?? ''),
+                'policy_category' => trim($_POST['policy_category'] ?? ''),
+                'policy_version' => trim($_POST['policy_version'] ?? ''),
+                'policy_status' => trim($_POST['policy_status'] ?? ''),
+                'policy_type' => trim($_POST['policy_type'] ?? ''),
+                'policy_description' => trim($_POST['policy_description'] ?? ''),
+                'policy_content' => $_POST['policy_content'] ?? '',
+                'effective_date' => trim($_POST['effective_date'] ?? ''),
+                'expiry_date' => !empty($_POST['expiry_date']) ? trim($_POST['expiry_date']) : null,
                 'created_by' => $_SESSION['user_id']
             ];
 
@@ -173,21 +150,7 @@ class Policies extends Controller
 
             // Check validation
             if (!$validator->hasErrors()) {
-                // Prepare data for database - using keys that match model expectations
-                $policyData = [
-                    'policy_name' => $data['policy_name'],
-                    'policy_category' => $data['policy_category'],
-                    'policy_version' => $data['policy_version'],
-                    'policy_status' => $data['policy_status'],
-                    'policy_type' => $data['policy_type'],
-                    'policy_description' => $data['policy_description'],
-                    'policy_content' => $data['policy_content'],
-                    'effective_date' => $data['effective_date'],
-                    'expiry_date' => $data['expiry_date'],
-                    'created_by' => $data['created_by']
-                ];
-
-                if ($this->policyModel->createPolicy($policyData)) {
+                if ($this->policyModel->createPolicy($data)) {
                     flash('policy_message', 'Policy created successfully!', 'alert alert-success');
                     redirect('policies/index');
                 } else {
@@ -249,35 +212,19 @@ class Policies extends Controller
     public function edit($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // Sanitize POST data
-            $sanitized = filter_input_array(INPUT_POST, [
-                'policy_name' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_category' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_version' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_status' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_type' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_description' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'policy_content' => FILTER_UNSAFE_RAW, // Keep HTML for rich text
-                'effective_date' => FILTER_SANITIZE_SPECIAL_CHARS,
-                'expiry_date' => FILTER_SANITIZE_SPECIAL_CHARS
-            ]);
-
-            // If filter_input_array fails, fall back to $_POST
-            if ($sanitized === null || $sanitized === false) {
-                $sanitized = $_POST;
-            }
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
 
             $data = [
                 'policy_id' => $id,
-                'policy_name' => trim($sanitized['policy_name'] ?? ''),
-                'policy_category' => trim($sanitized['policy_category'] ?? ''),
-                'policy_version' => trim($sanitized['policy_version'] ?? ''),
-                'policy_status' => trim($sanitized['policy_status'] ?? ''),
-                'policy_type' => trim($sanitized['policy_type'] ?? ''),
-                'policy_description' => trim($sanitized['policy_description'] ?? ''),
-                'policy_content' => $sanitized['policy_content'] ?? '', // Don't trim HTML content
-                'effective_date' => trim($sanitized['effective_date'] ?? ''),
-                'expiry_date' => !empty($sanitized['expiry_date']) ? trim($sanitized['expiry_date']) : null
+                'policy_name' => trim($_POST['policy_name'] ?? ''),
+                'policy_category' => trim($_POST['policy_category'] ?? ''),
+                'policy_version' => trim($_POST['policy_version'] ?? ''),
+                'policy_status' => trim($_POST['policy_status'] ?? ''),
+                'policy_type' => trim($_POST['policy_type'] ?? ''),
+                'policy_description' => trim($_POST['policy_description'] ?? ''),
+                'policy_content' => $_POST['policy_content'] ?? '',
+                'effective_date' => trim($_POST['effective_date'] ?? ''),
+                'expiry_date' => !empty($_POST['expiry_date']) ? trim($_POST['expiry_date']) : null
             ];
 
             // Create validator
@@ -367,22 +314,7 @@ class Policies extends Controller
 
             // Check validation
             if (!$validator->hasErrors()) {
-                // Prepare data for database - include policy_id in the array
-                $policyData = [
-                    'policy_id' => $id,  // Include policy_id in the array
-                    'policy_name' => $data['policy_name'],
-                    'policy_category' => $data['policy_category'],
-                    'policy_version' => $data['policy_version'],
-                    'policy_status' => $data['policy_status'],
-                    'policy_type' => $data['policy_type'],
-                    'policy_description' => $data['policy_description'],
-                    'policy_content' => $data['policy_content'],
-                    'effective_date' => $data['effective_date'],
-                    'expiry_date' => $data['expiry_date']
-                ];
-
-                // Pass only 1 parameter (policy_id is inside the array)
-                if ($this->policyModel->updatePolicy($policyData)) {
+                if ($this->policyModel->updatePolicy($data)) {
                     flash('policy_message', 'Policy updated successfully!', 'alert alert-success');
                     redirect('policies/index');
                 } else {
@@ -443,40 +375,21 @@ class Policies extends Controller
     // VIEW - View single policy details
     public function view_policy($id)
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            header('Content-Type: application/json');
+        // GET request - Show policy view page
+        $policy = $this->policyModel->getPolicyById($id);
 
-            $policy = $this->policyModel->getPolicyById($id);
-
-            if ($policy) {
-                echo json_encode([
-                    'success' => true,
-                    'policy' => $policy
-                ]);
-            } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Policy not found'
-                ]);
-            }
-            exit();
-        } else {
-            // GET request - Show policy view page
-            $policy = $this->policyModel->getPolicyById($id);
-
-            if (!$policy) {
-                flash('policy_message', 'Policy not found!', 'alert alert-danger');
-                redirect('policies/index');
-            }
-
-            $data = [
-                'title' => 'View Policy - Rentigo Admin',
-                'page' => 'policies',
-                'policy' => $policy
-            ];
-
-            $this->view('admin/v_view_policy', $data);
+        if (!$policy) {
+            flash('policy_message', 'Policy not found!', 'alert alert-danger');
+            redirect('policies/index');
         }
+
+        $data = [
+            'title' => 'View Policy - Rentigo Admin',
+            'page' => 'policies',
+            'policy' => $policy
+        ];
+
+        $this->view('admin/v_view_policy', $data);
     }
 
     // DELETE - Remove policy
@@ -534,7 +447,7 @@ class Policies extends Controller
             if (!$validator->hasErrors()) {
                 // Get policy details before update to check if status changed
                 $policy = $this->policyModel->getPolicyById($id);
-                
+
                 if (!$policy) {
                     echo json_encode(['success' => false, 'message' => 'Policy not found']);
                     exit();

@@ -259,16 +259,37 @@ class M_Policies
     }
 
     // Search policies
-    public function searchPolicies($searchTerm)
+    public function searchPolicies($searchTerm = '', $category = '', $status = '')
     {
-        $this->db->query("SELECT p.*, u.name as created_by_name
-                         FROM policies p
-                         LEFT JOIN users u ON p.created_by = u.id
-                         WHERE p.policy_name LIKE :search
-                            OR p.policy_content LIKE :search
-                         ORDER BY p.last_updated DESC");
+        $sql = "SELECT p.*, u.name as created_by_name
+                FROM policies p
+                LEFT JOIN users u ON p.created_by = u.id
+                WHERE 1=1";
 
-        $this->db->bind(':search', '%' . $searchTerm . '%');
+        $params = [];
+
+        if (!empty($searchTerm)) {
+            $sql .= " AND (p.policy_name LIKE :search OR p.policy_description LIKE :search)";
+            $params[':search'] = '%' . $searchTerm . '%';
+        }
+
+        if (!empty($category)) {
+            $sql .= " AND p.policy_category = :category";
+            $params[':category'] = $category;
+        }
+
+        if (!empty($status)) {
+            $sql .= " AND p.policy_status = :status";
+            $params[':status'] = $status;
+        }
+
+        $sql .= " ORDER BY p.last_updated DESC";
+
+        $this->db->query($sql);
+        foreach ($params as $key => $value) {
+            $this->db->bind($key, $value);
+        }
+
         return $this->db->resultSet();
     }
 

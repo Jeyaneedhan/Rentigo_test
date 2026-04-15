@@ -27,88 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
   })
 
   // Initialize specific modules
-  initializeManagerManagement()
-  initializePropertiesManagement()
   initializeUI()
   initializeKeyboardShortcuts()
 })
-
-
-// Manager Management Functions
-function initializeManagerManagement() {
-  // Search functionality for managers
-  const searchInput = document.getElementById('searchManagers')
-  if (searchInput) {
-    searchInput.addEventListener('input', function () {
-      const searchTerm = this.value.toLowerCase()
-      const rows = document.querySelectorAll('.managers-table tbody tr')
-
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase()
-        row.style.display = text.includes(searchTerm) ? '' : 'none'
-      })
-    })
-  }
-
-  // Filter functionality for managers
-  const filterDropdown = document.getElementById('filterManagers')
-  if (filterDropdown) {
-    filterDropdown.addEventListener('change', function () {
-      const filterValue = this.value.toLowerCase()
-      const rows = document.querySelectorAll('.managers-table tbody tr')
-
-      rows.forEach(row => {
-        if (filterValue === '') {
-          row.style.display = ''
-        } else {
-          const statusSpan = row.querySelector('[class*="status-"]')
-          if (statusSpan) {
-            const status = statusSpan.textContent.toLowerCase()
-            row.style.display = status.includes(filterValue) ? '' : 'none'
-          }
-        }
-      })
-    })
-  }
-}
-
-// Properties Management Functions
-function initializePropertiesManagement() {
-  // Search functionality
-  const searchInput = document.getElementById('searchProperties')
-  if (searchInput) {
-    searchInput.addEventListener('input', function () {
-      const searchTerm = this.value.toLowerCase()
-      const rows = document.querySelectorAll('.data-table tbody tr')
-
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase()
-        row.style.display = text.includes(searchTerm) ? '' : 'none'
-      })
-    })
-  }
-
-  // Filter functionality
-  const filterDropdown = document.getElementById('filterProperties')
-  if (filterDropdown) {
-    filterDropdown.addEventListener('change', function () {
-      const filterValue = this.value.toLowerCase()
-      const rows = document.querySelectorAll('.data-table tbody tr')
-
-      rows.forEach(row => {
-        if (filterValue === '') {
-          row.style.display = ''
-        } else {
-          const statusBadge = row.querySelector('.status-badge')
-          if (statusBadge) {
-            const status = statusBadge.textContent.toLowerCase()
-            row.style.display = status.includes(filterValue) ? '' : 'none'
-          }
-        }
-      })
-    })
-  }
-}
 
 // Search functionality for general use
 function performSearch(query) {

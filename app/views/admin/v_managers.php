@@ -108,22 +108,32 @@ AutoPaginate::init($data, 5);
 
 
     <!-- Search and Filter -->
-    <div class="search-filter-row">
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Search managers..." id="searchManagers">
+    <form method="GET" action="<?php echo URLROOT; ?>/admin/managers">
+        <div class="search-filter-row">
+            <div class="search-container">
+                <input type="text"
+                    class="search-input"
+                    name="search"
+                    placeholder="Search managers..."
+                    value="<?php echo htmlspecialchars($data['search'] ?? ''); ?>">
+            </div>
+            <div class="filter-container">
+                <select class="filter-select" name="status">
+                    <option value="" <?php echo (empty($data['status_filter'])) ? 'selected' : ''; ?>>All Managers</option>
+                    <option value="pending" <?php echo (($data['status_filter'] ?? '') === 'pending') ? 'selected' : ''; ?>>Pending</option>
+                    <option value="approved" <?php echo (($data['status_filter'] ?? '') === 'approved') ? 'selected' : ''; ?>>Approved</option>
+                    <option value="rejected" <?php echo (($data['status_filter'] ?? '') === 'rejected') ? 'selected' : ''; ?>>Rejected</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-secondary">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <a href="<?php echo URLROOT; ?>/admin/managers" class="btn btn-outline">Reset</a>
         </div>
-        <div class="filter-container">
-            <select class="filter-select" id="filterManagers" onchange="applyFilters()">
-                <option value="">All Managers</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-            </select>
-        </div>
-    </div>
+    </form>
 
     <!-- Manager Applications Table -->
-    <h3 class="table-title">All Property Manager Applications (<?php echo $totalManagers; ?>)</h3>
+    <h3 class="table-title">All Property Manager Applications (<?php echo count($data['managers'] ?? []); ?>)</h3>
     <div class="table-container">
         <table class="managers-table">
             <thead>
@@ -137,8 +147,8 @@ AutoPaginate::init($data, 5);
                 </tr>
             </thead>
             <tbody id="managers-tbody">
-                <?php if (!empty($data['allManagers'])): ?>
-                    <?php foreach ($data['allManagers'] as $manager): ?>
+                <?php if (!empty($data['managers'])): ?>
+                    <?php foreach ($data['managers'] as $manager): ?>
                         <tr id="manager-row-<?php echo $manager->id; ?>" data-status="<?php echo $manager->approval_status; ?>">
                             <td><?php echo htmlspecialchars($manager->name); ?></td>
                             <td><?php echo htmlspecialchars($manager->email); ?></td>
@@ -217,7 +227,7 @@ AutoPaginate::init($data, 5);
 </div>
 
 <!-- ADD PAGINATION HERE - Render at bottom -->
-<?php echo AutoPaginate::render($data['_pagination']); ?>
+<?php echo AutoPaginate::renderWithParam($data['_pagination']); ?>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>
 
@@ -347,37 +357,6 @@ AutoPaginate::init($data, 5);
                 button.disabled = false;
                 button.innerHTML = '<i class="fas fa-trash"></i>';
             });
-    }
-
-    // Combined filter function that handles both search and status filter
-    function applyFilters() {
-        const searchTerm = document.getElementById('searchManagers').value.toLowerCase();
-        const filterValue = document.getElementById('filterManagers').value.toLowerCase();
-        const rows = document.querySelectorAll('#managers-tbody tr');
-
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            const status = row.getAttribute('data-status');
-
-            // Check both conditions
-            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
-            const matchesStatus = filterValue === '' || status === filterValue;
-
-            // Show row only if it matches both filters
-            if (matchesSearch && matchesStatus) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
-
-    // Search managers
-    const searchInput = document.getElementById('searchManagers');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            applyFilters();
-        });
     }
 </script>
 

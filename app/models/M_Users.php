@@ -246,6 +246,44 @@ class M_Users
                               u.created_at DESC');
 
         $this->db->bind(':user_type', 'property_manager');
+        return $this->db->resultSet();
+    }
+
+    public function searchPropertyManagers($searchTerm, $status = '')
+    {
+        $query = 'SELECT u.id, u.name, u.email, u.account_status, u.created_at,
+                                 pm.approval_status, pm.phone, pm.approved_at, pm.employee_id_filename
+                  FROM users u
+                  INNER JOIN property_manager pm ON u.id = pm.user_id
+                  WHERE u.user_type = :user_type';
+
+        if (!empty($searchTerm)) {
+            $query .= ' AND (u.name LIKE :search OR u.email LIKE :search OR pm.employee_id_filename LIKE :search OR pm.phone LIKE :search)';
+        }
+
+        if (!empty($status) && $status !== 'all') {
+            $query .= ' AND pm.approval_status = :status';
+        }
+
+        $query .= ' ORDER BY
+                      CASE
+                          WHEN pm.approval_status = "pending" THEN 1
+                          WHEN pm.approval_status = "approved" THEN 2
+                          WHEN pm.approval_status = "rejected" THEN 3
+                          ELSE 4
+                      END,
+                      u.created_at DESC';
+
+        $this->db->query($query);
+        $this->db->bind(':user_type', 'property_manager');
+
+        if (!empty($searchTerm)) {
+            $this->db->bind(':search', '%' . $searchTerm . '%');
+        }
+
+        if (!empty($status) && $status !== 'all') {
+            $this->db->bind(':status', $status);
+        }
 
         return $this->db->resultSet();
     }

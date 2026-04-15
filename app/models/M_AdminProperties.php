@@ -17,7 +17,26 @@ class M_AdminProperties
     /**
      * Get every single property on the platform (approved or not).
      */
-    public function getAllProperties($status = null)
+    public function getAllProperties()
+    {
+        $this->db->query("SELECT 
+                    p.*,
+                    u.name as landlord_name,
+                    u.email as landlord_email,
+                    pm.name as manager_name
+                  FROM properties p
+                  LEFT JOIN users u ON p.landlord_id = u.id
+                  LEFT JOIN users pm ON p.manager_id = pm.id
+                  ORDER BY p.created_at DESC");
+
+        $result = $this->db->resultSet();
+        return is_array($result) ? $result : [];
+    }
+
+    /**
+     * Search properties with optional status filter.
+     */
+    public function searchProperties($searchTerm, $status = '')
     {
         $query = "SELECT 
                     p.*,
@@ -26,18 +45,29 @@ class M_AdminProperties
                     pm.name as manager_name
                   FROM properties p
                   LEFT JOIN users u ON p.landlord_id = u.id
-                  LEFT JOIN users pm ON p.manager_id = pm.id";
+                  LEFT JOIN users pm ON p.manager_id = pm.id
+                  WHERE 1=1";
 
-        // If a status is provided, filter by it (pending, approved, rejected)
-        if ($status) {
-            $query .= " WHERE p.approval_status = :status";
+        if (!empty($searchTerm)) {
+            $query .= " AND (p.address LIKE :search OR p.property_type LIKE :search OR u.name LIKE :search OR u.email LIKE :search OR pm.name LIKE :search)";
         }
+
+        if (!empty($status)) {
+            $query .= " AND p.approval_status = :status";
+        }
+
         $query .= " ORDER BY p.created_at DESC";
 
         $this->db->query($query);
-        if ($status) {
+
+        if (!empty($searchTerm)) {
+            $this->db->bind(':search', '%' . $searchTerm . '%');
+        }
+
+        if (!empty($status)) {
             $this->db->bind(':status', $status);
         }
+
         $result = $this->db->resultSet();
         return is_array($result) ? $result : [];
     }
