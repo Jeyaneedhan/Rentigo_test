@@ -468,53 +468,24 @@ class Admin extends Controller
         }
     }
 
-    // Property Manager approvals page
-    public function pm_approvals()
-    {
-        $pendingPMs = $this->userModel->getPendingPMs();
-
-        $data = [
-            'title' => 'PM Approvals - Rentigo Admin',
-            'page' => 'pm_approvals',
-            'pending_pms' => $pendingPMs
-        ];
-        $this->view('admin/v_pm_approvals', $data);
-    }
-
     // Approve Property Manager
     public function approvePM($userId)
     {
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            header('Content-Type: application/json');
-
-            error_log("ApprovePM called with userId: " . $userId);
-
             if (!isLoggedIn()) {
-                error_log("User not logged in");
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'You are not logged in'
-                ]);
+                flash('manager_message', 'You are not logged in', 'alert alert-danger');
+                redirect('users/login');
                 exit();
             }
 
             if ($_SESSION['user_type'] !== 'admin') {
-                error_log("User is not admin: " . $_SESSION['user_type']);
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Unauthorized access. Admin role required.'
-                ]);
+                flash('manager_message', 'Unauthorized access. Admin role required.', 'alert alert-danger');
+                redirect('admin/managers');
                 exit();
             }
 
-            error_log("Attempting to approve PM with ID: " . $userId);
-
             try {
                 $result = $this->userModel->approvePM($userId);
-                error_log("ApprovePM result: " . ($result ? 'true' : 'false'));
 
                 if ($result) {
                     // Send approval email to PM
@@ -525,28 +496,22 @@ class Admin extends Controller
                     if ($user && !empty($user->email)) {
                         $emailSent = sendPMApprovalEmail($user->email, $user->name);
                         if (!$emailSent) {
-                            global $smtp_error;
                             $emailWarning = ' However, the notification email could not be sent.';
-                            error_log("Failed to send PM approval email to: " . $user->email . " Error: " . $smtp_error);
                         }
                     }
 
-                    echo json_encode([
-                        'success' => true,
-                        'message' => 'Property Manager approved successfully' . $emailWarning
-                    ]);
+                    $message = 'Property Manager approved successfully' . $emailWarning;
+                    flash('manager_message', $message, 'alert alert-success');
+                    redirect('admin/managers');
                 } else {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => 'Failed to approve Property Manager. Database update returned false.'
-                    ]);
+                    $message = 'Failed to approve Property Manager. Database update returned false.';
+                    flash('manager_message', $message, 'alert alert-danger');
+                    redirect('admin/managers');
                 }
             } catch (Exception $e) {
-                error_log("Exception in approvePM: " . $e->getMessage());
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Error: ' . $e->getMessage()
-                ]);
+                $message = 'Error: ' . $e->getMessage();
+                flash('manager_message', $message, 'alert alert-danger');
+                redirect('admin/managers');
             }
             exit();
         } else {
@@ -558,21 +523,15 @@ class Admin extends Controller
     public function removePropertyManager($userId)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            header('Content-Type: application/json');
-
             if (!isLoggedIn()) {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'You are not logged in'
-                ]);
+                flash('manager_message', 'You are not logged in', 'alert alert-danger');
+                redirect('users/login');
                 exit();
             }
 
             if ($_SESSION['user_type'] !== 'admin') {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Unauthorized access. Admin role required.'
-                ]);
+                flash('manager_message', 'Unauthorized access. Admin role required.', 'alert alert-danger');
+                redirect('admin/managers');
                 exit();
             }
 
@@ -589,15 +548,13 @@ class Admin extends Controller
                     }
                 }
 
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Property Manager removed successfully' . $emailWarning
-                ]);
+                $message = 'Property Manager removed successfully' . $emailWarning;
+                flash('manager_message', $message, 'alert alert-success');
+                redirect('admin/managers');
             } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Failed to remove Property Manager'
-                ]);
+                $message = 'Failed to remove Property Manager';
+                flash('manager_message', $message, 'alert alert-danger');
+                redirect('admin/managers');
             }
             exit();
         } else {
@@ -609,13 +566,9 @@ class Admin extends Controller
     public function rejectPM($userId)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            header('Content-Type: application/json');
-
             if (!isLoggedIn() || $_SESSION['user_type'] !== 'admin') {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Unauthorized access'
-                ]);
+                flash('manager_message', 'Unauthorized access', 'alert alert-danger');
+                redirect('admin/managers');
                 exit();
             }
 
@@ -638,15 +591,13 @@ class Admin extends Controller
                     }
                 }
 
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Property Manager application rejected' . $emailWarning
-                ]);
+                $message = 'Property Manager application rejected' . $emailWarning;
+                flash('manager_message', $message, 'alert alert-success');
+                redirect('admin/managers');
             } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Failed to reject application'
-                ]);
+                $message = 'Failed to reject application';
+                flash('manager_message', $message, 'alert alert-danger');
+                redirect('admin/managers');
             }
             exit();
         } else {

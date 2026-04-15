@@ -210,40 +210,43 @@ AutoPaginate::init($data, 5);
                                 </td>
                                 <td>
                                     <div class="policy-actions">
-                                        <button class="action-btn view-btn"
-                                            onclick="viewPolicy(<?php echo $policy->policy_id; ?>)"
+                                        <a href="<?php echo URLROOT; ?>/policies/view_policy/<?php echo $policy->policy_id; ?>"
+                                            class="action-btn view-btn"
                                             title="View">
                                             <i class="fas fa-eye"></i>
-                                        </button>
+                                        </a>
                                         <a href="<?php echo URLROOT; ?>/policies/edit/<?php echo $policy->policy_id; ?>"
                                             class="action-btn edit-btn"
                                             title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <?php if ($policy->policy_status === 'draft'): ?>
-                                            <button class="action-btn approve-btn"
-                                                onclick="activatePolicy(<?php echo $policy->policy_id; ?>)"
-                                                title="Activate">
-                                                <i class="fas fa-play"></i>
-                                            </button>
+                                            <form method="POST" action="<?php echo URLROOT; ?>/policies/updateStatus/<?php echo $policy->policy_id; ?>" class="action-form" onsubmit="return confirm('Are you sure you want to activate this policy?');">
+                                                <input type="hidden" name="status" value="active">
+                                                <button type="submit" class="action-btn approve-btn" title="Activate">
+                                                    <i class="fas fa-play"></i>
+                                                </button>
+                                            </form>
                                         <?php elseif ($policy->policy_status === 'active'): ?>
-                                            <button class="action-btn status-btn"
-                                                onclick="deactivatePolicy(<?php echo $policy->policy_id; ?>)"
-                                                title="Deactivate">
-                                                <i class="fas fa-pause"></i>
-                                            </button>
+                                            <form method="POST" action="<?php echo URLROOT; ?>/policies/updateStatus/<?php echo $policy->policy_id; ?>" class="action-form" onsubmit="return confirm('Are you sure you want to deactivate this policy?');">
+                                                <input type="hidden" name="status" value="inactive">
+                                                <button type="submit" class="action-btn status-btn" title="Deactivate">
+                                                    <i class="fas fa-pause"></i>
+                                                </button>
+                                            </form>
                                         <?php else: ?>
-                                            <button class="action-btn approve-btn"
-                                                onclick="activatePolicy(<?php echo $policy->policy_id; ?>)"
-                                                title="Activate">
-                                                <i class="fas fa-play"></i>
-                                            </button>
+                                            <form method="POST" action="<?php echo URLROOT; ?>/policies/updateStatus/<?php echo $policy->policy_id; ?>" class="action-form" onsubmit="return confirm('Are you sure you want to activate this policy?');">
+                                                <input type="hidden" name="status" value="active">
+                                                <button type="submit" class="action-btn approve-btn" title="Activate">
+                                                    <i class="fas fa-play"></i>
+                                                </button>
+                                            </form>
                                         <?php endif; ?>
-                                        <button class="action-btn danger-btn"
-                                            onclick="deletePolicy(<?php echo $policy->policy_id; ?>)"
-                                            title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <form method="POST" action="<?php echo URLROOT; ?>/policies/delete/<?php echo $policy->policy_id; ?>" class="action-form" onsubmit="return confirm('Are you sure you want to delete this policy? This action cannot be undone.');">
+                                            <button type="submit" class="action-btn danger-btn" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -270,125 +273,17 @@ AutoPaginate::init($data, 5);
     </div>
 </div>
 
-<!-- View Policy Modal -->
-<div class="modal-overlay hidden" id="viewPolicyModal">
-    <div class="modal-content modal-large">
-        <div class="modal-header">
-            <h3 id="modalPolicyTitle">Policy Details</h3>
-            <button class="modal-close" onclick="closeViewPolicyModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body" id="modalPolicyContent">
-            <!-- Policy content will be loaded here -->
-        </div>
-    </div>
-</div>
-
 <!-- ADD PAGINATION HERE - Render at bottom -->
 <?php echo AutoPaginate::render($data['_pagination']); ?>
 
+<style>
+    .action-form {
+        display: inline-block;
+        margin: 0;
+    }
+</style>
+
 <script>
-    // Policy Management Functions
-    function viewPolicy(policyId) {
-        window.location.href = `<?php echo URLROOT; ?>/policies/view_policy/${policyId}`;
-    }
-
-    function closeViewPolicyModal() {
-        document.getElementById('viewPolicyModal').classList.add('hidden');
-    }
-
-    function activatePolicy(policyId) {
-        if (confirm('Are you sure you want to activate this policy?')) {
-            updatePolicyStatus(policyId, 'active');
-        }
-    }
-
-    function deactivatePolicy(policyId) {
-        if (confirm('Are you sure you want to deactivate this policy?')) {
-            updatePolicyStatus(policyId, 'inactive');
-        }
-    }
-
-    function updatePolicyStatus(policyId, status) {
-        fetch(`<?php echo URLROOT; ?>/policies/updateStatus/${policyId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    status: status
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    // Reload the page to reflect changes
-                    location.reload();
-                } else {
-                    showNotification(data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('Failed to update policy status', 'error');
-            });
-    }
-
-    function deletePolicy(policyId) {
-        if (confirm('Are you sure you want to delete this policy? This action cannot be undone.')) {
-            fetch(`<?php echo URLROOT; ?>/policies/delete/${policyId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification(data.message, 'success');
-                        // Remove the row from table
-                        const row = document.querySelector(`tr[data-policy-id="${policyId}"]`);
-                        if (row) {
-                            row.remove();
-                            updatePolicyCount();
-                        }
-                    } else {
-                        showNotification(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Failed to delete policy', 'error');
-                });
-        }
-    }
-
-    function updatePolicyCount() {
-        const rows = document.querySelectorAll('.policies-table tbody tr');
-        const count = rows.length;
-        const header = document.querySelector('.section-header h3');
-        if (header) {
-            header.textContent = `Policy Documents (${count})`;
-        }
-    }
-
-    // Close modal when clicking outside
-    document.addEventListener('click', function(event) {
-        const modal = document.getElementById('viewPolicyModal');
-        if (event.target === modal) {
-            closeViewPolicyModal();
-        }
-    });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeViewPolicyModal();
-        }
-    });
-
     // Filters submit only via the button.
 </script>
 

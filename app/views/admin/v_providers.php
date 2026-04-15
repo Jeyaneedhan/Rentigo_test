@@ -265,20 +265,21 @@ AutoPaginate::init($data, 5);
                                             title="Edit Provider">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button class="action-btn status-btn"
-                                            onclick="toggleProviderStatus(<?php echo $provider->id; ?>, '<?php echo $provider->status; ?>')"
-                                            title="Toggle Status">
-                                            <?php if ($provider->status === 'active'): ?>
-                                                <i class="fas fa-pause"></i>
-                                            <?php else: ?>
-                                                <i class="fas fa-play"></i>
-                                            <?php endif; ?>
-                                        </button>
-                                        <button class="action-btn danger-btn"
-                                            onclick="deleteProvider(<?php echo $provider->id; ?>)"
-                                            title="Delete Provider">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <form method="POST" action="<?php echo URLROOT; ?>/providers/updateStatus/<?php echo $provider->id; ?>" class="action-form" onsubmit="return confirm('Are you sure you want to <?php echo $provider->status === 'active' ? 'deactivate' : 'activate'; ?> this provider?');">
+                                            <input type="hidden" name="status" value="<?php echo $provider->status === 'active' ? 'inactive' : 'active'; ?>">
+                                            <button type="submit" class="action-btn status-btn" title="Toggle Status">
+                                                <?php if ($provider->status === 'active'): ?>
+                                                    <i class="fas fa-pause"></i>
+                                                <?php else: ?>
+                                                    <i class="fas fa-play"></i>
+                                                <?php endif; ?>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="<?php echo URLROOT; ?>/providers/delete/<?php echo $provider->id; ?>" class="action-form" onsubmit="return confirm('Are you sure you want to delete this provider? This action cannot be undone.');">
+                                            <button type="submit" class="action-btn danger-btn" title="Delete Provider">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -353,60 +354,14 @@ AutoPaginate::init($data, 5);
 <!-- ADD PAGINATION HERE - Render at bottom -->
 <?php echo AutoPaginate::render($data['_pagination']); ?>
 
+<style>
+    .action-form {
+        display: inline-block;
+        margin: 0;
+    }
+</style>
+
 <script>
-    // Provider management functions
-    function toggleProviderStatus(providerId, currentStatus) {
-        const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-        const confirmation = confirm(`Are you sure you want to ${newStatus === 'active' ? 'activate' : 'deactivate'} this provider?`);
-
-        if (confirmation) {
-            fetch(`<?php echo URLROOT; ?>/providers/updateStatus/${providerId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `status=${newStatus}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while updating the provider status.');
-                });
-        }
-    }
-
-    function deleteProvider(providerId) {
-        const confirmation = confirm('Are you sure you want to delete this provider? This action cannot be undone.');
-
-        if (confirmation) {
-            fetch(`<?php echo URLROOT; ?>/providers/delete/${providerId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the provider.');
-                });
-        }
-    }
-
     // Auto-hide flash messages after 5 seconds
     document.addEventListener('DOMContentLoaded', function() {
         const alerts = document.querySelectorAll('.alert');

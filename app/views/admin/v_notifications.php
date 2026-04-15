@@ -100,14 +100,14 @@
         <!-- Tabs -->
         <div class="tabs-container">
             <div class="tabs-header">
-                <button class="tab-button <?php echo ($data['active_tab'] ?? 'admin-sent') === 'admin-sent' ? 'active' : ''; ?>" data-tab="admin-sent">
+                <a href="<?php echo URLROOT; ?>/admin/notifications?tab=admin-sent" class="tab-button <?php echo ($data['active_tab'] ?? 'admin-sent') === 'admin-sent' ? 'active' : ''; ?>">
                     <i class="fas fa-user-shield"></i>
                     Admin Sent (<?php echo count($data['adminNotifications'] ?? []); ?>)
-                </button>
-                <button class="tab-button <?php echo ($data['active_tab'] ?? 'admin-sent') === 'other-notifications' ? 'active' : ''; ?>" data-tab="other-notifications">
+                </a>
+                <a href="<?php echo URLROOT; ?>/admin/notifications?tab=other-notifications" class="tab-button <?php echo ($data['active_tab'] ?? 'admin-sent') === 'other-notifications' ? 'active' : ''; ?>">
                     <i class="fas fa-bell"></i>
                     Other Notifications (<?php echo count($data['otherNotifications'] ?? []); ?>)
-                </button>
+                </a>
             </div>
 
             <!-- Tab 1: Admin Sent Notifications -->
@@ -287,6 +287,7 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
+        text-decoration: none;
     }
 
     .tab-button:hover {
@@ -377,27 +378,5 @@
         overflow-x: auto;
     }
 </style>
-
-<script>
-    // Tab functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-
-                // Remove active class from all buttons and contents
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
-
-                // Add active class to clicked button and corresponding content
-                this.classList.add('active');
-                document.getElementById(tabName).classList.add('active');
-            });
-        });
-    });
-</script>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>

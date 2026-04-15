@@ -494,76 +494,20 @@
 </style>
 
 <script>
-    // Sync editor content with hidden textarea
-    document.getElementById('policy_content_editor').addEventListener('input', function() {
-        document.getElementById('policy_content').value = this.innerHTML;
-    });
-
-    // Form submission handler
-    document.getElementById('editPolicyForm').addEventListener('submit', function(e) {
-        // Sync editor content before submission
-        const editorContent = document.getElementById('policy_content_editor').innerHTML.trim();
-        document.getElementById('policy_content').value = editorContent;
-    });
-
-    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        // Load existing content
-        const hiddenContent = document.getElementById('policy_content').value;
-        if (hiddenContent) {
-            document.getElementById('policy_content_editor').innerHTML = hiddenContent;
+        const form = document.getElementById('editPolicyForm');
+        const editor = document.getElementById('policy_content_editor');
+        const hiddenField = document.getElementById('policy_content');
+
+        // Restore editor content after server-side validation errors.
+        if (hiddenField.value) {
+            editor.innerHTML = hiddenField.value;
         }
 
-        // Handle expiry date validation
-        document.getElementById('effective_date').addEventListener('change', function() {
-            const expiryDateInput = document.getElementById('expiry_date');
-            expiryDateInput.setAttribute('min', this.value);
-
-            // Clear expiry date if it's before effective date
-            if (expiryDateInput.value && expiryDateInput.value <= this.value) {
-                expiryDateInput.value = '';
-            }
+        // Ensure contenteditable content is submitted to backend.
+        form.addEventListener('submit', function() {
+            hiddenField.value = editor.innerHTML.trim();
         });
-
-        // Prevent form submission on toolbar buttons
-        document.querySelectorAll('.editor-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-            });
-        });
-
-        // Version format validation
-        const versionInput = document.getElementById('policy_version');
-
-        versionInput.addEventListener('blur', function() {
-            let value = this.value.toLowerCase().replace(/[^v\d.]/g, '');
-
-            if (value && !value.startsWith('v')) {
-                value = 'v' + value;
-            }
-
-            // Ensure format v#.#
-            const match = value.match(/v(\d+)\.?(\d*)/);
-            if (match) {
-                const major = match[1];
-                const minor = match[2] || '0';
-                this.value = `v${major}.${minor}`;
-            }
-        });
-
-        // Remove validation errors on input
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('input', function() {
-                this.classList.remove('is-invalid');
-            });
-        });
-    });
-
-    // Prevent paste with formatting
-    document.getElementById('policy_content_editor').addEventListener('paste', function(e) {
-        e.preventDefault();
-        const text = e.clipboardData.getData('text/plain');
-        document.execCommand('insertText', false, text);
     });
 </script>
 

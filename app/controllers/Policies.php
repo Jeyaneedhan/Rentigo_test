@@ -396,21 +396,21 @@ class Policies extends Controller
     public function delete($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            header('Content-Type: application/json');
-
             // Verify policy exists
             $policy = $this->policyModel->getPolicyById($id);
 
             if (!$policy) {
-                echo json_encode(['success' => false, 'message' => 'Policy not found']);
+                flash('policy_message', 'Policy not found', 'alert alert-danger');
+                redirect('policies/index');
                 exit();
             }
 
             if ($this->policyModel->deletePolicy($id)) {
-                echo json_encode(['success' => true, 'message' => 'Policy deleted successfully']);
+                flash('policy_message', 'Policy deleted successfully', 'alert alert-success');
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to delete policy']);
+                flash('policy_message', 'Failed to delete policy', 'alert alert-danger');
             }
+            redirect('policies/index');
             exit();
         } else {
             redirect('policies/index');
@@ -421,20 +421,8 @@ class Policies extends Controller
     public function updateStatus($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            header('Content-Type: application/json');
-
-            // Try to get JSON input first, fall back to POST data
-            $input = json_decode(file_get_contents('php://input'), true);
-
-            if ($input === null) {
-                // Not JSON, try regular POST
-                $input = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
-                if ($input === null || $input === false) {
-                    $input = $_POST;
-                }
-            }
-
-            $status = $input['status'] ?? '';
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
+            $status = $_POST['status'] ?? '';
 
             // Validate status
             $validator = new Validator();
@@ -449,7 +437,8 @@ class Policies extends Controller
                 $policy = $this->policyModel->getPolicyById($id);
 
                 if (!$policy) {
-                    echo json_encode(['success' => false, 'message' => 'Policy not found']);
+                    flash('policy_message', 'Policy not found', 'alert alert-danger');
+                    redirect('policies/index');
                     exit();
                 }
 
@@ -463,14 +452,15 @@ class Policies extends Controller
                         $this->sendPolicyStatusNotifications($id, $status, $policy);
                     }
 
-                    echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+                    flash('policy_message', 'Status updated successfully', 'alert alert-success');
                 } else {
-                    echo json_encode(['success' => false, 'message' => 'Failed to update status']);
+                    flash('policy_message', 'Failed to update status', 'alert alert-danger');
                 }
             } else {
                 $errors = $validator->getErrors();
-                echo json_encode(['success' => false, 'message' => $errors['status'] ?? 'Invalid status']);
+                flash('policy_message', $errors['status'] ?? 'Invalid status', 'alert alert-danger');
             }
+            redirect('policies/index');
             exit();
         } else {
             redirect('policies/index');
@@ -575,34 +565,6 @@ class Policies extends Controller
                 'success' => true,
                 'stats' => $stats
             ]);
-            exit();
-        } else {
-            redirect('policies/index');
-        }
-    }
-
-    // AJAX - Search policies
-    public function search()
-    {
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-            header('Content-Type: application/json');
-
-            $searchTerm = $_GET['term'] ?? '';
-
-            if (strlen($searchTerm) >= 3) {
-                $filters = ['search' => $searchTerm];
-                $policies = $this->policyModel->getAllPolicies($filters);
-
-                echo json_encode([
-                    'success' => true,
-                    'policies' => $policies
-                ]);
-            } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Search term must be at least 3 characters'
-                ]);
-            }
             exit();
         } else {
             redirect('policies/index');

@@ -208,9 +208,9 @@ AutoPaginate::init($data, 10);
                                 </td>
                                 <td>
                                     <div class="transaction-actions">
-                                        <button class="action-btn view-btn" onclick="viewTransaction('<?php echo $isMaintenance ? 'MAIN' : 'TXN'; ?><?php echo $transaction->id; ?>', event)" title="View">
+                                        <a class="action-btn view-btn" href="<?php echo URLROOT; ?>/admin/view_financial/<?php echo $isMaintenance ? 'MAIN' : 'TXN'; ?><?php echo $transaction->id; ?>" title="View">
                                             <i class="fas fa-eye"></i>
-                                        </button>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -228,40 +228,5 @@ AutoPaginate::init($data, 10);
 
 <!-- ADD PAGINATION HERE - Render at bottom -->
 <?php echo AutoPaginate::render($data['_pagination']); ?>
-
-<!-- Transaction Details Modal -->
-<div id="transactionModal" class="modal-overlay hidden">
-    <div class="modal-content modal-large">
-        <div class="modal-header">
-            <h3>Transaction Details</h3>
-            <button class="modal-close" onclick="closeTransactionModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body" id="transactionModalContent">
-            <!-- Content will be populated by JavaScript -->
-        </div>
-    </div>
-</div>
-
-<script>
-    // Transaction management functions - Global scope for onclick handlers
-    function viewTransaction(transactionId, event) {
-        window.location.href = `<?php echo URLROOT; ?>/admin/view_financial/${transactionId}`
-    }
-
-    function closeTransactionModal() {
-        const modal = document.getElementById('transactionModal')
-        if (modal) {
-            modal.classList.add('hidden')
-        }
-    }
-
-    // Initialize basic functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        // Any initialization code can go here
-        console.log('Financial management page loaded')
-    })
-</script>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>

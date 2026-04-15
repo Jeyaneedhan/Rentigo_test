@@ -339,21 +339,21 @@ class Providers extends Controller
     public function delete($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            header('Content-Type: application/json');
-
             // Verify provider exists
             $provider = $this->serviceProviderModel->getProviderById($id);
 
             if (!$provider) {
-                echo json_encode(['success' => false, 'message' => 'Provider not found']);
+                flash('provider_message', 'Provider not found', 'alert alert-danger');
+                redirect('providers/index');
                 exit();
             }
 
             if ($this->serviceProviderModel->delete($id)) {
-                echo json_encode(['success' => true, 'message' => 'Provider deleted successfully']);
+                flash('provider_message', 'Provider deleted successfully', 'alert alert-success');
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to delete provider']);
+                flash('provider_message', 'Failed to delete provider', 'alert alert-danger');
             }
+            redirect('providers/index');
             exit();
         } else {
             redirect('providers/index');
@@ -364,8 +364,6 @@ class Providers extends Controller
     public function updateStatus($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            header('Content-Type: application/json');
-
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
             $status = $_POST['status'] ?? '';
 
@@ -379,14 +377,15 @@ class Providers extends Controller
 
             if (!$validator->hasErrors()) {
                 if ($this->serviceProviderModel->updateStatus($id, $status)) {
-                    echo json_encode(['success' => true, 'message' => 'Status updated successfully']);
+                    flash('provider_message', 'Status updated successfully', 'alert alert-success');
                 } else {
-                    echo json_encode(['success' => false, 'message' => 'Failed to update status']);
+                    flash('provider_message', 'Failed to update status', 'alert alert-danger');
                 }
             } else {
                 $errors = $validator->getErrors();
-                echo json_encode(['success' => false, 'message' => $errors['status'] ?? 'Invalid status']);
+                flash('provider_message', $errors['status'] ?? 'Invalid status', 'alert alert-danger');
             }
+            redirect('providers/index');
             exit();
         } else {
             redirect('providers/index');

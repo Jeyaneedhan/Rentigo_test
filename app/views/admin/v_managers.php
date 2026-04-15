@@ -15,6 +15,8 @@ AutoPaginate::init($data, 5);
         </div>
     </div>
 
+    <?php flash('manager_message'); ?>
+
     <!-- Stats Cards -->
     <?php
     $totalManagers = 0;
@@ -22,9 +24,10 @@ AutoPaginate::init($data, 5);
     $approvedCount = 0;
     $rejectedCount = 0;
 
-    if (!empty($data['allManagers'])) {
-        $totalManagers = count($data['allManagers']);
-        foreach ($data['allManagers'] as $manager) {
+    $statsManagers = $data['allManagers'] ?? ($data['managers'] ?? []);
+    if (!empty($statsManagers)) {
+        $totalManagers = count($statsManagers);
+        foreach ($statsManagers as $manager) {
             if ($manager->approval_status === 'pending') $pendingCount++;
             if ($manager->approval_status === 'approved') $approvedCount++;
             if ($manager->approval_status === 'rejected') $rejectedCount++;
@@ -185,31 +188,31 @@ AutoPaginate::init($data, 5);
                                 <?php if ($manager->approval_status === 'pending'): ?>
                                     <!-- Pending: Show Approve and Reject buttons -->
                                     <div class="action-buttons-group">
-                                        <button class="action-btn approve-btn"
-                                            id="approve-btn-<?php echo $manager->id; ?>"
-                                            onclick="approveManagerCustom(<?php echo $manager->id; ?>)" title="Approve Manager">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                        <button class="action-btn reject-btn"
-                                            id="reject-btn-<?php echo $manager->id; ?>"
-                                            onclick="rejectManagerCustom(<?php echo $manager->id; ?>)" title="Reject Manager">
-                                            <i class=" fas fa-times"></i>
-                                        </button>
+                                        <form method="POST" action="<?php echo URLROOT; ?>/admin/approvePM/<?php echo $manager->id; ?>" class="action-form">
+                                            <button type="submit" class="action-btn approve-btn" title="Approve Manager" onclick="return confirm('Are you sure you want to approve this manager?');">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="<?php echo URLROOT; ?>/admin/rejectPM/<?php echo $manager->id; ?>" class="action-form">
+                                            <button type="submit" class="action-btn reject-btn" title="Reject Manager" onclick="return confirm('Are you sure you want to reject this property manager application?');">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 <?php elseif ($manager->approval_status === 'approved'): ?>
                                     <!-- Approved: Show Remove button only -->
-                                    <button class="action-btn reject-btn"
-                                        id="remove-btn-<?php echo $manager->id; ?>"
-                                        onclick="removeManagerCustom(<?php echo $manager->id; ?>)" title="Remove Manager">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <form method="POST" action="<?php echo URLROOT; ?>/admin/removePropertyManager/<?php echo $manager->id; ?>" class="action-form">
+                                        <button type="submit" class="action-btn reject-btn" title="Remove Manager" onclick="return confirm('Are you sure you want to remove this property manager? This action cannot be undone.');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 <?php elseif ($manager->approval_status === 'rejected'): ?>
                                     <!-- Rejected: Show Remove button only -->
-                                    <button class="action-btn reject-btn"
-                                        id="remove-btn-<?php echo $manager->id; ?>"
-                                        onclick="removeManagerCustom(<?php echo $manager->id; ?>)" title="Remove Manager">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <form method="POST" action="<?php echo URLROOT; ?>/admin/removePropertyManager/<?php echo $manager->id; ?>" class="action-form">
+                                        <button type="submit" class="action-btn reject-btn" title="Remove Manager" onclick="return confirm('Are you sure you want to remove this property manager? This action cannot be undone.');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -223,142 +226,11 @@ AutoPaginate::init($data, 5);
         </table>
     </div>
 </div>
-</div>
-</div>
 
 <!-- ADD PAGINATION HERE - Render at bottom -->
 <?php echo AutoPaginate::renderWithParam($data['_pagination']); ?>
 
 <?php require APPROOT . '/views/inc/admin_footer.php'; ?>
-
-<!-- IMPORTANT: This script must come AFTER admin_footer.php to override admin.js -->
-<script>
-    // Approve Manager Function
-    function approveManagerCustom(managerId) {
-        if (!confirm('Are you sure you want to approve this manager?')) {
-            return;
-        }
-
-        const button = document.getElementById('approve-btn-' + managerId);
-        if (!button) {
-            alert('Error: Button not found');
-            return;
-        }
-
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-        const url = '<?php echo URLROOT; ?>/admin/approvePM/' + managerId;
-
-        fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message || 'Manager approved successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to approve manager'));
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-check"></i>';
-                }
-            })
-            .catch(error => {
-                alert('An error occurred: ' + error.message);
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-check"></i>';
-            });
-    }
-
-    // Reject Manager Function
-    function rejectManagerCustom(managerId) {
-        if (!confirm('Are you sure you want to reject this property manager application?')) {
-            return;
-        }
-
-        const button = document.getElementById('reject-btn-' + managerId);
-        if (!button) {
-            alert('Error: Button not found');
-            return;
-        }
-
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-        const url = '<?php echo URLROOT; ?>/admin/rejectPM/' + managerId;
-
-        fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message || 'Manager application rejected successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to reject manager'));
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-times"></i>';
-                }
-            })
-            .catch(error => {
-                alert('An error occurred: ' + error.message);
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-times"></i>';
-            });
-    }
-
-    // Remove Manager Function
-    function removeManagerCustom(managerId) {
-        if (!confirm('Are you sure you want to remove this property manager? This action cannot be undone.')) {
-            return;
-        }
-
-        const button = document.getElementById('remove-btn-' + managerId);
-        if (!button) {
-            alert('Error: Button not found');
-            return;
-        }
-
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-        const url = '<?php echo URLROOT; ?>/admin/removePropertyManager/' + managerId;
-
-        fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                credentials: 'same-origin'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message || 'Manager removed successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to remove manager'));
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-trash"></i>';
-                }
-            })
-            .catch(error => {
-                alert('An error occurred: ' + error.message);
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-trash"></i>';
-            });
-    }
-</script>
 
 <style>
     /* Table Container */
@@ -447,6 +319,11 @@ AutoPaginate::init($data, 5);
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
+    }
+
+    .action-form {
+        display: inline;
+        margin: 0;
     }
 
     /* Action Button Styles */
