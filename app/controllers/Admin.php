@@ -190,12 +190,6 @@ class Admin extends Controller
         $paymentModel = $this->model('M_Payments');
         $maintenanceQuotationsModel = $this->model('M_MaintenanceQuotations');
 
-        // Get all rental payments from tenants
-        $allPayments = $paymentModel->getAllPayments();
-
-        // Get all maintenance service payments
-        $maintenancePayments = $maintenanceQuotationsModel->getAllMaintenancePayments();
-
         // Get all-time financial stats using the new model method
         $financialStats = $paymentModel->getAdminFinancialStats('all');
         $maintenanceRevenue = $maintenanceQuotationsModel->getTotalMaintenanceIncome('all');
@@ -208,75 +202,37 @@ class Admin extends Controller
         $pendingCount = $financialStats->pending_count ?? 0;
         $overdueCount = $financialStats->overdue_count ?? 0;
 
+        // Providers-style filter inputs.
+        $type = $_GET['type'] ?? '';
+        $status = $_GET['status'] ?? '';
+        $dateFrom = $_GET['date_from'] ?? '';
+        $dateTo = $_GET['date_to'] ?? '';
+
+        if (!empty($type) || !empty($status) || !empty($dateFrom) || !empty($dateTo)) {
+            if ($type === 'rental') {
+                $payments = $paymentModel->searchAdminPayments($status, $dateFrom, $dateTo);
+                $maintenancePayments = [];
+            } elseif ($type === 'maintenance') {
+                $payments = [];
+                $maintenancePayments = $maintenanceQuotationsModel->searchMaintenancePayments($status, $dateFrom, $dateTo);
+            } else {
+                $payments = $paymentModel->searchAdminPayments($status, $dateFrom, $dateTo);
+                $maintenancePayments = $maintenanceQuotationsModel->searchMaintenancePayments($status, $dateFrom, $dateTo);
+            }
+        } else {
+            $payments = $paymentModel->getAllPayments();
+            $maintenancePayments = $maintenanceQuotationsModel->getAllMaintenancePayments();
+        }
+
         // Combine all transactions into one array for display
-        $allTransactions = array_merge($allPayments, $maintenancePayments);
+        $filteredTransactions = array_merge($payments, $maintenancePayments);
 
         // Sort all transactions by date, newest first
-        usort($allTransactions, function ($a, $b) {
+        usort($filteredTransactions, function ($a, $b) {
             $dateA = strtotime($a->payment_date ?? $a->due_date ?? $a->created_at);
             $dateB = strtotime($b->payment_date ?? $b->due_date ?? $b->created_at);
-            return $dateB - $dateA;  // Descending order
+            return $dateB - $dateA;
         });
-
-        // ==================== APPLY FILTERS ====================
-        // Start with all transactions, then filter based on user's selections
-        $filteredTransactions = $allTransactions;
-
-        // Get filter parameters from the URL
-        $filterType = $_GET['filter_type'] ?? '';
-        $filterStatus = $_GET['filter_status'] ?? '';
-        $filterDateFrom = $_GET['filter_date_from'] ?? '';
-        $filterDateTo = $_GET['filter_date_to'] ?? '';
-
-        // Apply Type Filter
-        if (!empty($filterType)) {
-            $filteredTransactions = array_filter($filteredTransactions, function ($transaction) use ($filterType) {
-                $isMaintenance = isset($transaction->payment_type) && $transaction->payment_type === 'maintenance';
-
-                if ($filterType === 'rental') {
-                    return !$isMaintenance;
-                } elseif ($filterType === 'maintenance') {
-                    return $isMaintenance;
-                }
-                return true;
-            });
-        }
-
-        // Apply Status Filter
-        if (!empty($filterStatus)) {
-            $filteredTransactions = array_filter($filteredTransactions, function ($transaction) use ($filterStatus) {
-                return strtolower($transaction->status) === strtolower($filterStatus);
-            });
-        }
-
-        // Apply Date Range Filter
-        if (!empty($filterDateFrom) || !empty($filterDateTo)) {
-            $filteredTransactions = array_filter($filteredTransactions, function ($transaction) use ($filterDateFrom, $filterDateTo) {
-                $displayDate = $transaction->payment_date ?? $transaction->due_date ?? $transaction->created_at;
-                $transactionDate = strtotime($displayDate);
-
-                // Check FROM date
-                if (!empty($filterDateFrom)) {
-                    $fromDate = strtotime($filterDateFrom);
-                    if ($transactionDate < $fromDate) {
-                        return false;
-                    }
-                }
-
-                // Check TO date
-                if (!empty($filterDateTo)) {
-                    $toDate = strtotime($filterDateTo . ' 23:59:59'); // End of day
-                    if ($transactionDate > $toDate) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-        }
-
-        // Re-index array after filtering
-        $filteredTransactions = array_values($filteredTransactions);
 
         $data = [
             'title' => 'Financials - Rentigo Admin',
@@ -289,11 +245,11 @@ class Admin extends Controller
             'overdueCount' => $overdueCount,
             'recentTransactions' => $filteredTransactions,
 
-            // Pass filter values back to view for persistence
-            'filter_type' => $filterType,
-            'filter_status' => $filterStatus,
-            'filter_date_from' => $filterDateFrom,
-            'filter_date_to' => $filterDateTo,
+            // Pass Providers-style filter values back to view for persistence.
+            'type_filter' => $type,
+            'status_filter' => $status,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
         ];
         $this->view('admin/v_financials', $data);
     }
@@ -609,58 +565,18 @@ class Admin extends Controller
     public function inspections()
     {
         $inspectionModel = $this->model('M_Inspection');
-        $allInspections = $inspectionModel->getAllInspections();
 
-        // ==================== APPLY FILTERS ====================
-        $filteredInspections = $allInspections;
+        // Providers-style filter inputs.
+        $status = $_GET['status'] ?? '';
+        $type = $_GET['type'] ?? '';
+        $dateFrom = $_GET['date_from'] ?? '';
+        $dateTo = $_GET['date_to'] ?? '';
 
-        // Get filter parameters
-        $filterStatus = $_GET['filter_status'] ?? '';
-        $filterType = $_GET['filter_type'] ?? '';
-        $filterDateFrom = $_GET['filter_date_from'] ?? '';
-        $filterDateTo = $_GET['filter_date_to'] ?? '';
-
-        // Apply Status Filter
-        if (!empty($filterStatus)) {
-            $filteredInspections = array_filter($filteredInspections, function ($inspection) use ($filterStatus) {
-                return strtolower($inspection->status) === strtolower($filterStatus);
-            });
+        if (!empty($status) || !empty($type) || !empty($dateFrom) || !empty($dateTo)) {
+            $filteredInspections = $inspectionModel->searchInspections($status, $type, $dateFrom, $dateTo);
+        } else {
+            $filteredInspections = $inspectionModel->getAllInspections();
         }
-
-        // Apply Type Filter
-        if (!empty($filterType)) {
-            $filteredInspections = array_filter($filteredInspections, function ($inspection) use ($filterType) {
-                return strtolower($inspection->type) === strtolower($filterType);
-            });
-        }
-
-        // Apply Date Range Filter (on scheduled_date)
-        if (!empty($filterDateFrom) || !empty($filterDateTo)) {
-            $filteredInspections = array_filter($filteredInspections, function ($inspection) use ($filterDateFrom, $filterDateTo) {
-                $scheduledDate = strtotime($inspection->scheduled_date);
-
-                // Check FROM date
-                if (!empty($filterDateFrom)) {
-                    $fromDate = strtotime($filterDateFrom);
-                    if ($scheduledDate < $fromDate) {
-                        return false;
-                    }
-                }
-
-                // Check TO date
-                if (!empty($filterDateTo)) {
-                    $toDate = strtotime($filterDateTo . ' 23:59:59'); // End of day
-                    if ($scheduledDate > $toDate) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-        }
-
-        // Re-index array after filtering
-        $filteredInspections = array_values($filteredInspections);
 
         $data = [
             'title' => 'All Inspections',
@@ -668,11 +584,11 @@ class Admin extends Controller
             'user_name' => $_SESSION['user_name'],
             'inspections' => $filteredInspections,
 
-            // Pass filter values back to view for persistence
-            'filter_status' => $filterStatus,
-            'filter_type' => $filterType,
-            'filter_date_from' => $filterDateFrom,
-            'filter_date_to' => $filterDateTo,
+            // Pass Providers-style filter values back to view for persistence.
+            'status_filter' => $status,
+            'type_filter' => $type,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
         ];
 
         $this->view('admin/v_inspections', $data);

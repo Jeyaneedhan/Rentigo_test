@@ -2,7 +2,7 @@
 
 /**
  * M_Policies Model
- * This manages the "Boring Legal Stuff"—Terms of Service, Privacy Policies, etc.
+ * This manages the "Legal Stuff"—Terms of Service, Privacy Policies, etc.
  * It lets Admins update the legal text of the platform without touching the code.
  */
 class M_Policies

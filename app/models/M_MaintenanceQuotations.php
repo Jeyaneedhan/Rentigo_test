@@ -231,6 +231,53 @@ class M_MaintenanceQuotations
         return $this->db->resultSet();
     }
 
+    // Search/filter maintenance payments for admin listing
+    public function searchMaintenancePayments($status = '', $dateFrom = '', $dateTo = '')
+    {
+        $sql = 'SELECT
+                mp.*,
+                mr.title as maintenance_title,
+                p.address as property_address,
+                u.name as landlord_name,
+                "maintenance" as payment_type
+                FROM maintenance_payments mp
+                LEFT JOIN maintenance_quotations mq ON mp.quotation_id = mq.id
+                LEFT JOIN maintenance_requests mr ON mq.request_id = mr.id
+                LEFT JOIN properties p ON mr.property_id = p.id
+                LEFT JOIN users u ON mr.landlord_id = u.id
+                WHERE 1=1';
+
+        if (!empty($status)) {
+            $sql .= ' AND LOWER(mp.status) = :status';
+        }
+
+        if (!empty($dateFrom)) {
+            $sql .= ' AND DATE(COALESCE(mp.payment_date, mp.created_at)) >= :date_from';
+        }
+
+        if (!empty($dateTo)) {
+            $sql .= ' AND DATE(COALESCE(mp.payment_date, mp.created_at)) <= :date_to';
+        }
+
+        $sql .= ' ORDER BY mp.payment_date DESC';
+
+        $this->db->query($sql);
+
+        if (!empty($status)) {
+            $this->db->bind(':status', strtolower($status));
+        }
+
+        if (!empty($dateFrom)) {
+            $this->db->bind(':date_from', $dateFrom);
+        }
+
+        if (!empty($dateTo)) {
+            $this->db->bind(':date_to', $dateTo);
+        }
+
+        return $this->db->resultSet();
+    }
+
     // Get maintenance payment by ID with details
     public function getMaintenancePaymentById($id)
     {

@@ -94,32 +94,32 @@ AutoPaginate::init($data, 10);
     <form method="GET" action="<?php echo URLROOT; ?>/admin/financials">
         <div class="search-filter-content">
             <div class="filter-dropdown-wrapper">
-                <select class="form-select" name="filter_type">
+                <select class="form-select" name="type">
                     <option value="">All Types</option>
-                    <option value="rental" <?php echo ($data['filter_type'] ?? '') === 'rental' ? 'selected' : ''; ?>>Rental</option>
-                    <option value="maintenance" <?php echo ($data['filter_type'] ?? '') === 'maintenance' ? 'selected' : ''; ?>>Maintenance</option>
+                    <option value="rental" <?php echo ($data['type_filter'] ?? '') === 'rental' ? 'selected' : ''; ?>>Rental</option>
+                    <option value="maintenance" <?php echo ($data['type_filter'] ?? '') === 'maintenance' ? 'selected' : ''; ?>>Maintenance</option>
                 </select>
             </div>
             <div class="filter-dropdown-wrapper">
-                <select class="form-select" name="filter_status">
+                <select class="form-select" name="status">
                     <option value="">All Statuses</option>
-                    <option value="completed" <?php echo ($data['filter_status'] ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                    <option value="pending" <?php echo ($data['filter_status'] ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                    <option value="overdue" <?php echo ($data['filter_status'] ?? '') === 'overdue' ? 'selected' : ''; ?>>Overdue</option>
-                    <option value="failed" <?php echo ($data['filter_status'] ?? '') === 'failed' ? 'selected' : ''; ?>>Failed</option>
+                    <option value="completed" <?php echo ($data['status_filter'] ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                    <option value="pending" <?php echo ($data['status_filter'] ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                    <option value="overdue" <?php echo ($data['status_filter'] ?? '') === 'overdue' ? 'selected' : ''; ?>>Overdue</option>
+                    <option value="failed" <?php echo ($data['status_filter'] ?? '') === 'failed' ? 'selected' : ''; ?>>Failed</option>
                 </select>
             </div>
             <div class="filter-dropdown-wrapper">
-                <input type="date" name="filter_date_from" class="form-input" placeholder="From Date" value="<?php echo htmlspecialchars($data['filter_date_from'] ?? ''); ?>">
+                <input type="date" name="date_from" class="form-input" placeholder="From Date" value="<?php echo htmlspecialchars($data['date_from'] ?? ''); ?>">
             </div>
             <div class="filter-dropdown-wrapper">
-                <input type="date" name="filter_date_to" class="form-input" placeholder="To Date" value="<?php echo htmlspecialchars($data['filter_date_to'] ?? ''); ?>">
+                <input type="date" name="date_to" class="form-input" placeholder="To Date" value="<?php echo htmlspecialchars($data['date_to'] ?? ''); ?>">
             </div>
             <button type="submit" class="btn btn-secondary">
-                <i class="fas fa-filter"></i> Filter
+                <i class="fas fa-search"></i> Search
             </button>
             <a href="<?php echo URLROOT; ?>/admin/financials" class="btn btn-outline">
-                <i class="fas fa-times"></i> Clear
+                <i class="fas fa-refresh"></i> Clear
             </a>
         </div>
     </form>

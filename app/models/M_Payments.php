@@ -375,6 +375,51 @@ class M_Payments
         return $this->db->resultSet();
     }
 
+    // Search/filter rental payments for admin listing
+    public function searchAdminPayments($status = '', $dateFrom = '', $dateTo = '')
+    {
+        $sql = 'SELECT p.*,
+                pr.address as property_address,
+                t.name as tenant_name, t.email as tenant_email,
+                l.name as landlord_name, l.email as landlord_email,
+                "rental" as payment_type
+                FROM payments p
+                LEFT JOIN properties pr ON p.property_id = pr.id
+                LEFT JOIN users t ON p.tenant_id = t.id
+                LEFT JOIN users l ON p.landlord_id = l.id
+                WHERE 1=1';
+
+        if (!empty($status)) {
+            $sql .= ' AND LOWER(p.status) = :status';
+        }
+
+        if (!empty($dateFrom)) {
+            $sql .= ' AND DATE(COALESCE(p.payment_date, p.due_date, p.created_at)) >= :date_from';
+        }
+
+        if (!empty($dateTo)) {
+            $sql .= ' AND DATE(COALESCE(p.payment_date, p.due_date, p.created_at)) <= :date_to';
+        }
+
+        $sql .= ' ORDER BY p.created_at DESC';
+
+        $this->db->query($sql);
+
+        if (!empty($status)) {
+            $this->db->bind(':status', strtolower($status));
+        }
+
+        if (!empty($dateFrom)) {
+            $this->db->bind(':date_from', $dateFrom);
+        }
+
+        if (!empty($dateTo)) {
+            $this->db->bind(':date_to', $dateTo);
+        }
+
+        return $this->db->resultSet();
+    }
+
     // Get system-wide payment statistics (for admin)
     public function getSystemPaymentStats()
     {

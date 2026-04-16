@@ -1,7 +1,6 @@
 <?php
+
 /**
- * PDO Database Class
- * THE DATA ENGINE: This class handles all the talking to MySQL.
  * We use a specialized type of connection called PDO (PHP Data Objects).
  * 
  * Why PDO? Because it's SECURE. It uses "Prepared Statements" which 

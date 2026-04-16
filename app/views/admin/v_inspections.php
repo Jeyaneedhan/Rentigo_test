@@ -18,37 +18,37 @@ AutoPaginate::init($data, 5);
     <form method="GET" action="<?php echo URLROOT; ?>/admin/inspections">
         <div class="search-filter-content">
             <div class="filter-dropdown-wrapper">
-                <select class="form-select" name="filter_status">
+                <select class="form-select" name="status">
                     <option value="">All Statuses</option>
-                    <option value="scheduled" <?php echo ($data['filter_status'] ?? '') === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
-                    <option value="in_progress" <?php echo ($data['filter_status'] ?? '') === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                    <option value="completed" <?php echo ($data['filter_status'] ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
-                    <option value="cancelled" <?php echo ($data['filter_status'] ?? '') === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                    <option value="scheduled" <?php echo ($data['status_filter'] ?? '') === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
+                    <option value="in_progress" <?php echo ($data['status_filter'] ?? '') === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
+                    <option value="completed" <?php echo ($data['status_filter'] ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                    <option value="cancelled" <?php echo ($data['status_filter'] ?? '') === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                 </select>
             </div>
             <div class="filter-dropdown-wrapper">
-                <select class="form-select" name="filter_type">
+                <select class="form-select" name="type">
                     <option value="">All Types</option>
-                    <option value="routine" <?php echo ($data['filter_type'] ?? '') === 'routine' ? 'selected' : ''; ?>>Routine</option>
-                    <option value="move_in" <?php echo ($data['filter_type'] ?? '') === 'move_in' ? 'selected' : ''; ?>>Move In</option>
-                    <option value="move_out" <?php echo ($data['filter_type'] ?? '') === 'move_out' ? 'selected' : ''; ?>>Move Out</option>
-                    <option value="maintenance" <?php echo ($data['filter_type'] ?? '') === 'maintenance' ? 'selected' : ''; ?>>Maintenance</option>
-                    <option value="annual" <?php echo ($data['filter_type'] ?? '') === 'annual' ? 'selected' : ''; ?>>Annual</option>
-                    <option value="emergency" <?php echo ($data['filter_type'] ?? '') === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
-                    <option value="issue" <?php echo ($data['filter_type'] ?? '') === 'issue' ? 'selected' : ''; ?>>Issue</option>
+                    <option value="routine" <?php echo ($data['type_filter'] ?? '') === 'routine' ? 'selected' : ''; ?>>Routine</option>
+                    <option value="move_in" <?php echo ($data['type_filter'] ?? '') === 'move_in' ? 'selected' : ''; ?>>Move In</option>
+                    <option value="move_out" <?php echo ($data['type_filter'] ?? '') === 'move_out' ? 'selected' : ''; ?>>Move Out</option>
+                    <option value="maintenance" <?php echo ($data['type_filter'] ?? '') === 'maintenance' ? 'selected' : ''; ?>>Maintenance</option>
+                    <option value="annual" <?php echo ($data['type_filter'] ?? '') === 'annual' ? 'selected' : ''; ?>>Annual</option>
+                    <option value="emergency" <?php echo ($data['type_filter'] ?? '') === 'emergency' ? 'selected' : ''; ?>>Emergency</option>
+                    <option value="issue" <?php echo ($data['type_filter'] ?? '') === 'issue' ? 'selected' : ''; ?>>Issue</option>
                 </select>
             </div>
             <div class="filter-dropdown-wrapper">
-                <input type="date" name="filter_date_from" class="form-input" placeholder="From Date" value="<?php echo htmlspecialchars($data['filter_date_from'] ?? ''); ?>">
+                <input type="date" name="date_from" class="form-input" placeholder="From Date" value="<?php echo htmlspecialchars($data['date_from'] ?? ''); ?>">
             </div>
             <div class="filter-dropdown-wrapper">
-                <input type="date" name="filter_date_to" class="form-input" placeholder="To Date" value="<?php echo htmlspecialchars($data['filter_date_to'] ?? ''); ?>">
+                <input type="date" name="date_to" class="form-input" placeholder="To Date" value="<?php echo htmlspecialchars($data['date_to'] ?? ''); ?>">
             </div>
             <button type="submit" class="btn btn-secondary">
-                <i class="fas fa-filter"></i> Filter
+                <i class="fas fa-search"></i> Search
             </button>
             <a href="<?php echo URLROOT; ?>/admin/inspections" class="btn btn-outline">
-                <i class="fas fa-times"></i> Clear
+                <i class="fas fa-refresh"></i> Clear
             </a>
         </div>
     </form>

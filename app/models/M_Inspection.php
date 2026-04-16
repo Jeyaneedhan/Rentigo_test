@@ -1,4 +1,5 @@
 <?php
+
 /**
  * M_Inspection Model
  * This model manages "Property Inspections" — when a manager actually visits 
@@ -163,6 +164,62 @@ class M_Inspection
             LEFT JOIN users t ON i.tenant_id = t.id
             ORDER BY i.scheduled_date DESC, i.scheduled_time DESC
         ");
+        return $this->db->resultSet();
+    }
+
+    // Search/filter inspections for admin listing
+    public function searchInspections($status = '', $type = '', $dateFrom = '', $dateTo = '')
+    {
+        $sql = "
+            SELECT i.*,
+                   p.address as property_address,
+                   m.name as manager_name,
+                   l.name as landlord_name,
+                   t.name as tenant_name
+            FROM inspections i
+            LEFT JOIN properties p ON i.property_id = p.id
+            LEFT JOIN users m ON i.manager_id = m.id
+            LEFT JOIN users l ON i.landlord_id = l.id
+            LEFT JOIN users t ON i.tenant_id = t.id
+            WHERE 1=1
+        ";
+
+        if (!empty($status)) {
+            $sql .= " AND LOWER(i.status) = :status";
+        }
+
+        if (!empty($type)) {
+            $sql .= " AND LOWER(i.type) = :type";
+        }
+
+        if (!empty($dateFrom)) {
+            $sql .= " AND DATE(i.scheduled_date) >= :date_from";
+        }
+
+        if (!empty($dateTo)) {
+            $sql .= " AND DATE(i.scheduled_date) <= :date_to";
+        }
+
+        $sql .= " ORDER BY i.scheduled_date DESC, i.scheduled_time DESC";
+
+        $this->db->query($sql);
+
+        if (!empty($status)) {
+            $this->db->bind(':status', strtolower($status));
+        }
+
+        if (!empty($type)) {
+            $this->db->bind(':type', strtolower($type));
+        }
+
+        if (!empty($dateFrom)) {
+            $this->db->bind(':date_from', $dateFrom);
+        }
+
+        if (!empty($dateTo)) {
+            $this->db->bind(':date_to', $dateTo);
+        }
+
         return $this->db->resultSet();
     }
 
