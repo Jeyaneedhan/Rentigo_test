@@ -5,6 +5,8 @@
 require_once APPROOT . '/../app/helpers/AutoPaginate.php';
 AutoPaginate::init($data, 5);
 ?>
+<!-- Flash Messages -->
+<?php flash('policy_message'); ?>
 
 <div class="page-content">
     <!-- Page Header -->
@@ -20,8 +22,7 @@ AutoPaginate::init($data, 5);
         </div>
     </div>
 
-    <!-- Flash Messages -->
-    <?php flash('policy_message'); ?>
+
 
     <!-- Stats Cards -->
     <div class="stats-grid">
