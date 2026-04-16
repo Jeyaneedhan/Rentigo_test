@@ -86,6 +86,18 @@ function showNotification(message, type = 'info') {
     }, 4000);
 }
 
+// Auto-hide flash alerts on authenticated pages.
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.alert').forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+
 // ============================================================
 // STAT CARD DROPDOWNS
 // Used on admin, landlord, manager, and tenant dashboards.
