@@ -4,6 +4,7 @@ class TenantProperties extends Controller
     private $tenantPropertyModel;
     private $propertyModel;
     private $notificationModel;
+    private $bookingModel;
 
     public function __construct()
     {
@@ -15,11 +16,14 @@ class TenantProperties extends Controller
         $this->tenantPropertyModel = $this->model('M_TenantProperties');
         $this->propertyModel = $this->model('M_Properties');
         $this->notificationModel = $this->model('M_Notifications');
+        $this->bookingModel = $this->model('M_Bookings');
     }
 
     // List all approved and available properties
     public function index()
     {
+        $this->releaseExpiredReservations();
+
         $properties = $this->tenantPropertyModel->getApprovedProperties();
 
         // Optionally add images, etc.
@@ -39,6 +43,8 @@ class TenantProperties extends Controller
     // View property details
     public function details($id)
     {
+        $this->releaseExpiredReservations();
+
         $property = $this->tenantPropertyModel->getPropertyById($id);
 
         if (!$property) {
@@ -84,6 +90,8 @@ class TenantProperties extends Controller
     // Reserve property - Step 1 (Tenant)
     public function reserve($id)
     {
+        $this->releaseExpiredReservations();
+
         if (!isLoggedIn() || $_SESSION['user_type'] !== 'tenant') {
             flash('reservation_message', 'Only tenants can reserve properties', 'alert alert-danger');
             redirect('users/login');
@@ -113,9 +121,21 @@ class TenantProperties extends Controller
                     'user_id' => $_SESSION['user_id'],
                     'type' => 'property',
                     'title' => 'Property Reserved Successfully',
-                    'message' => 'Your reservation for "' . substr($property->address, 0, 50) . '..." has been confirmed. Please visit our office to proceed with the property viewing and booking process.',
+                    'message' => 'Your reservation for "' . substr($property->address, 0, 50) . '..." has been confirmed. The property manager will contact you shortly. Please visit our office within 48 hours to proceed with the physical viewing and booking process.',
                     'link' => 'tenantproperties/details/' . $id
                 ]);
+
+                // Notify assigned manager to contact tenant within 24 hours.
+                if (!empty($property->manager_id)) {
+                    $tenantName = $_SESSION['user_name'] ?? 'A tenant';
+                    $this->notificationModel->createNotification([
+                        'user_id' => $property->manager_id,
+                        'type' => 'property',
+                        'title' => 'New Property Reservation',
+                        'message' => $tenantName . ' reserved "' . substr($property->address, 0, 50) . '...". Please contact the tenant within 24 hours to begin the physical process.',
+                        'link' => 'managerproperties/details/' . $id
+                    ]);
+                }
 
                 flash('reservation_message', 'Property reserved successfully! Please visit our office to view the property and proceed with booking.', 'alert alert-success');
                 redirect('tenant/dashboard');
@@ -125,6 +145,61 @@ class TenantProperties extends Controller
             }
         } else {
             redirect('tenantproperties/index');
+        }
+    }
+
+    // Auto-release reservations older than 48 hours with no active booking
+    private function releaseExpiredReservations()
+    {
+        $reservedProperties = $this->propertyModel->getAllPropertiesByStatus('reserved');
+        if (empty($reservedProperties)) {
+            return;
+        }
+
+        $expiryWindowSeconds = 48 * 60 * 60;
+        $now = time();
+
+        foreach ($reservedProperties as $property) {
+            $latestReservation = $this->notificationModel->getLatestPropertyReservationNotification($property->id);
+            if (!$latestReservation || empty($latestReservation->created_at)) {
+                continue;
+            }
+
+            $reservedAt = strtotime($latestReservation->created_at);
+            if (!$reservedAt || ($now - $reservedAt) < $expiryWindowSeconds) {
+                continue;
+            }
+
+            if ($this->bookingModel->hasOpenBookingForProperty($property->id)) {
+                continue;
+            }
+
+            if ($this->propertyModel->updatePropertyStatus($property->id, 'available')) {
+                $propertyLink = 'tenantproperties/details/' . $property->id;
+                $propertyAddress = $property->address ?? ('Property #' . $property->id);
+
+                // Notify the tenant who made the reservation
+                if (!empty($latestReservation->user_id)) {
+                    $this->notificationModel->createNotification([
+                        'user_id' => $latestReservation->user_id,
+                        'type' => 'property',
+                        'title' => 'Reservation Expired',
+                        'message' => "Your reservation for {$propertyAddress} has expired because no follow-up was completed within 48 hours. The property is now available again.",
+                        'link' => $propertyLink
+                    ]);
+                }
+
+                // Notify the assigned manager if available
+                if (!empty($property->manager_id)) {
+                    $this->notificationModel->createNotification([
+                        'user_id' => $property->manager_id,
+                        'type' => 'property',
+                        'title' => 'Reservation Auto-Released',
+                        'message' => "Reservation for {$propertyAddress} was automatically released after 48 hours without tenant follow-up.",
+                        'link' => 'managerproperties/details/' . $property->id
+                    ]);
+                }
+            }
         }
     }
 

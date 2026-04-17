@@ -376,6 +376,26 @@ class M_Notifications
         return $this->db->resultSet();
     }
 
+    // Get latest reservation confirmation notification for a specific property
+    public function getLatestPropertyReservationNotification($property_id)
+    {
+        $link = 'tenantproperties/details/' . (int)$property_id;
+
+        $this->db->query('SELECT *
+                         FROM notifications
+                         WHERE type = :type
+                           AND title = :title
+                           AND link = :link
+                         ORDER BY created_at DESC
+                         LIMIT 1');
+
+        $this->db->bind(':type', 'property');
+        $this->db->bind(':title', 'Property Reserved Successfully');
+        $this->db->bind(':link', $link);
+
+        return $this->db->single();
+    }
+
     // Get notification statistics for admin
     // @param string $period 'all', 'month', or 'year' for date filtering
     public function getNotificationStats($period = 'all')

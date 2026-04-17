@@ -110,6 +110,18 @@ class M_Bookings
         return $this->db->resultSet();
     }
 
+    // Check whether property has an in-progress booking flow
+    public function hasOpenBookingForProperty($property_id)
+    {
+        $this->db->query('SELECT COUNT(*) as count
+                         FROM bookings
+                         WHERE property_id = :property_id
+                           AND status IN ("pending", "approved", "active")');
+        $this->db->bind(':property_id', $property_id);
+        $result = $this->db->single();
+        return (int)($result->count ?? 0) > 0;
+    }
+
     /**
      * Update the status of a booking (e.g., from 'pending' to 'approved')
      * Also saves a reason if it was rejected.

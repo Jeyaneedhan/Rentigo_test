@@ -307,6 +307,14 @@ class M_Properties
         return $this->getPropertyStats($landlordId, $period);
     }
 
+    // Get all properties by status (used for reservation expiry checks)
+    public function getAllPropertiesByStatus($status)
+    {
+        $this->db->query('SELECT * FROM properties WHERE status = :status ORDER BY created_at DESC');
+        $this->db->bind(':status', $status);
+        return $this->db->resultSet();
+    }
+
     // Alias for updateStatus (used by various controllers)
     public function updatePropertyStatus($propertyId, $status)
     {
