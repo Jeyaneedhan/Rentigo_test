@@ -20,6 +20,7 @@
     <!-- New Maintenance Request Form -->
     <div class="form-container">
         <form action="<?php echo URLROOT; ?>/maintenance/create" method="POST" enctype="multipart/form-data" class="maintenance-form">
+            <input type="hidden" name="issue_id" value="<?php echo isset($data['issue_id']) ? (int)$data['issue_id'] : ''; ?>">
 
             <!-- Property Selection -->
             <div class="form-section">

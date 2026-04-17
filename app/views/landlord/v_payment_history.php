@@ -211,9 +211,11 @@ AutoPaginate::init($data, 5);
                                             <i class="fas fa-receipt"></i> Receipt
                                         </a>
                                     <?php elseif ($payment->status === 'pending'): ?>
-                                        <button class="btn btn-secondary btn-sm" onclick="sendReminder(<?php echo $payment->id; ?>)">
-                                            <i class="fas fa-bell"></i> Remind
-                                        </button>
+                                        <form action="<?php echo URLROOT; ?>/landlord/sendPaymentReminder/<?php echo $payment->id; ?>" method="POST" style="display:inline;" onsubmit="return confirm('Send payment reminder to tenant?');">
+                                            <button type="submit" class="btn btn-secondary btn-sm">
+                                                <i class="fas fa-bell"></i> Remind
+                                            </button>
+                                        </form>
                                     <?php else: ?>
                                         <a href="<?php echo URLROOT; ?>/payments/details/<?php echo $payment->id; ?>"
                                             class="btn btn-outline btn-sm">
@@ -336,15 +338,6 @@ AutoPaginate::init($data, 5);
         </div>
     </div>
 <?php endif; ?>
-
-<script>
-    function sendReminder(paymentId) {
-        if (confirm('Send payment reminder to tenant?')) {
-            // In a real application, this would make an AJAX call
-            alert('Payment reminder sent to tenant!');
-        }
-    }
-</script>
 
 <style>
     code {

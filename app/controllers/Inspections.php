@@ -186,6 +186,7 @@ class Inspections extends Controller
                 if ($data['time']) {
                     $scheduleInfo .= ' at ' . date('g:i A', strtotime($data['time']));
                 }
+                $managerName = $_SESSION['user_name'] ?? 'Property Manager';
 
                 // Notify landlord
                 if ($property->landlord_id) {
@@ -204,7 +205,7 @@ class Inspections extends Controller
                         'user_id' => $property->tenant_id,
                         'type' => 'inspection_scheduled',
                         'title' => 'Inspection Scheduled',
-                        'message' => "A {$inspectionType} inspection has been scheduled for your property at {$property->address} on {$scheduleInfo}.",
+                        'message' => "{$managerName} scheduled a {$inspectionType} inspection for your property at {$property->address} on {$scheduleInfo}.",
                         'link' => 'tenant/inspections'
                     ]);
                 }
@@ -379,6 +380,26 @@ class Inspections extends Controller
 
             // Attempt to update inspection
             if ($this->M_Inspection->updateInspection($id, $updateData)) {
+                // Notify tenant about update with manager name and date
+                if (!empty($property->tenant_id)) {
+                    $notificationModel = $this->model('M_Notifications');
+                    $inspectionType = ucfirst(str_replace('_', ' ', $data['type']));
+                    $scheduleInfo = date('M d, Y', strtotime($data['date']));
+                    if (!empty($data['time'])) {
+                        $scheduleInfo .= ' at ' . date('g:i A', strtotime($data['time']));
+                    }
+                    $managerName = $_SESSION['user_name'] ?? 'Property Manager';
+                    $statusText = ucfirst(str_replace('_', ' ', $data['status']));
+
+                    $notificationModel->createNotification([
+                        'user_id' => $property->tenant_id,
+                        'type' => 'inspection_updated',
+                        'title' => 'Inspection Updated',
+                        'message' => "{$managerName} updated your {$inspectionType} inspection for {$property->address}. Date: {$scheduleInfo}. Status: {$statusText}.",
+                        'link' => 'tenant/inspections'
+                    ]);
+                }
+
                 flash('inspection_message', 'Inspection updated successfully', 'alert alert-success');
                 redirect('inspections/index');
             } else {

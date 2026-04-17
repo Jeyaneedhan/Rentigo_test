@@ -80,6 +80,28 @@ class M_Maintenance
     }
 
     /**
+     * Get a maintenance request linked to a specific issue.
+     */
+    public function getMaintenanceByIssueId($issue_id)
+    {
+        $this->db->query('SELECT m.*,
+                         p.address as property_address, p.property_type,
+                         l.name as landlord_name, l.email as landlord_email,
+                         r.name as requester_name, r.email as requester_email, r.user_type as requester_type,
+                         sp.name as provider_name, sp.email as provider_email, sp.phone as provider_phone
+                         FROM maintenance_requests m
+                         LEFT JOIN properties p ON m.property_id = p.id
+                         LEFT JOIN users l ON m.landlord_id = l.id
+                         LEFT JOIN users r ON m.requester_id = r.id
+                         LEFT JOIN service_providers sp ON m.provider_id = sp.id
+                         WHERE m.issue_id = :issue_id
+                         ORDER BY m.created_at DESC
+                         LIMIT 1');
+        $this->db->bind(':issue_id', $issue_id);
+        return $this->db->single();
+    }
+
+    /**
      * Get all requests for a landlord, including subqueries for quotation and payment status
      * This query is a bit of a beast! It helps show the current progress of each fix.
      */

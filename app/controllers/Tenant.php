@@ -310,7 +310,8 @@ class Tenant extends Controller
             case 'tenant_total_bookings':
                 $stats = $this->bookingModel->getBookingStats($tenant_id, 'tenant', $period);
                 $value = $stats->total ?? 0;
-                $subtitle = ($stats->active ?? 0) . ' active, ' . ($stats->pending ?? 0) . ' pending';
+                $activeCount = ($stats->active ?? 0) + ($stats->approved ?? 0);
+                $subtitle = $activeCount . ' active, ' . ($stats->pending ?? 0) . ' pending';
                 break;
 
             case 'tenant_pending_payments':
@@ -341,7 +342,7 @@ class Tenant extends Controller
             case 'tenant_payments_pending':
                 $stats = $this->paymentModel->getTenantPaymentStats($tenant_id, $period);
                 $value = $stats->pending_count ?? 0;
-                $subtitle = 'LKR ' . number_format($stats->pending_amount ?? 0, 0);
+                $subtitle = 'LKR ' . number_format(($stats->pending_amount ?? 0) * 1.10, 0);
                 break;
 
             case 'tenant_payments_overdue':
@@ -365,7 +366,7 @@ class Tenant extends Controller
 
             case 'tenant_bookings_active':
                 $stats = $this->bookingModel->getBookingStats($tenant_id, 'tenant', $period);
-                $value = $stats->active ?? 0;
+                $value = ($stats->active ?? 0) + ($stats->approved ?? 0);
                 $subtitle = 'Current rentals';
                 break;
 

@@ -246,6 +246,63 @@ class Landlord extends Controller
         $this->view('landlord/v_payment_history', $data);
     }
 
+    // Send payment reminder to tenant for a pending payment
+    public function sendPaymentReminder($payment_id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            redirect('landlord/payment_history');
+        }
+
+        $payment = $this->paymentModel->getPaymentById($payment_id);
+
+        if (!$payment) {
+            flash('payment_message', 'Payment record not found.', 'alert alert-danger');
+            redirect('landlord/payment_history');
+            return;
+        }
+
+        // Ensure this payment belongs to the logged-in landlord
+        if ((int)$payment->landlord_id !== (int)$_SESSION['user_id']) {
+            flash('payment_message', 'Unauthorized action.', 'alert alert-danger');
+            redirect('landlord/payment_history');
+            return;
+        }
+
+        // Reminders are meaningful only for pending payments
+        if ($payment->status !== 'pending') {
+            flash('payment_message', 'Reminder can only be sent for pending payments.', 'alert alert-warning');
+            redirect('landlord/payment_history');
+            return;
+        }
+
+        $tenantId = $payment->tenant_id ?? null;
+        if (empty($tenantId)) {
+            flash('payment_message', 'Tenant not found for this payment.', 'alert alert-danger');
+            redirect('landlord/payment_history');
+            return;
+        }
+
+        $amount = number_format((float)$payment->amount, 2);
+        $dueDate = !empty($payment->due_date) ? date('M d, Y', strtotime($payment->due_date)) : 'N/A';
+        $propertyAddress = $payment->property_address ?? 'your property';
+
+        $created = $this->notificationModel->createNotification([
+            'user_id' => $tenantId,
+            'type' => 'payment',
+            'title' => 'Payment Reminder',
+            'message' => "This is a reminder that your rent payment of LKR {$amount} for {$propertyAddress} is due on {$dueDate}.",
+            'link' => 'tenant/pay_rent'
+        ]);
+
+        if ($created) {
+            flash('payment_message', 'Payment reminder sent successfully.', 'alert alert-success');
+        } else {
+            flash('payment_message', 'Failed to send payment reminder. Please try again.', 'alert alert-danger');
+        }
+
+        redirect('landlord/payment_history');
+    }
+
     public function feedback()
     {
         // Ensure completed bookings are up to date before showing review prompts
@@ -488,7 +545,7 @@ class Landlord extends Controller
 
             case 'booking_active':
                 $stats = $this->bookingModel->getBookingStats($_SESSION['user_id'], 'landlord', $period);
-                $value = $stats->active ?? 0;
+                $value = ($stats->active ?? 0) + ($stats->approved ?? 0);
                 $formatted = (string) $value;
                 $subtitle = 'Currently occupied';
                 break;

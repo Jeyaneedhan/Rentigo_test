@@ -53,7 +53,7 @@
                             <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_bookings_active', 'month', event)">This Month</div>
                         </div>
                     </div>
-                    <h3 id="stat-value-tenant_bookings_active"><?php echo $data['bookingStats']->active ?? 0; ?></h3>
+                    <h3 id="stat-value-tenant_bookings_active"><?php echo (($data['bookingStats']->active ?? 0) + ($data['bookingStats']->approved ?? 0)); ?></h3>
                     <span class="stat-subtext" id="stat-subtitle-tenant_bookings_active">Current rentals</span>
                 </div>
             </div>

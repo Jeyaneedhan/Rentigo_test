@@ -1,9 +1,11 @@
 <?php require APPROOT . '/views/inc/tenant_header.php'; ?>
 
 <?php
-// ADD PAGINATION
+// Paginate only Payment History (do not paginate pending cards)
 require_once APPROOT . '/../app/helpers/AutoPaginate.php';
-AutoPaginate::init($data, 5);
+$paymentHistoryPagination = AutoPaginate::paginate($data['paymentHistory'] ?? [], 'history_page', 5);
+$paymentHistoryItems = $paymentHistoryPagination['items'];
+$paymentHistoryMeta = $paymentHistoryPagination['pagination'];
 ?>
 
 <div class="page-content">
@@ -68,7 +70,7 @@ AutoPaginate::init($data, 5);
                         </div>
                     </div>
                     <h4 id="stat-value-tenant_payments_pending"><?php echo $data['paymentStats']->pending_count ?? 0; ?></h4>
-                    <span class="stat-subtext" id="stat-subtitle-tenant_payments_pending">LKR <?php echo number_format($data['paymentStats']->pending_amount ?? 0, 0); ?></span>
+                    <span class="stat-subtext" id="stat-subtitle-tenant_payments_pending">LKR <?php echo number_format(($data['paymentStats']->pending_amount ?? 0) * 1.10, 0); ?></span>
                 </div>
             </div>
             <div class="stat-card <?php echo ($data['paymentStats']->overdue_count ?? 0) > 0 ? 'danger' : ''; ?>" data-stat-type="tenant_payments_overdue">
@@ -145,7 +147,7 @@ AutoPaginate::init($data, 5);
             <h3>Payment History</h3>
         </div>
 
-        <?php if (!empty($data['paymentHistory'])): ?>
+        <?php if (!empty($paymentHistoryItems)): ?>
             <div class="table-container">
                 <table class="data-table">
                     <thead>
@@ -160,7 +162,7 @@ AutoPaginate::init($data, 5);
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($data['paymentHistory'] as $payment): ?>
+                        <?php foreach ($paymentHistoryItems as $payment): ?>
                             <?php
                             $statusClass = '';
                             switch ($payment->status) {
@@ -228,6 +230,8 @@ AutoPaginate::init($data, 5);
                 <span>Your payment history will appear here once you make your first payment.</span>
             </div>
         <?php endif; ?>
+
+        <?php echo AutoPaginate::renderWithParam($paymentHistoryMeta, 'history_page'); ?>
     </div>
 </div>
 
@@ -276,9 +280,6 @@ AutoPaginate::init($data, 5);
         </div>
     </div>
 </div>
-
-<!-- ADD PAGINATION HERE - Render at bottom -->
-<?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <script>
     function openPaymentModal(paymentId, amount, propertyName) {

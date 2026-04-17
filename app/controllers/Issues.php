@@ -401,6 +401,25 @@ class Issues extends Controller
                 ];
 
                 if ($this->issueModel->updateIssue($dbData)) {
+                    $maintenanceModel = $this->model('M_Maintenance');
+                    $maintenanceRequestId = $issue->maintenance_request_id ?? null;
+                    $linkedMaintenance = null;
+
+                    if (!empty($maintenanceRequestId)) {
+                        $linkedMaintenance = $maintenanceModel->getMaintenanceById($maintenanceRequestId);
+                    }
+
+                    if (!$linkedMaintenance) {
+                        $linkedMaintenance = $maintenanceModel->getMaintenanceByIssueId($issue->id);
+                        $maintenanceRequestId = $linkedMaintenance->id ?? null;
+                    }
+
+                    $maintenanceStatus = $this->mapIssueStatusToMaintenanceStatus($data['status']);
+
+                    if (!empty($maintenanceRequestId) && !empty($maintenanceStatus)) {
+                        $maintenanceModel->updateMaintenanceStatus($maintenanceRequestId, $maintenanceStatus);
+                    }
+
                     flash('issue_message', 'Issue updated successfully', 'alert alert-success');
                     redirect('issues/track');
                 } else {
@@ -445,6 +464,19 @@ class Issues extends Controller
 
             $this->view('tenant/v_edit_issue', $data);
         }
+    }
+
+    private function mapIssueStatusToMaintenanceStatus($issueStatus)
+    {
+        $statusMap = [
+            'pending' => 'pending',
+            'assigned' => 'scheduled',
+            'in_progress' => 'in_progress',
+            'resolved' => 'completed',
+            'cancelled' => 'cancelled'
+        ];
+
+        return $statusMap[$issueStatus] ?? null;
     }
 
     public function delete($id = null)

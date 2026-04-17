@@ -8,6 +8,7 @@ class Maintenance extends Controller
     private $providerModel;
     private $notificationModel;
     private $quotationModel;
+    private $issueModel;
 
     public function __construct()
     {
@@ -20,6 +21,7 @@ class Maintenance extends Controller
         $this->providerModel = $this->model('M_ServiceProviders');
         $this->notificationModel = $this->model('M_Notifications');
         $this->quotationModel = $this->model('M_MaintenanceQuotations');
+        $this->issueModel = $this->model('M_Issue');
     }
 
     public function index()
@@ -115,6 +117,20 @@ class Maintenance extends Controller
             redirect('users/login');
         }
 
+        $prefillPropertyId = isset($_GET['property_id']) ? (int)$_GET['property_id'] : 0;
+        $prefillIssueId = isset($_GET['issue_id']) ? (int)$_GET['issue_id'] : 0;
+        $prefillIssue = null;
+
+        if ($_SESSION['user_type'] === 'landlord' && $prefillIssueId > 0) {
+            $issue = $this->issueModel->getIssueById($prefillIssueId);
+            if ($issue && (int)$issue->landlord_id === (int)$_SESSION['user_id']) {
+                $prefillIssue = $issue;
+                if ($prefillPropertyId <= 0) {
+                    $prefillPropertyId = (int)$issue->property_id;
+                }
+            }
+        }
+
         // Get user's properties
         $properties = [];
         if ($_SESSION['user_type'] == 'landlord') {
@@ -123,13 +139,13 @@ class Maintenance extends Controller
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Sanitize POST data
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             // Validate and create maintenance request
             $data = [
                 'property_id' => trim($_POST['property_id']),
                 'landlord_id' => $_SESSION['user_id'],
-                'issue_id' => trim($_POST['issue_id']) ?: null,
+                'issue_id' => !empty($_POST['issue_id']) ? (int)trim($_POST['issue_id']) : null,
                 'requester_id' => $_SESSION['user_id'],
                 'title' => trim($_POST['title']),
                 'description' => trim($_POST['description']),
@@ -150,6 +166,22 @@ class Maintenance extends Controller
             $request_id = $this->maintenanceModel->createMaintenanceRequest($data);
 
             if ($request_id) {
+                if (!empty($data['issue_id'])) {
+                    $this->issueModel->linkToMaintenance($data['issue_id'], $request_id);
+                    $this->issueModel->updateStatus($data['issue_id'], 'in_progress');
+
+                    $linkedIssue = $this->issueModel->getIssueById($data['issue_id']);
+                    if ($linkedIssue && !empty($linkedIssue->tenant_id)) {
+                        $this->notificationModel->createNotification([
+                            'user_id' => $linkedIssue->tenant_id,
+                            'type' => 'issue_update',
+                            'title' => 'Issue Updated to Maintenance',
+                            'message' => 'Your reported issue "' . $linkedIssue->title . '" has been converted into a maintenance request and is now in progress.',
+                            'link' => 'issues/details/' . $linkedIssue->id
+                        ]);
+                    }
+                }
+
                 // Get property details to find the property manager
                 $property = $this->propertyModel->getPropertyById($data['property_id']);
 
@@ -175,15 +207,16 @@ class Maintenance extends Controller
                 'page' => 'maintenance',
                 'user_name' => $_SESSION['user_name'],
                 'properties' => $properties,
-                'property_id' => '',
+                'property_id' => $prefillPropertyId > 0 ? $prefillPropertyId : '',
+                'issue_id' => $prefillIssueId > 0 ? $prefillIssueId : '',
                 'property_err' => '',
-                'title' => '',
+                'title' => $prefillIssue->title ?? '',
                 'title_err' => '',
-                'category' => '',
+                'category' => $prefillIssue->category ?? '',
                 'category_err' => '',
-                'priority' => '',
+                'priority' => $prefillIssue->priority ?? '',
                 'priority_err' => '',
-                'description' => '',
+                'description' => $prefillIssue->description ?? '',
                 'description_err' => '',
                 'notes' => '',
                 'estimated_cost' => ''
@@ -237,7 +270,7 @@ class Maintenance extends Controller
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Sanitize POST data
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             // Prepare update data
             $data = [
@@ -346,7 +379,7 @@ class Maintenance extends Controller
     public function updateStatus($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             $status = trim($_POST['status']);
 
@@ -370,6 +403,36 @@ class Maintenance extends Controller
             }
 
             if ($this->maintenanceModel->updateMaintenanceStatus($id, $status)) {
+                // Sync linked issue status so PM does not need to update issue separately
+                if (!empty($maintenance->issue_id)) {
+                    $mappedIssueStatus = $this->mapMaintenanceStatusToIssueStatus($status);
+
+                    if (!empty($mappedIssueStatus)) {
+                        $resolutionNotes = null;
+                        if ($mappedIssueStatus === 'resolved') {
+                            $resolutionNotes = 'Resolved via linked maintenance request #' . $id;
+                        } elseif ($mappedIssueStatus === 'cancelled') {
+                            $resolutionNotes = 'Linked maintenance request #' . $id . ' was cancelled.';
+                        }
+
+                        $this->issueModel->updateStatus($maintenance->issue_id, $mappedIssueStatus, $resolutionNotes);
+
+                        $linkedIssue = $this->issueModel->getIssueById($maintenance->issue_id);
+                        if ($linkedIssue && !empty($linkedIssue->tenant_id)) {
+                            $statusText = ucfirst(str_replace('_', ' ', $mappedIssueStatus));
+                            $updaterName = $_SESSION['user_name'] ?? 'Property Manager';
+
+                            $this->notificationModel->createNotification([
+                                'user_id' => $linkedIssue->tenant_id,
+                                'type' => 'issue_update',
+                                'title' => 'Issue Status Updated',
+                                'message' => 'Your issue "' . $linkedIssue->title . '" has been updated to: ' . $statusText . ' by ' . $updaterName . ' via maintenance request progress.',
+                                'link' => 'issues/details/' . $linkedIssue->id
+                            ]);
+                        }
+                    }
+                }
+
                 // Send notification to landlord if user is Property Manager
                 if ($_SESSION['user_type'] === 'property_manager' && $maintenance->landlord_id) {
                     $statusText = ucfirst(str_replace('_', ' ', $status));
@@ -407,11 +470,26 @@ class Maintenance extends Controller
         }
     }
 
+    private function mapMaintenanceStatusToIssueStatus($maintenanceStatus)
+    {
+        $statusMap = [
+            'pending' => 'pending',
+            'quoted' => 'pending',
+            'scheduled' => 'in_progress',
+            'approved' => 'in_progress',
+            'in_progress' => 'in_progress',
+            'completed' => 'resolved',
+            'cancelled' => 'cancelled'
+        ];
+
+        return $statusMap[$maintenanceStatus] ?? null;
+    }
+
     // Complete maintenance request
     public function complete($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             $actual_cost = trim($_POST['actual_cost']);
             $completion_notes = trim($_POST['completion_notes']);
@@ -430,7 +508,7 @@ class Maintenance extends Controller
     public function cancel($id)
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             // Get maintenance request
             $maintenance = $this->maintenanceModel->getMaintenanceById($id);
@@ -517,7 +595,7 @@ class Maintenance extends Controller
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             $data = [
                 'request_id' => $request_id,
@@ -614,7 +692,7 @@ class Maintenance extends Controller
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             $quotation = $this->quotationModel->getQuotationById($quotation_id);
 
@@ -652,7 +730,7 @@ class Maintenance extends Controller
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
             $quotation = $this->quotationModel->getQuotationById($quotation_id);
 

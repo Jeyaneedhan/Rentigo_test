@@ -81,7 +81,7 @@ AutoPaginate::init($data, 5);
                     <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_active', 'month', event)">Current Month</div>
                 </div>
             </div>
-            <div class="stat-value" id="stat-value-booking_active"><?php echo $data['bookingStats']->active ?? 0; ?></div>
+            <div class="stat-value" id="stat-value-booking_active"><?php echo (($data['bookingStats']->active ?? 0) + ($data['bookingStats']->approved ?? 0)); ?></div>
             <div class="stat-change" id="stat-subtitle-booking_active">Currently occupied</div>
         </div>
     </div>

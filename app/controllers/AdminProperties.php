@@ -289,6 +289,19 @@ class AdminProperties extends Controller
                 return;
             }
 
+            $landlordId = $property->landlord_id ?? null;
+            $propertyAddress = $property->address ?? ('Property #' . $id);
+
+            if (!empty($landlordId)) {
+                $this->notificationModel->createNotification([
+                    'user_id' => $landlordId,
+                    'type' => 'property',
+                    'title' => 'Property Deleted by Admin',
+                    'message' => 'Your property at "' . substr($propertyAddress, 0, 50) . '..." has been deleted by an administrator.',
+                    'link' => 'properties/index'
+                ]);
+            }
+
             // Delete property images & documents from disk
             $propertyDir = APPROOT . '/../public/uploads/properties/property_' . $id . '/';
             $this->deleteDirectory($propertyDir);

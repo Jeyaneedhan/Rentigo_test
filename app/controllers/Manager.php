@@ -261,10 +261,11 @@ class Manager extends Controller
         // Get issues for properties assigned to this PM
         $allIssues = $issueModel->getIssuesByManager($manager_id);
 
-        $openIssues = array_filter($allIssues, fn($issue) => $issue->status === 'pending');
+        $pendingIssues = array_filter($allIssues, fn($issue) => $issue->status === 'pending');
         $assignedIssues = array_filter($allIssues, fn($issue) => $issue->status === 'assigned');
         $inProgressIssues = array_filter($allIssues, fn($issue) => $issue->status === 'in_progress');
         $resolvedIssues = array_filter($allIssues, fn($issue) => $issue->status === 'resolved');
+        $cancelledIssues = array_filter($allIssues, fn($issue) => $issue->status === 'cancelled');
 
         // Get issue statistics
         $stats = $issueModel->getIssueStats($manager_id, 'manager');
@@ -274,10 +275,12 @@ class Manager extends Controller
             'page' => 'issues',
             'user_name' => $_SESSION['user_name'],
             'allIssues' => $allIssues,
-            'openIssues' => $openIssues,
+            'pendingIssues' => $pendingIssues,
+            'openIssues' => $pendingIssues,
             'assignedIssues' => $assignedIssues,
             'inProgressIssues' => $inProgressIssues,
             'resolvedIssues' => $resolvedIssues,
+            'cancelledIssues' => $cancelledIssues,
             'issueStats' => $stats,
             'unread_notifications' => $this->getUnreadNotificationCount()
         ];
@@ -357,6 +360,26 @@ class Manager extends Controller
         }
 
         if ($issueModel->updateStatus($issue_id, $status, $resolution_notes)) {
+            // Keep the linked maintenance request in sync when an issue already has one
+            $maintenanceModel = $this->model('M_Maintenance');
+            $maintenanceRequestId = $issue->maintenance_request_id ?? null;
+            $linkedMaintenance = null;
+
+            if (!empty($maintenanceRequestId)) {
+                $linkedMaintenance = $maintenanceModel->getMaintenanceById($maintenanceRequestId);
+            }
+
+            if (!$linkedMaintenance) {
+                $linkedMaintenance = $maintenanceModel->getMaintenanceByIssueId($issue_id);
+                $maintenanceRequestId = $linkedMaintenance->id ?? null;
+            }
+
+            $maintenanceStatus = $this->mapIssueStatusToMaintenanceStatus($status);
+
+            if (!empty($maintenanceRequestId) && !empty($maintenanceStatus)) {
+                $maintenanceModel->updateMaintenanceStatus($maintenanceRequestId, $maintenanceStatus);
+            }
+
             // Send notification to tenant
             $notificationModel = $this->model('M_Notifications');
             $statusText = ucfirst(str_replace('_', ' ', $status));
@@ -389,6 +412,19 @@ class Manager extends Controller
             echo json_encode(['success' => false, 'message' => 'Failed to update issue status']);
         }
         exit();
+    }
+
+    private function mapIssueStatusToMaintenanceStatus($issueStatus)
+    {
+        $statusMap = [
+            'pending' => 'pending',
+            'assigned' => 'scheduled',
+            'in_progress' => 'in_progress',
+            'resolved' => 'completed',
+            'cancelled' => 'cancelled'
+        ];
+
+        return $statusMap[$issueStatus] ?? null;
     }
 
     // Notify landlord about issue
