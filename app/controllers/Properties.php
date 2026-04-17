@@ -20,6 +20,11 @@ class Properties extends Controller
         $this->userModel = $this->model('M_Users');
     }
 
+    private function getUnreadNotificationCount()
+    {
+        return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
+    }
+
     public function index()
     {
         $properties = $this->propertyModel->getPropertiesByLandlord($_SESSION['user_id']);
@@ -36,7 +41,8 @@ class Properties extends Controller
         $data = [
             'title' => 'Properties',
             'properties' => $properties,
-            'page' => 'properties'
+            'page' => 'properties',
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('landlord/v_properties', $data);
     }
@@ -73,6 +79,7 @@ class Properties extends Controller
                 $data = $result['data'];
                 $data['max_file_size'] = $this->getMaxFileSize();
                 $data['max_post_size'] = $this->getMaxPostSize();
+                $data['unread_notifications'] = $this->getUnreadNotificationCount();
                 $this->view('landlord/v_add_property', $data);
                 return;
             }
@@ -135,6 +142,7 @@ class Properties extends Controller
             } else {
                 flash('property_message', 'Failed to add property. Please check all fields and try again.', 'alert alert-danger');
                 redirect('properties/add');
+                return;
             }
         } else {
             // GET request
@@ -163,7 +171,8 @@ class Properties extends Controller
                 'bathrooms_err' => '',
                 'sqft_err' => '',
                 'rent_err' => '',
-                'deposit_err' => ''
+                'deposit_err' => '',
+                'unread_notifications' => $this->getUnreadNotificationCount()
             ];
 
             $this->view('landlord/v_add_property', $data);
@@ -312,7 +321,8 @@ class Properties extends Controller
                 'data' => array_merge($data, [
                     'address_err' => $errors['address'] ?? '',
                     'type_err' => $errors['type'] ?? '',
-                    'sqft_err' => $errors['sqft'] ?? ''
+                    'sqft_err' => $errors['sqft'] ?? '',
+                    'unread_notifications' => $this->getUnreadNotificationCount()
                 ])
             ];
         }
@@ -455,7 +465,6 @@ class Properties extends Controller
             $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
             $filename = 'img_' . date('Y-m-d_H-i-s') . '_' . $i . '.' . $extension;
             $filePath = $propertyDir . $filename;
-
             if (move_uploaded_file($tmpName, $filePath)) {
                 $uploadedCount++;
 
@@ -913,7 +922,8 @@ class Properties extends Controller
                     'bathrooms_err' => $errors['bathrooms'] ?? '',
                     'sqft_err' => $errors['sqft'] ?? '',
                     'rent_err' => $errors['rent'] ?? '',
-                    'deposit_err' => $errors['deposit'] ?? ''
+                    'deposit_err' => $errors['deposit'] ?? '',
+                    'unread_notifications' => $this->getUnreadNotificationCount()
                 ];
 
                 $this->view('landlord/v_edit_properties', $viewData);
@@ -965,7 +975,8 @@ class Properties extends Controller
                 'bathrooms_err' => '',
                 'sqft_err' => '',
                 'rent_err' => '',
-                'deposit_err' => ''
+                'deposit_err' => '',
+                'unread_notifications' => $this->getUnreadNotificationCount()
             ];
 
             $this->view('landlord/v_edit_properties', $data);
@@ -1098,7 +1109,8 @@ class Properties extends Controller
 
         $data = [
             'title' => 'Property Details',
-            'property' => $property
+            'property' => $property,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         $this->view('landlord/v_property_details', $data);

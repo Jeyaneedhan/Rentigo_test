@@ -19,6 +19,15 @@ class TenantProperties extends Controller
         $this->bookingModel = $this->model('M_Bookings');
     }
 
+    // Helper method to get unread notification count
+    private function getUnreadNotificationCount()
+    {
+        if (isLoggedIn()) {
+            return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
+        }
+        return 0;
+    }
+
     // List all approved and available properties
     public function index()
     {
@@ -36,6 +45,7 @@ class TenantProperties extends Controller
         $data = [
             'properties' => $properties,
             'page' => 'search_properties',
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('tenant/v_search_properties', $data);
     }
@@ -74,7 +84,8 @@ class TenantProperties extends Controller
             'property' => $property,
             'reviews' => $reviews ?? [],
             'averageRating' => $averageRating,
-            'reviewCount' => $reviewCount
+            'reviewCount' => $reviewCount,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
         $this->view('tenant/v_property_details', $data);
     }
@@ -116,12 +127,23 @@ class TenantProperties extends Controller
 
             // Update property status to reserved
             if ($this->propertyModel->updatePropertyStatus($id, 'reserved')) {
+                // Get user emails for notifications
+                $userModel = $this->model('M_Users');
+                $tenantUser = $userModel->getUserById($_SESSION['user_id']);
+                $tenantEmail = $tenantUser->email ?? 'N/A';
+
                 // Send notification to tenant
+                $managerEmail = 'N/A';
+                if (!empty($property->manager_id)) {
+                    $managerUser = $userModel->getUserById($property->manager_id);
+                    $managerEmail = $managerUser->email ?? 'N/A';
+                }
+
                 $this->notificationModel->createNotification([
                     'user_id' => $_SESSION['user_id'],
                     'type' => 'property',
                     'title' => 'Property Reserved Successfully',
-                    'message' => 'Your reservation for "' . substr($property->address, 0, 50) . '..." has been confirmed. The property manager will contact you shortly. Please visit our office within 48 hours to proceed with the physical viewing and booking process.',
+                    'message' => 'Your reservation for "' . substr($property->address, 0, 50) . '..." has been confirmed. The property manager will contact you shortly. Please visit our office within 48 hours to proceed with the physical viewing and booking process. Property Manager Email: ' . $managerEmail,
                     'link' => 'tenantproperties/details/' . $id
                 ]);
 
@@ -132,7 +154,7 @@ class TenantProperties extends Controller
                         'user_id' => $property->manager_id,
                         'type' => 'property',
                         'title' => 'New Property Reservation',
-                        'message' => $tenantName . ' reserved "' . substr($property->address, 0, 50) . '...". Please contact the tenant within 24 hours to begin the physical process.',
+                        'message' => $tenantName . ' reserved "' . substr($property->address, 0, 50) . '...". Please contact the tenant within 24 hours to begin the physical process. Tenant Email: ' . $tenantEmail,
                         'link' => 'managerproperties/details/' . $id
                     ]);
                 }

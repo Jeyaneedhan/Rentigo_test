@@ -2,6 +2,7 @@
 class Inspections extends Controller
 {
     private $M_Inspection;
+    private $notificationModel;
 
     public function __construct()
     {
@@ -11,6 +12,12 @@ class Inspections extends Controller
         }
 
         $this->M_Inspection = $this->model('M_Inspection');
+        $this->notificationModel = $this->model('M_Notifications');
+    }
+
+    private function getUnreadNotificationCount()
+    {
+        return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
     }
 
     // Show all inspections for this manager
@@ -22,7 +29,8 @@ class Inspections extends Controller
             'title' => 'Property Inspections',
             'page' => 'inspections',
             'inspections' => $inspections,
-            'user_name' => $_SESSION['user_name']
+            'user_name' => $_SESSION['user_name'],
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         $this->view('manager/v_inspections', $data);
@@ -153,7 +161,8 @@ class Inspections extends Controller
                     'property_id_err' => $errors['property_id'] ?? '',
                     'type_err' => $errors['type'] ?? '',
                     'issue_id_err' => $errors['issue_id'] ?? '',
-                    'date_err' => $errors['date'] ?? ''
+                    'date_err' => $errors['date'] ?? '',
+                    'unread_notifications' => $this->getUnreadNotificationCount()
                 ];
 
                 $this->view('manager/v_add_inspection', $viewData);
@@ -236,7 +245,8 @@ class Inspections extends Controller
                 'issue_id_err' => '',
                 'date_err' => '',
                 'time_err' => '',
-                'notes_err' => ''
+                'notes_err' => '',
+                'unread_notifications' => $this->getUnreadNotificationCount()
             ];
 
             $this->view('manager/v_add_inspection', $data);
@@ -359,7 +369,8 @@ class Inspections extends Controller
                     'type_err' => $errors['type'] ?? '',
                     'issue_id_err' => $errors['issue_id'] ?? '',
                     'date_err' => $errors['date'] ?? '',
-                    'status_err' => $errors['status'] ?? ''
+                    'status_err' => $errors['status'] ?? '',
+                    'unread_notifications' => $this->getUnreadNotificationCount()
                 ];
 
                 $this->view('manager/v_edit_inspection', $viewData);
@@ -425,7 +436,8 @@ class Inspections extends Controller
                 'type_err' => '',
                 'issue_id_err' => '',
                 'date_err' => '',
-                'status_err' => ''
+                'status_err' => '',
+                'unread_notifications' => $this->getUnreadNotificationCount()
             ];
 
             $this->view('manager/v_edit_inspection', $data);

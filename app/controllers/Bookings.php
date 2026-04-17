@@ -169,6 +169,12 @@ class Bookings extends Controller
             'booking' => $booking
         ];
 
+        // Add unread notifications for manager views
+        if (isPropertyManager()) {
+            $notificationModel = $this->model('M_Notifications');
+            $data['unread_notifications'] = $notificationModel->getUnreadCount($_SESSION['user_id']);
+        }
+
         // Load appropriate view based on user type
         if (isTenant()) {
             $this->view('tenant/v_booking_details', $data);

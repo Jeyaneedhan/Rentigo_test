@@ -4,6 +4,7 @@ require_once '../app/helpers/helper.php';
 class Issues extends Controller
 {
     private $issueModel;
+    private $notificationModel;
 
     public function __construct()
     {
@@ -12,6 +13,12 @@ class Issues extends Controller
         }
 
         $this->issueModel = $this->model('M_Issue');
+        $this->notificationModel = $this->model('M_Notifications');
+    }
+
+    private function getUnreadNotificationCount()
+    {
+        return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
     }
 
     public function report()
@@ -123,6 +130,7 @@ class Issues extends Controller
                 $data['page_title'] = 'Report Issues - TenantHub';
                 $data['page'] = 'report_issue';
                 $data['user_name'] = $_SESSION['user_name'];
+                $data['unread_notifications'] = $this->getUnreadNotificationCount();
 
                 $this->view('tenant/v_report_issue', $data);
             }
@@ -145,7 +153,8 @@ class Issues extends Controller
                 'title_err' => '',
                 'description_err' => '',
                 'category_err' => '',
-                'priority_err' => ''
+                'priority_err' => '',
+                'unread_notifications' => $this->getUnreadNotificationCount()
             ];
 
             $this->view('tenant/v_report_issue', $data);
@@ -168,7 +177,8 @@ class Issues extends Controller
             'issueStats' => $issueStats,
             'pending_issues' => $issueStats->pending_count ?? 0,
             'in_progress_issues' => $issueStats->in_progress_count ?? 0,
-            'resolved_issues' => $issueStats->resolved_count ?? 0
+            'resolved_issues' => $issueStats->resolved_count ?? 0,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         $this->view('tenant/v_track_issues', $data);
@@ -295,7 +305,8 @@ class Issues extends Controller
             'maintenanceRequest' => $maintenanceRequest,
             'quotations' => $quotations,
             'serviceProvider' => $serviceProvider,
-            'statusHistory' => $statusHistory
+            'statusHistory' => $statusHistory,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         $this->view('tenant/v_issue_details', $data);
@@ -438,6 +449,7 @@ class Issues extends Controller
                 $data['page_title'] = 'Edit Issue - TenantHub';
                 $data['page'] = 'edit_issue';
                 $data['user_name'] = $_SESSION['user_name'];
+                $data['unread_notifications'] = $this->getUnreadNotificationCount();
 
                 $this->view('tenant/v_edit_issue', $data);
             }
@@ -459,7 +471,8 @@ class Issues extends Controller
                 'title_err' => '',
                 'description_err' => '',
                 'category_err' => '',
-                'priority_err' => ''
+                'priority_err' => '',
+                'unread_notifications' => $this->getUnreadNotificationCount()
             ];
 
             $this->view('tenant/v_edit_issue', $data);

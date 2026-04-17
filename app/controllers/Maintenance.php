@@ -24,6 +24,11 @@ class Maintenance extends Controller
         $this->issueModel = $this->model('M_Issue');
     }
 
+    private function getUnreadNotificationCount()
+    {
+        return $this->notificationModel->getUnreadCount($_SESSION['user_id']);
+    }
+
     public function index()
     {
         $user_type = $_SESSION['user_type'];
@@ -95,6 +100,7 @@ class Maintenance extends Controller
             'user_name' => $_SESSION['user_name'],
             'maintenanceRequests' => $filteredMaintenanceRequests,
             'maintenanceStats' => $maintenanceStats,
+            'unread_notifications' => $this->getUnreadNotificationCount(),
 
             // Pass filter values back to view for persistence
             'filter_status' => $filterStatus,
@@ -219,7 +225,8 @@ class Maintenance extends Controller
                 'description' => $prefillIssue->description ?? '',
                 'description_err' => '',
                 'notes' => '',
-                'estimated_cost' => ''
+                'estimated_cost' => '',
+                'unread_notifications' => $this->getUnreadNotificationCount()
             ];
 
             $this->view('landlord/v_new_maintenance_request', $data);
@@ -306,7 +313,8 @@ class Maintenance extends Controller
                 'user_name' => $_SESSION['user_name'],
                 'maintenance' => $maintenance,
                 'properties' => $properties,
-                'remaining_seconds' => max(0, $remainingSeconds)
+                'remaining_seconds' => max(0, $remainingSeconds),
+                'unread_notifications' => $this->getUnreadNotificationCount()
             ];
 
             $this->view('landlord/v_edit_maintenance', $data);
@@ -345,7 +353,8 @@ class Maintenance extends Controller
             'maintenance' => $maintenance,
             'quotations' => $quotations,
             'payment' => $payment,
-            'providers' => $providers
+            'providers' => $providers,
+            'unread_notifications' => $this->getUnreadNotificationCount()
         ];
 
         if ($_SESSION['user_type'] == 'landlord') {
