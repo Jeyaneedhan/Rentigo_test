@@ -117,8 +117,11 @@ if (!empty($data['inspections']) && is_iterable($data['inspections'])) {
                                         <td><?php echo htmlspecialchars($inspection->property_address ?? 'N/A'); ?></td>
                                         <td><?php echo ucfirst($inspection->type); ?></td>
                                         <td><?php echo $inspection->scheduled_date; ?></td>
-                                        <td><span
-                                                class="status-badge pending"><?php echo ucfirst($inspection->status); ?></span>
+                                        <td>
+                                            <?php $statusClass = strtolower((string) ($inspection->status ?? 'pending')); ?>
+                                            <span class="status-badge <?php echo htmlspecialchars($statusClass); ?>">
+                                                <?php echo ucfirst(str_replace('_', ' ', $inspection->status)); ?>
+                                            </span>
                                         </td>
                                         <td>
                                             <div class="action-buttons">

@@ -171,7 +171,7 @@ AutoPaginate::init($data, 10);
                                     ?>
                                 </span>
                             </div>
-                            <p><?php echo htmlspecialchars($notification->message); ?></p>
+                            <p><?php echo $notification->message; ?></p>
                             <div class="notification-meta">
                                 <span class="notification-type">
                                     <i class="fas fa-tag"></i>

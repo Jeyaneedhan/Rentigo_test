@@ -88,14 +88,14 @@
                             <label>Days Remaining:</label>
                             <span>
                                 <?php
-                                    $today = new DateTime();
-                                    $end = new DateTime($lease->end_date);
-                                    $diff = $today->diff($end);
-                                    if ($diff->invert) {
-                                        echo 'Expired';
-                                    } else {
-                                        echo $diff->days . ' days';
-                                    }
+                                $today = new DateTime();
+                                $end = new DateTime($lease->end_date);
+                                $diff = $today->diff($end);
+                                if ($diff->invert) {
+                                    echo 'Expired';
+                                } else {
+                                    echo $diff->days . ' days';
+                                }
                                 ?>
                             </span>
                         </div>
@@ -121,41 +121,6 @@
                     </div>
                 </div>
 
-                <!-- Lease Signatures -->
-                <div class="info-section">
-                    <h4><i class="fas fa-file-signature"></i> Signatures</h4>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <label>Tenant Signed:</label>
-                            <span>
-                                <?php if ($lease->signed_by_tenant): ?>
-                                    <span class="badge badge-success">
-                                        <i class="fas fa-check"></i> Signed on <?php echo date('M d, Y', strtotime($lease->tenant_signature_date)); ?>
-                                    </span>
-                                <?php else: ?>
-                                    <span class="badge badge-warning">
-                                        <i class="fas fa-clock"></i> Pending
-                                    </span>
-                                <?php endif; ?>
-                            </span>
-                        </div>
-                        <div class="info-item">
-                            <label>Landlord Signed:</label>
-                            <span>
-                                <?php if ($lease->signed_by_landlord): ?>
-                                    <span class="badge badge-success">
-                                        <i class="fas fa-check"></i> Signed on <?php echo date('M d, Y', strtotime($lease->landlord_signature_date)); ?>
-                                    </span>
-                                <?php else: ?>
-                                    <span class="badge badge-warning">
-                                        <i class="fas fa-clock"></i> Pending
-                                    </span>
-                                <?php endif; ?>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Terms and Conditions -->
                 <?php if (!empty($lease->terms_and_conditions)): ?>
                     <div class="info-section">
@@ -171,20 +136,20 @@
                     <h4><i class="fas fa-calendar-check"></i> Payment Schedule</h4>
                     <div class="payment-schedule">
                         <?php
-                            $start = new DateTime($lease->start_date);
-                            $end = new DateTime($lease->end_date);
-                            $months = $lease->lease_duration_months ?? 1;
-                            $monthlyPayment = $lease->monthly_rent * 1.10;
+                        $start = new DateTime($lease->start_date);
+                        $end = new DateTime($lease->end_date);
+                        $months = $lease->lease_duration_months ?? 1;
+                        $monthlyPayment = $lease->monthly_rent * 1.10;
 
-                            for ($i = 0; $i < $months; $i++) {
-                                $paymentDate = clone $start;
-                                $paymentDate->modify("+$i month");
-                                echo '<div class="payment-item">';
-                                echo '<span class="payment-month">Month ' . ($i + 1) . '</span>';
-                                echo '<span class="payment-date">' . $paymentDate->format('F Y') . '</span>';
-                                echo '<span class="payment-amount">Rs ' . number_format($monthlyPayment) . '</span>';
-                                echo '</div>';
-                            }
+                        for ($i = 0; $i < $months; $i++) {
+                            $paymentDate = clone $start;
+                            $paymentDate->modify("+$i month");
+                            echo '<div class="payment-item">';
+                            echo '<span class="payment-month">Month ' . ($i + 1) . '</span>';
+                            echo '<span class="payment-date">' . $paymentDate->format('F Y') . '</span>';
+                            echo '<span class="payment-amount">Rs ' . number_format($monthlyPayment) . '</span>';
+                            echo '</div>';
+                        }
                         ?>
                     </div>
                 </div>

@@ -15,16 +15,11 @@ class M_Bookings
         $this->db = new Database;
     }
 
-    /**
-     * Start the process: A tenant wants to move in!
-     * This creates a 'pending' request that the landlord needs to review.
-     */
-    public function createBooking($data)
+    private function insertBookingWithDocumentMetadata($data)
     {
-        $this->db->query('INSERT INTO bookings (tenant_id, property_id, landlord_id, move_in_date, move_out_date, monthly_rent, deposit_amount, total_amount, status, notes)
-                         VALUES (:tenant_id, :property_id, :landlord_id, :move_in_date, :move_out_date, :monthly_rent, :deposit_amount, :total_amount, :status, :notes)');
+        $this->db->query('INSERT INTO bookings (tenant_id, property_id, landlord_id, move_in_date, move_out_date, monthly_rent, deposit_amount, total_amount, status, notes, tenant_document_path, tenant_document_name)
+                         VALUES (:tenant_id, :property_id, :landlord_id, :move_in_date, :move_out_date, :monthly_rent, :deposit_amount, :total_amount, :status, :notes, :tenant_document_path, :tenant_document_name)');
 
-        // Bind all the details for the new request
         $this->db->bind(':tenant_id', $data['tenant_id']);
         $this->db->bind(':property_id', $data['property_id']);
         $this->db->bind(':landlord_id', $data['landlord_id']);
@@ -33,14 +28,45 @@ class M_Bookings
         $this->db->bind(':monthly_rent', $data['monthly_rent']);
         $this->db->bind(':deposit_amount', $data['deposit_amount']);
         $this->db->bind(':total_amount', $data['total_amount']);
-        $this->db->bind(':status', $data['status']); // Usually starts as 'pending'
+        $this->db->bind(':status', $data['status']);
         $this->db->bind(':notes', $data['notes']);
+        $this->db->bind(':tenant_document_path', $data['tenant_document_path'] ?? null);
+        $this->db->bind(':tenant_document_name', $data['tenant_document_name'] ?? null);
 
         if ($this->db->execute()) {
             return $this->db->lastInsertId();
-        } else {
-            return false;
         }
+
+        return false;
+    }
+
+    private function ensureBookingDocumentColumns()
+    {
+        $this->db->query('ALTER TABLE bookings
+                         ADD COLUMN IF NOT EXISTS tenant_document_path VARCHAR(255) DEFAULT NULL,
+                         ADD COLUMN IF NOT EXISTS tenant_document_name VARCHAR(255) DEFAULT NULL');
+        return $this->db->execute();
+    }
+
+    /**
+     * Start the process: A tenant wants to move in!
+     * This creates a 'pending' request that the landlord needs to review.
+     */
+    public function createBooking($data)
+    {
+        try {
+            return $this->insertBookingWithDocumentMetadata($data);
+        } catch (PDOException $e) {
+            try {
+                if ($this->ensureBookingDocumentColumns()) {
+                    return $this->insertBookingWithDocumentMetadata($data);
+                }
+            } catch (PDOException $retryException) {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     /**

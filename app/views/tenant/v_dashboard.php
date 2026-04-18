@@ -26,7 +26,7 @@
                 </div>
                 <h3 class="stat-number" id="stat-value-tenant_total_bookings"><?php echo $data['bookingStats']->total ?? 0; ?></h3>
                 <span class="stat-subtext" id="stat-subtitle-tenant_total_bookings">
-                    <?php echo (($data['bookingStats']->active ?? 0) + ($data['bookingStats']->approved ?? 0)); ?> active,
+                    <?php echo ($data['bookingStats']->active ?? 0); ?> active,
                     <?php echo $data['bookingStats']->pending ?? 0; ?> pending
                 </span>
             </div>
@@ -152,7 +152,7 @@
                         <?php
                         $statusClass = '';
                         switch ($data['activeBooking']->status) {
-                            case 'approved':
+                            case 'active':
                                 $statusClass = 'approved';
                                 break;
                             case 'pending':

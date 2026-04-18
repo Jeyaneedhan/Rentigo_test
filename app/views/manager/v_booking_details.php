@@ -84,10 +84,10 @@
                             <label>Duration:</label>
                             <span>
                                 <?php
-                                    $start = new DateTime($booking->move_in_date);
-                                    $end = new DateTime($booking->move_out_date);
-                                    $interval = $start->diff($end);
-                                    echo $interval->days . ' days';
+                                $start = new DateTime($booking->move_in_date);
+                                $end = new DateTime($booking->move_out_date);
+                                $interval = $start->diff($end);
+                                echo $interval->days . ' days';
                                 ?>
                             </span>
                         </div>
@@ -121,6 +121,23 @@
                     </div>
                 <?php endif; ?>
 
+                <!-- Tenant Verification Document -->
+                <div class="info-section">
+                    <h4><i class="fas fa-file-upload"></i> Tenant Verification Document</h4>
+                    <?php if (!empty($booking->tenant_document_path)): ?>
+                        <p class="notes" style="margin-bottom: 1rem;">
+                            <?php echo htmlspecialchars($booking->tenant_document_name ?? basename($booking->tenant_document_path)); ?>
+                        </p>
+                        <a href="<?php echo URLROOT . '/' . ltrim($booking->tenant_document_path, '/'); ?>" target="_blank" class="btn btn-secondary">
+                            <i class="fas fa-eye"></i> View Uploaded Document
+                        </a>
+                    <?php else: ?>
+                        <p class="notes" style="border-left-color:#f59e0b;">
+                            No document was uploaded with this booking.
+                        </p>
+                    <?php endif; ?>
+                </div>
+
                 <!-- Rejection Reason (if applicable) -->
                 <?php if ($booking->status === 'rejected' && !empty($booking->rejection_reason)): ?>
                     <div class="info-section rejection-section">
@@ -135,7 +152,7 @@
                         <h4><i class="fas fa-tasks"></i> Actions</h4>
                         <div class="action-buttons">
                             <form method="POST" action="<?php echo URLROOT; ?>/bookings/approve/<?php echo $booking->id; ?>" style="display:inline;"
-                                  onsubmit="return confirm('Are you sure you want to approve this booking request? This will create a lease agreement.');">
+                                onsubmit="return confirm('Are you sure you want to approve this booking request? This will create a lease agreement.');">
                                 <button type="submit" class="btn btn-success">
                                     <i class="fas fa-check"></i> Approve Booking
                                 </button>
@@ -167,7 +184,7 @@
                 <div class="form-group">
                     <label for="rejection_reason">Rejection Reason <span style="color: red;">*</span></label>
                     <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="4" required
-                              placeholder="Please provide a clear reason for rejecting this booking..."></textarea>
+                        placeholder="Please provide a clear reason for rejecting this booking..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">

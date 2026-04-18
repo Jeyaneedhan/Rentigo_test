@@ -103,10 +103,12 @@ CREATE TABLE `bookings` (
   `monthly_rent` decimal(10,2) NOT NULL,
   `deposit_amount` decimal(10,2) NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
-  `status` enum('pending','approved','rejected','active','completed','cancelled') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','rejected','active','completed','cancelled') NOT NULL DEFAULT 'pending',
   `rejection_reason` text,
   `cancellation_reason` text,
   `notes` text,
+  `tenant_document_path` varchar(255) DEFAULT NULL,
+  `tenant_document_name` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -534,7 +536,11 @@ INSERT INTO `bookings` (`id`, `tenant_id`, `property_id`, `landlord_id`, `move_i
 (2, 3, 3, 2, '2025-01-20', '2026-01-20', 55000.00, 55000.00, 110000.00, 'active', 'N/A', 'N/A', 'Studio near beach', '2025-01-15 10:00:00', '2025-01-20 00:00:00'),
 (3, 3, 5, 2, '2025-02-05', '2026-02-05', 165000.00, 165000.00, 330000.00, 'active', 'N/A', 'N/A', 'Premium condo', '2025-01-30 11:00:00', '2025-02-05 00:00:00'),
 (4, 3, 10, 2, '2026-03-01', '2027-03-01', 88000.00, 88000.00, 176000.00, 'active', 'N/A', 'N/A', 'Renovated apartment', '2026-02-20 09:00:00', '2026-03-01 00:00:00'),
-(5, 3, 2, 2, '2026-04-01', '2027-04-01', 110000.00, 110000.00, 220000.00, 'approved', 'N/A', 'N/A', 'Family apartment - pending lease signing', '2026-03-15 10:00:00', '2026-03-20 12:00:00');
+(5, 3, 2, 2, '2026-04-01', '2027-04-01', 110000.00, 110000.00, 220000.00, 'active', 'N/A', 'N/A', 'Family apartment - pending lease signing', '2026-03-15 10:00:00', '2026-03-20 12:00:00'),
+(6, 3, 8, 2, '2026-05-01', '2027-05-01', 78000.00, 78000.00, 156000.00, 'pending', 'N/A', 'N/A', 'Recent booking request pending landlord review', '2026-04-16 10:00:00', '2026-04-16 10:00:00'),
+(7, 3, 9, 2, '2026-05-15', '2027-05-15', 92000.00, 92000.00, 184000.00, 'pending', 'N/A', 'N/A', 'Second recent booking request pending landlord review', '2026-04-18 09:30:00', '2026-04-18 09:30:00'),
+(8, 3, 4, 2, '2025-04-01', '2026-03-31', 180000.00, 180000.00, 360000.00, 'completed', 'N/A', 'N/A', 'Completed stay - awaiting tenant review', '2025-03-20 09:15:00', '2026-04-10 14:00:00'),
+(9, 3, 6, 2, '2025-05-01', '2026-04-01', 120000.00, 120000.00, 240000.00, 'completed', 'N/A', 'N/A', 'Completed stay - awaiting tenant review', '2025-04-15 10:00:00', '2026-04-12 11:30:00');
 
 -- --------------------------------------------------------
 -- Inspections (2025 and 2026)
@@ -655,7 +661,9 @@ INSERT INTO `policies` (`policy_id`, `policy_name`, `policy_category`, `policy_d
 INSERT INTO `reviews` (`id`, `reviewer_id`, `reviewee_id`, `property_id`, `booking_id`, `rating`, `review_text`, `review_type`, `status`, `created_at`) VALUES
 (1, 3, 2, 1, 1, 5, 'Excellent property and responsive landlord. Very clean and well maintained.', 'property', 'approved', '2025-02-05 10:00:00'),
 (2, 3, 2, 3, 2, 4, 'Great location and good value. Minor maintenance issues resolved quickly.', 'property', 'approved', '2025-01-25 14:00:00'),
-(3, 3, 2, 5, 3, 5, 'Absolutely love this condo! Premium amenities and perfect location.', 'property', 'approved', '2025-03-10 11:00:00');
+(3, 3, 2, 5, 3, 5, 'Absolutely love this condo! Premium amenities and perfect location.', 'property', 'approved', '2025-03-10 11:00:00'),
+(4, 2, 3, 4, 8, 5, 'Tenant maintained the house very well and communicated professionally throughout the lease.', 'tenant', 'approved', '2026-04-11 09:00:00'),
+(5, 2, 3, 6, 9, 4, 'Responsible tenant with on-time payments and cooperative behavior during inspections.', 'tenant', 'approved', '2026-04-13 10:30:00');
 
 -- --------------------------------------------------------
 -- Password Resets (for demo)
@@ -700,7 +708,7 @@ ALTER TABLE `Posts` ADD PRIMARY KEY (`id`), ADD KEY `user_id` (`user_id`);
 ALTER TABLE `users` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 ALTER TABLE `properties` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 ALTER TABLE `market_properties` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
-ALTER TABLE `bookings` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+ALTER TABLE `bookings` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 ALTER TABLE `inspections` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 ALTER TABLE `issues` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 ALTER TABLE `service_providers` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
@@ -712,7 +720,7 @@ ALTER TABLE `payments` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1
 ALTER TABLE `notifications` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 ALTER TABLE `property_manager` MODIFY `manager_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 ALTER TABLE `policies` MODIFY `policy_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-ALTER TABLE `reviews` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+ALTER TABLE `reviews` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 ALTER TABLE `password_resets` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 ALTER TABLE `Posts` MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 

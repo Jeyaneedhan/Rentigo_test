@@ -40,15 +40,15 @@ AutoPaginate::init($data, 5);
         </div>
         <div class="stat-content">
             <div class="stat-header">
-                <h3 class="stat-label" id="stat-label-booking_approved" onclick="toggleStatDropdown('booking_approved')">Approved</h3>
+                <h3 class="stat-label" id="stat-label-booking_approved" onclick="toggleStatDropdown('booking_approved')">Active</h3>
                 <div class="stat-dropdown" id="stat-dropdown-booking_approved">
                     <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_approved', 'all', event)">All Time</div>
                     <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_approved', 'year', event)">Current Year</div>
                     <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_approved', 'month', event)">Current Month</div>
                 </div>
             </div>
-            <div class="stat-value" id="stat-value-booking_approved"><?php echo $data['approvedCount'] ?? 0; ?></div>
-            <div class="stat-change" id="stat-subtitle-booking_approved">Accepted bookings</div>
+            <div class="stat-value" id="stat-value-booking_approved"><?php echo $data['activeCount'] ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_approved">Active bookings</div>
         </div>
     </div>
     <div class="stat-card" data-stat-type="booking_rejected">
@@ -77,7 +77,7 @@ AutoPaginate::init($data, 5);
             <select name="status" class="form-select">
                 <option value="all" <?php echo ($data['currentStatusFilter'] ?? 'all') === 'all' ? 'selected' : ''; ?>>All Statuses</option>
                 <option value="pending" <?php echo ($data['currentStatusFilter'] ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                <option value="approved" <?php echo ($data['currentStatusFilter'] ?? '') === 'approved' ? 'selected' : ''; ?>>Approved</option>
+                <option value="active" <?php echo ($data['currentStatusFilter'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
                 <option value="rejected" <?php echo ($data['currentStatusFilter'] ?? '') === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
             </select>
         </div>
@@ -149,7 +149,7 @@ AutoPaginate::init($data, 5);
                                     case 'pending':
                                         $statusClass = 'badge-warning';
                                         break;
-                                    case 'approved':
+                                    case 'active':
                                         $statusClass = 'badge-success';
                                         break;
                                     case 'rejected':

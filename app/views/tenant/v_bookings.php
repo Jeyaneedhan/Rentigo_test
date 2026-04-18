@@ -27,21 +27,6 @@
                     <span class="stat-subtext" id="stat-subtitle-tenant_bookings_pending">Awaiting approval</span>
                 </div>
             </div>
-            <div class="stat-card" data-stat-type="tenant_bookings_approved">
-                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                <div class="stat-content">
-                    <div class="stat-header">
-                        <span class="stat-label-clickable" id="stat-label-tenant_bookings_approved" onclick="toggleStatDropdown('tenant_bookings_approved')">Approved</span>
-                        <div class="stat-dropdown" id="stat-dropdown-tenant_bookings_approved">
-                            <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('tenant_bookings_approved', 'all', event)">All Time</div>
-                            <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('tenant_bookings_approved', 'year', event)">This Year</div>
-                            <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_bookings_approved', 'month', event)">This Month</div>
-                        </div>
-                    </div>
-                    <h3 id="stat-value-tenant_bookings_approved"><?php echo $data['bookingStats']->approved ?? 0; ?></h3>
-                    <span class="stat-subtext" id="stat-subtitle-tenant_bookings_approved">Ready to proceed</span>
-                </div>
-            </div>
             <div class="stat-card" data-stat-type="tenant_bookings_active">
                 <div class="stat-icon"><i class="fas fa-home"></i></div>
                 <div class="stat-content">
@@ -53,7 +38,7 @@
                             <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('tenant_bookings_active', 'month', event)">This Month</div>
                         </div>
                     </div>
-                    <h3 id="stat-value-tenant_bookings_active"><?php echo (($data['bookingStats']->active ?? 0) + ($data['bookingStats']->approved ?? 0)); ?></h3>
+                    <h3 id="stat-value-tenant_bookings_active"><?php echo ($data['bookingStats']->active ?? 0); ?></h3>
                     <span class="stat-subtext" id="stat-subtitle-tenant_bookings_active">Current rentals</span>
                 </div>
             </div>
@@ -87,7 +72,7 @@
         <?php if (!empty($data['bookings'])): ?>
             <?php
             $activeBookings = array_filter($data['bookings'], function ($booking) {
-                return in_array($booking->status, ['pending', 'approved', 'active']);
+                return in_array($booking->status, ['pending', 'active']);
             });
             ?>
 
@@ -117,9 +102,6 @@
                                 $statusClass = '';
                                 switch ($booking->status) {
                                     case 'active':
-                                        $statusClass = 'approved';
-                                        break;
-                                    case 'approved':
                                         $statusClass = 'approved';
                                         break;
                                     case 'pending':
@@ -193,9 +175,6 @@
                                     $statusClass = '';
                                     switch ($booking->status) {
                                         case 'active':
-                                            $statusClass = 'approved';
-                                            break;
-                                        case 'approved':
                                             $statusClass = 'approved';
                                             break;
                                         case 'pending':

@@ -143,7 +143,7 @@ class TenantProperties extends Controller
                     'user_id' => $_SESSION['user_id'],
                     'type' => 'property',
                     'title' => 'Property Reserved Successfully',
-                    'message' => 'Your reservation for "' . substr($property->address, 0, 50) . '..." has been confirmed. The property manager will contact you shortly. Please visit our office within 48 hours to proceed with the physical viewing and booking process. Property Manager Email: ' . $managerEmail,
+                    'message' => 'Your reservation for "' . substr($property->address, 0, 50) . '..." has been confirmed. The property manager will contact you shortly. Please visit our office within 48 hours to proceed with the physical viewing and booking process. <strong>Property Manager Email: ' . $managerEmail . '</strong>',
                     'link' => 'tenantproperties/details/' . $id
                 ]);
 
@@ -154,13 +154,13 @@ class TenantProperties extends Controller
                         'user_id' => $property->manager_id,
                         'type' => 'property',
                         'title' => 'New Property Reservation',
-                        'message' => $tenantName . ' reserved "' . substr($property->address, 0, 50) . '...". Please contact the tenant within 24 hours to begin the physical process. Tenant Email: ' . $tenantEmail,
+                        'message' => $tenantName . ' reserved "' . substr($property->address, 0, 50) . '...". Please contact the tenant within 24 hours to begin the physical process. <strong>Tenant Email: ' . $tenantEmail . '</strong>',
                         'link' => 'managerproperties/details/' . $id
                     ]);
                 }
 
-                flash('reservation_message', 'Property reserved successfully! Please visit our office to view the property and proceed with booking.', 'alert alert-success');
-                redirect('tenant/dashboard');
+                flash('reservation_message', 'Property reserved successfully! Please check your notifications for next steps.', 'alert alert-success');
+                redirect('tenant/notifications');
             } else {
                 flash('reservation_message', 'Failed to reserve property. Please try again.', 'alert alert-danger');
                 redirect('tenantproperties/details/' . $id);

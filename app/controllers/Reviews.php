@@ -155,7 +155,7 @@ class Reviews extends Controller
                 return;
             }
 
-            if ($this->reviewModel->hasUserReviewed($_SESSION['user_id'], null, $booking->tenant_id, 'tenant')) {
+            if ($this->reviewModel->hasUserReviewedBooking($_SESSION['user_id'], $booking_id, 'tenant')) {
                 flash('review_message', 'You have already reviewed this tenant', 'alert alert-info');
                 redirect('landlord/feedback');
                 return;
@@ -185,6 +185,12 @@ class Reviews extends Controller
             if (empty($rating) || $rating < 1 || $rating > 5) {
                 flash('review_message', 'Please provide a rating between 1 and 5', 'alert alert-danger');
                 redirect('landlord/feedback');
+            }
+
+            if ($this->reviewModel->hasUserReviewedBooking($_SESSION['user_id'], $booking_id, 'tenant')) {
+                flash('review_message', 'You have already reviewed this booking', 'alert alert-info');
+                redirect('landlord/feedback');
+                return;
             }
 
             $data = [

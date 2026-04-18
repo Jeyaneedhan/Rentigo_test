@@ -186,6 +186,22 @@ class M_Reviews
         return $result->count > 0;
     }
 
+    // Check if reviewer has already reviewed a specific booking for a given review type
+    public function hasUserReviewedBooking($reviewer_id, $booking_id, $review_type)
+    {
+        $this->db->query('SELECT COUNT(*) as count
+                         FROM reviews
+                         WHERE reviewer_id = :reviewer_id
+                         AND booking_id = :booking_id
+                         AND review_type = :review_type');
+        $this->db->bind(':reviewer_id', $reviewer_id);
+        $this->db->bind(':booking_id', $booking_id);
+        $this->db->bind(':review_type', $review_type);
+
+        $result = $this->db->single();
+        return ($result->count ?? 0) > 0;
+    }
+
     // Update review status (approve/reject)
     public function updateReviewStatus($id, $status)
     {

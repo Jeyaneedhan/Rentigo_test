@@ -125,51 +125,6 @@
                     </div>
                 </div>
 
-                <!-- Lease Signatures -->
-                <div class="info-section">
-                    <h4><i class="fas fa-file-signature"></i> Signatures</h4>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <label>Your Signature:</label>
-                            <span>
-                                <?php if ($lease->signed_by_tenant): ?>
-                                    <span class="badge badge-success">
-                                        <i class="fas fa-check"></i> Signed on <?php echo date('M d, Y', strtotime($lease->tenant_signature_date)); ?>
-                                    </span>
-                                <?php else: ?>
-                                    <span class="badge badge-warning">
-                                        <i class="fas fa-clock"></i> Pending
-                                    </span>
-                                <?php endif; ?>
-                            </span>
-                        </div>
-                        <div class="info-item">
-                            <label>Landlord Signature:</label>
-                            <span>
-                                <?php if ($lease->signed_by_landlord): ?>
-                                    <span class="badge badge-success">
-                                        <i class="fas fa-check"></i> Signed on <?php echo date('M d, Y', strtotime($lease->landlord_signature_date)); ?>
-                                    </span>
-                                <?php else: ?>
-                                    <span class="badge badge-warning">
-                                        <i class="fas fa-clock"></i> Pending
-                                    </span>
-                                <?php endif; ?>
-                            </span>
-                        </div>
-                    </div>
-
-                    <?php if (!$lease->signed_by_tenant && $lease->status === 'pending_signatures'): ?>
-                        <div style="margin-top: 1.5rem;">
-                            <a href="<?php echo URLROOT; ?>/leaseagreements/signTenant/<?php echo $lease->id; ?>"
-                                class="btn btn-primary btn-lg"
-                                onclick="return confirm('Are you sure you want to sign this lease agreement? This action cannot be undone.');">
-                                <i class="fas fa-pen"></i> Sign Lease Agreement
-                            </a>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
                 <!-- Terms and Conditions -->
                 <?php if (!empty($lease->terms_and_conditions)): ?>
                     <div class="info-section">

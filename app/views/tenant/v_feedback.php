@@ -199,7 +199,7 @@
     .landlord-avatar {
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #45a9ea 0%, #2f8ed8 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;

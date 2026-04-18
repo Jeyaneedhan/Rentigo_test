@@ -493,9 +493,8 @@ class Policies extends Controller
 
         // Create notification message
         $notificationMessage = sprintf(
-            'The policy "%s" (ID: #%d) has been %s on %s by %s.',
+            'The policy "%s" has been %s on %s by %s.',
             $policy->policy_name,
-            $policy->policy_id,
             $action,
             $dateTime,
             $adminName

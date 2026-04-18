@@ -51,21 +51,21 @@ AutoPaginate::init($data, 5);
             <div class="stat-change" id="stat-subtitle-booking_pending">Awaiting response</div>
         </div>
     </div>
-    <div class="stat-card success" data-stat-type="booking_approved">
+    <div class="stat-card" data-stat-type="booking_completed">
         <div class="stat-icon">
-            <i class="fas fa-check-circle"></i>
+            <i class="fas fa-history"></i>
         </div>
         <div class="stat-content">
             <div class="stat-header">
-                <span class="stat-label" id="stat-label-booking_approved" onclick="toggleStatDropdown('booking_approved')">Approved</span>
-                <div class="stat-dropdown" id="stat-dropdown-booking_approved">
-                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_approved', 'all', event)">All Time</div>
-                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_approved', 'year', event)">Current Year</div>
-                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_approved', 'month', event)">Current Month</div>
+                <span class="stat-label" id="stat-label-booking_completed" onclick="toggleStatDropdown('booking_completed')">Completed</span>
+                <div class="stat-dropdown" id="stat-dropdown-booking_completed">
+                    <div class="stat-dropdown-item selected" data-period="all" onclick="selectStatPeriod('booking_completed', 'all', event)">All Time</div>
+                    <div class="stat-dropdown-item" data-period="year" onclick="selectStatPeriod('booking_completed', 'year', event)">Current Year</div>
+                    <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_completed', 'month', event)">Current Month</div>
                 </div>
             </div>
-            <div class="stat-value" id="stat-value-booking_approved"><?php echo $data['bookingStats']->approved ?? 0; ?></div>
-            <div class="stat-change" id="stat-subtitle-booking_approved">Accepted bookings</div>
+            <div class="stat-value" id="stat-value-booking_completed"><?php echo $data['bookingStats']->completed ?? 0; ?></div>
+            <div class="stat-change" id="stat-subtitle-booking_completed">Completed bookings</div>
         </div>
     </div>
     <div class="stat-card" data-stat-type="booking_active">
@@ -81,7 +81,7 @@ AutoPaginate::init($data, 5);
                     <div class="stat-dropdown-item" data-period="month" onclick="selectStatPeriod('booking_active', 'month', event)">Current Month</div>
                 </div>
             </div>
-            <div class="stat-value" id="stat-value-booking_active"><?php echo (($data['bookingStats']->active ?? 0) + ($data['bookingStats']->approved ?? 0)); ?></div>
+            <div class="stat-value" id="stat-value-booking_active"><?php echo ($data['bookingStats']->active ?? 0); ?></div>
             <div class="stat-change" id="stat-subtitle-booking_active">Currently occupied</div>
         </div>
     </div>
@@ -94,7 +94,6 @@ AutoPaginate::init($data, 5);
             <select name="filter_status" class="form-select">
                 <option value="" <?php echo empty($data['filter_status']) ? 'selected' : ''; ?>>All Statuses</option>
                 <option value="pending" <?php echo $data['filter_status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                <option value="approved" <?php echo $data['filter_status'] === 'approved' ? 'selected' : ''; ?>>Approved</option>
                 <option value="active" <?php echo $data['filter_status'] === 'active' ? 'selected' : ''; ?>>Active</option>
                 <option value="rejected" <?php echo $data['filter_status'] === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
                 <option value="cancelled" <?php echo $data['filter_status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
@@ -279,12 +278,6 @@ AutoPaginate::init($data, 5);
         background: #fef3c7;
         color: #92400e;
         border: 1px solid #f59e0b;
-    }
-
-    .status-badge.approved {
-        background: #d1fae5;
-        color: #065f46;
-        border: 1px solid #10b981;
     }
 
     .status-badge.active {

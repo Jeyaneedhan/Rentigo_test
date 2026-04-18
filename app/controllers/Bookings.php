@@ -24,6 +24,69 @@ class Bookings extends Controller
         $this->leaseModel = $this->model('M_LeaseAgreements');
     }
 
+    private function uploadTenantBookingDocument($property_id)
+    {
+        if (!isset($_FILES['tenant_document'])) {
+            return ['success' => false, 'error' => 'Please upload a company document'];
+        }
+
+        $file = $_FILES['tenant_document'];
+
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return ['success' => false, 'error' => 'Please upload a company document'];
+        }
+
+        $allowedMimeTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'image/jpeg',
+            'image/png'
+        ];
+        $allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+        $maxSize = 5 * 1024 * 1024;
+
+        if (($file['size'] ?? 0) > $maxSize) {
+            return ['success' => false, 'error' => 'Document size must not exceed 5MB'];
+        }
+
+        $originalName = $file['name'] ?? 'document';
+        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (!in_array($extension, $allowedExtensions, true)) {
+            return ['success' => false, 'error' => 'Only PDF, DOC, DOCX, JPG, and PNG files are allowed'];
+        }
+
+        $detectedMime = mime_content_type($file['tmp_name']);
+        if (!in_array($detectedMime, $allowedMimeTypes, true)) {
+            return ['success' => false, 'error' => 'Invalid document type uploaded'];
+        }
+
+        $uploadDir = APPROOT . '/../public/uploads/bookings/tenant_documents/';
+        if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true)) {
+            return ['success' => false, 'error' => 'Failed to prepare upload directory'];
+        }
+
+        $safeOriginalName = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($originalName));
+        $storedName = sprintf(
+            'tenant_%d_property_%d_%s.%s',
+            (int) $_SESSION['user_id'],
+            (int) $property_id,
+            uniqid(),
+            $extension
+        );
+
+        $targetPath = $uploadDir . $storedName;
+        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+            return ['success' => false, 'error' => 'Failed to upload document. Please try again'];
+        }
+
+        return [
+            'success' => true,
+            'path' => 'uploads/bookings/tenant_documents/' . $storedName,
+            'name' => $safeOriginalName
+        ];
+    }
+
     // Create a new booking (Tenant)
     public function create($property_id)
     {
@@ -62,6 +125,12 @@ class Bookings extends Controller
             $move_out_date = trim($_POST['move_out_date']);
             $notes = trim($_POST['notes']);
 
+            $documentUpload = $this->uploadTenantBookingDocument($property_id);
+            if (!$documentUpload['success']) {
+                flash('booking_message', $documentUpload['error'], 'alert alert-danger');
+                redirect('tenantproperties/details/' . $property_id);
+            }
+
             if (strtotime($move_in_date) < strtotime('today')) {
                 flash('booking_message', 'Move-in date cannot be in the past', 'alert alert-danger');
                 redirect('tenantproperties/details/' . $property_id);
@@ -93,7 +162,9 @@ class Bookings extends Controller
                 'deposit_amount' => $deposit_amount,
                 'total_amount' => $total_amount,
                 'status' => 'pending',
-                'notes' => $notes
+                'notes' => $notes,
+                'tenant_document_path' => $documentUpload['path'],
+                'tenant_document_name' => $documentUpload['name']
             ];
 
             $booking_id = $this->bookingModel->createBooking($data);
@@ -105,7 +176,7 @@ class Bookings extends Controller
                         'user_id' => $property->manager_id,
                         'type' => 'booking',
                         'title' => 'New Booking Request',
-                        'message' => $_SESSION['user_name'] . ' has requested to book property at "' . substr($property->address, 0, 50) . '..."',
+                        'message' => $_SESSION['user_name'] . ' has requested to book property at "' . substr($property->address, 0, 50) . '..." and uploaded a verification document.',
                         'link' => 'bookings/details/' . $booking_id
                     ]);
                 }
@@ -113,6 +184,12 @@ class Bookings extends Controller
                 flash('booking_message', 'Booking request submitted successfully! Waiting for Property Manager approval.', 'alert alert-success');
                 redirect('tenant/bookings');
             } else {
+                if (!empty($documentUpload['path'])) {
+                    $uploadedPath = APPROOT . '/../public/' . $documentUpload['path'];
+                    if (file_exists($uploadedPath)) {
+                        unlink($uploadedPath);
+                    }
+                }
                 flash('booking_message', 'Something went wrong. Please try again.', 'alert alert-danger');
                 redirect('tenantproperties/details/' . $property_id);
             }
@@ -207,7 +284,7 @@ class Bookings extends Controller
             redirect('manager/dashboard');
         }
 
-        if ($this->bookingModel->updateBookingStatus($id, 'approved')) {
+        if ($this->bookingModel->updateBookingStatus($id, 'active')) {
             // Update property status
             $this->propertyModel->updatePropertyStatus($booking->property_id, 'occupied');
 
@@ -247,7 +324,7 @@ class Bookings extends Controller
                 $booking->move_out_date
             );
 
-            flash('booking_message', 'Booking approved successfully! ' . $payments_created . ' payment(s) scheduled.', 'alert alert-success');
+            flash('booking_message', 'Booking activated successfully! ' . $payments_created . ' payment(s) scheduled.', 'alert alert-success');
         } else {
             flash('booking_message', 'Failed to approve booking', 'alert alert-danger');
         }

@@ -536,16 +536,16 @@ class Landlord extends Controller
                 $subtitle = 'Awaiting response';
                 break;
 
-            case 'booking_approved':
+            case 'booking_completed':
                 $stats = $this->bookingModel->getBookingStats($_SESSION['user_id'], 'landlord', $period);
-                $value = $stats->approved ?? 0;
+                $value = $stats->completed ?? 0;
                 $formatted = (string) $value;
-                $subtitle = 'Accepted bookings';
+                $subtitle = 'Completed bookings';
                 break;
 
             case 'booking_active':
                 $stats = $this->bookingModel->getBookingStats($_SESSION['user_id'], 'landlord', $period);
-                $value = ($stats->active ?? 0) + ($stats->approved ?? 0);
+                $value = $stats->active ?? 0;
                 $formatted = (string) $value;
                 $subtitle = 'Currently occupied';
                 break;

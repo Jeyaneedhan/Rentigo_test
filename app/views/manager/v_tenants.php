@@ -87,7 +87,6 @@ AutoPaginate::init($data, 5);
                         <option value="active" <?php echo ($data['currentStatusFilter'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
                         <option value="pending" <?php echo ($data['currentStatusFilter'] ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
                         <option value="vacated" <?php echo ($data['currentStatusFilter'] ?? '') === 'vacated' ? 'selected' : ''; ?>>Vacated</option>
-                        <option value="approved" <?php echo ($data['currentStatusFilter'] ?? '') === 'approved' ? 'selected' : ''; ?>>Approved</option>
                         <option value="completed" <?php echo ($data['currentStatusFilter'] ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
                         <option value="cancelled" <?php echo ($data['currentStatusFilter'] ?? '') === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                     </select>
@@ -146,7 +145,7 @@ AutoPaginate::init($data, 5);
                                     <td><?php echo htmlspecialchars($booking->address ?? 'N/A'); ?></td>
                                     <td>LKR <?php echo number_format($booking->monthly_rent * 1.10 ?? 0, 0); ?></td>
                                     <td>
-                                        <?php if ($booking->status === 'active' || $booking->status === 'approved'): ?>
+                                        <?php if ($booking->status === 'active'): ?>
                                             <strong class="text-success">LKR <?php echo number_format($booking->monthly_rent * 0.10 ?? 0, 0); ?></strong>
                                         <?php else: ?>
                                             <span class="text-muted">LKR <?php echo number_format($booking->monthly_rent * 0.10 ?? 0, 0); ?></span>
@@ -160,7 +159,6 @@ AutoPaginate::init($data, 5);
                                         $statusText = ucfirst($booking->status);
                                         switch ($booking->status) {
                                             case 'active':
-                                            case 'approved':
                                                 $statusClass = 'status-badge approved';
                                                 break;
                                             case 'pending':

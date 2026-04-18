@@ -89,7 +89,7 @@
                     <div class="feedback-item">
                         <div class="feedback-header">
                             <div class="tenant-info">
-                                <div class="tenant-avatar">
+                                <div class="tenant-avatar tenant-theme">
                                     <?php
                                     $name = $booking->tenant_name ?? 'T';
                                     $initials = strtoupper(substr($name, 0, 1));
@@ -131,68 +131,6 @@
     </div>
 </div>
 
-<!-- Reviews About You (From Tenants) -->
-<div class="content-card">
-    <div class="card-header">
-        <h2 class="card-title">Reviews About You</h2>
-    </div>
-    <div class="card-body">
-        <?php if (!empty($data['reviewsAboutMe'])): ?>
-            <div class="feedback-container">
-                <?php foreach ($data['reviewsAboutMe'] as $review): ?>
-                    <div class="feedback-item">
-                        <div class="feedback-header">
-                            <div class="tenant-info">
-                                <div class="tenant-avatar">
-                                    <?php
-                                    $name = $review->reviewer_name ?? 'T';
-                                    $initials = strtoupper(substr($name, 0, 1));
-                                    if (strpos($name, ' ') !== false) {
-                                        $parts = explode(' ', $name);
-                                        $initials = strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1));
-                                    }
-                                    echo $initials;
-                                    ?>
-                                </div>
-                                <div>
-                                    <h4><?php echo htmlspecialchars($review->reviewer_name ?? 'Tenant'); ?></h4>
-                                    <p><?php echo htmlspecialchars($review->property_address ?? 'Property'); ?></p>
-                                </div>
-                            </div>
-                            <div class="feedback-meta">
-                                <div class="rating">
-                                    <span class="stars">
-                                        <?php
-                                        for ($i = 1; $i <= 5; $i++) {
-                                            echo $i <= $review->rating ? '★' : '☆';
-                                        }
-                                        ?>
-                                    </span>
-                                    <span class="rating-number"><?php echo number_format($review->rating, 1); ?></span>
-                                </div>
-                                <span class="feedback-date"><?php echo date('M d, Y', strtotime($review->created_at)); ?></span>
-                            </div>
-                        </div>
-                        <div class="feedback-content">
-                            <?php if (!empty($review->review_text)): ?>
-                                <p>"<?php echo nl2br(htmlspecialchars($review->review_text)); ?>"</p>
-                            <?php else: ?>
-                                <p class="text-muted"><em>No written review</em></p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <div class="empty-state">
-                <i class="fas fa-star-half-alt"></i>
-                <p>No reviews yet</p>
-                <span>Tenant reviews about your properties and management will appear here.</span>
-            </div>
-        <?php endif; ?>
-    </div>
-</div>
-
 <!-- Your Reviews (About Tenants) -->
 <div class="content-card">
     <div class="card-header">
@@ -205,7 +143,7 @@
                     <div class="feedback-item">
                         <div class="feedback-header">
                             <div class="tenant-info">
-                                <div class="tenant-avatar">
+                                <div class="tenant-avatar landlord-theme">
                                     <?php
                                     $name = $review->reviewee_name ?? 'T';
                                     $initials = strtoupper(substr($name, 0, 1));
@@ -266,6 +204,68 @@
     </div>
 </div>
 
+<!-- Reviews About You (From Tenants) -->
+<div class="content-card">
+    <div class="card-header">
+        <h2 class="card-title">Reviews About You</h2>
+    </div>
+    <div class="card-body">
+        <?php if (!empty($data['reviewsAboutMe'])): ?>
+            <div class="feedback-container">
+                <?php foreach ($data['reviewsAboutMe'] as $review): ?>
+                    <div class="feedback-item">
+                        <div class="feedback-header">
+                            <div class="tenant-info">
+                                <div class="tenant-avatar tenant-theme">
+                                    <?php
+                                    $name = $review->reviewer_name ?? 'T';
+                                    $initials = strtoupper(substr($name, 0, 1));
+                                    if (strpos($name, ' ') !== false) {
+                                        $parts = explode(' ', $name);
+                                        $initials = strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1));
+                                    }
+                                    echo $initials;
+                                    ?>
+                                </div>
+                                <div>
+                                    <h4><?php echo htmlspecialchars($review->reviewer_name ?? 'Tenant'); ?></h4>
+                                    <p><?php echo htmlspecialchars($review->property_address ?? 'Property'); ?></p>
+                                </div>
+                            </div>
+                            <div class="feedback-meta">
+                                <div class="rating">
+                                    <span class="stars">
+                                        <?php
+                                        for ($i = 1; $i <= 5; $i++) {
+                                            echo $i <= $review->rating ? '★' : '☆';
+                                        }
+                                        ?>
+                                    </span>
+                                    <span class="rating-number"><?php echo number_format($review->rating, 1); ?></span>
+                                </div>
+                                <span class="feedback-date"><?php echo date('M d, Y', strtotime($review->created_at)); ?></span>
+                            </div>
+                        </div>
+                        <div class="feedback-content">
+                            <?php if (!empty($review->review_text)): ?>
+                                <p>"<?php echo nl2br(htmlspecialchars($review->review_text)); ?>"</p>
+                            <?php else: ?>
+                                <p class="text-muted"><em>No written review</em></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <div class="empty-state">
+                <i class="fas fa-star-half-alt"></i>
+                <p>No reviews yet</p>
+                <span>Tenant reviews about your properties and management will appear here.</span>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
 <style>
     .feedback-container {
         display: flex;
@@ -297,7 +297,7 @@
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #45a9ea 0%, #2f8ed8 100%);
         color: white;
         display: flex;
         align-items: center;
@@ -305,6 +305,14 @@
         font-weight: 600;
         font-size: 18px;
         flex-shrink: 0;
+    }
+
+    .tenant-avatar.tenant-theme {
+        background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    }
+
+    .tenant-avatar.landlord-theme {
+        background: linear-gradient(135deg, #45a9ea 0%, #2f8ed8 100%);
     }
 
     .tenant-info h4 {

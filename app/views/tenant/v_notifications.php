@@ -116,7 +116,7 @@ AutoPaginate::init($data, 10);
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <p class="notification-message"><?php echo htmlspecialchars($notification->message); ?></p>
+                        <p class="notification-message"><?php echo $notification->message; ?></p>
                         <div class="notification-actions">
                             <?php if (!$notification->is_read): ?>
                                 <button class="btn btn-sm btn-secondary"

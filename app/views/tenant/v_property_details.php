@@ -218,7 +218,7 @@
                     <?php if ($property->status === 'available'): ?>
                         <!-- Reserve Property Button -->
                         <form method="POST" action="<?php echo URLROOT; ?>/tenantproperties/reserve/<?php echo $property->id; ?>"
-                              onsubmit="return confirm('Are you sure you want to reserve this property? You will be notified to visit our office for viewing.');">
+                            onsubmit="return confirm('Are you sure you want to reserve this property? You will be notified to visit our office for viewing.');">
                             <button class="btn btn-primary" type="submit">
                                 <i class="fas fa-calendar-check"></i> Reserve Property
                             </button>
@@ -258,16 +258,16 @@
                             </div>
                             <div class="stars" style="color: #f59e0b; font-size: 1.5rem;">
                                 <?php
-                                    $avgRating = $data['averageRating'];
-                                    for ($i = 1; $i <= 5; $i++) {
-                                        if ($i <= floor($avgRating)) {
-                                            echo '<i class="fas fa-star"></i>';
-                                        } elseif ($i - 0.5 <= $avgRating) {
-                                            echo '<i class="fas fa-star-half-alt"></i>';
-                                        } else {
-                                            echo '<i class="far fa-star"></i>';
-                                        }
+                                $avgRating = $data['averageRating'];
+                                for ($i = 1; $i <= 5; $i++) {
+                                    if ($i <= floor($avgRating)) {
+                                        echo '<i class="fas fa-star"></i>';
+                                    } elseif ($i - 0.5 <= $avgRating) {
+                                        echo '<i class="fas fa-star-half-alt"></i>';
+                                    } else {
+                                        echo '<i class="far fa-star"></i>';
                                     }
+                                }
                                 ?>
                             </div>
                             <div style="color: #6b7280; margin-top: 0.5rem;">
@@ -295,9 +295,9 @@
                                         </div>
                                         <div class="stars" style="color: #f59e0b; font-size: 1rem;">
                                             <?php
-                                                for ($i = 1; $i <= 5; $i++) {
-                                                    echo $i <= $review->rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-                                                }
+                                            for ($i = 1; $i <= 5; $i++) {
+                                                echo $i <= $review->rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                                            }
                                             ?>
                                         </div>
                                     </div>
@@ -339,22 +339,30 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <form method="POST" action="<?php echo URLROOT; ?>/bookings/create/<?php echo $property->id ?? ''; ?>" id="bookingForm">
+        <form method="POST" action="<?php echo URLROOT; ?>/bookings/create/<?php echo $property->id ?? ''; ?>" id="bookingForm" enctype="multipart/form-data">
             <div class="modal-body">
                 <div class="form-group">
                     <label for="move_in_date">Move-in Date <span style="color: red;">*</span></label>
                     <input type="date" class="form-control" id="move_in_date" name="move_in_date" required
-                           min="<?php echo date('Y-m-d'); ?>">
+                        min="<?php echo date('Y-m-d'); ?>">
                 </div>
                 <div class="form-group">
                     <label for="move_out_date">Move-out Date <span style="color: red;">*</span></label>
                     <input type="date" class="form-control" id="move_out_date" name="move_out_date" required
-                           min="<?php echo date('Y-m-d'); ?>">
+                        min="<?php echo date('Y-m-d'); ?>">
                 </div>
                 <div class="form-group">
                     <label for="notes">Additional Notes (Optional)</label>
                     <textarea class="form-control" id="notes" name="notes" rows="3"
-                              placeholder="Any special requests or requirements..."></textarea>
+                        placeholder="Any special requests or requirements..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tenant_document">Company Document <span style="color: red;">*</span></label>
+                    <input type="file" class="form-control" id="tenant_document" name="tenant_document" required
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    <small style="color:#6b7280; display:block; margin-top:0.35rem;">
+                        Upload a valid company document for property manager verification (max 5MB).
+                    </small>
                 </div>
                 <div class="alert alert-info" style="margin-top: 1rem;">
                     <i class="fas fa-info-circle"></i> You are booking this reserved property. The Property Manager will review your booking request.

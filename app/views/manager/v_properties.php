@@ -66,6 +66,7 @@ AutoPaginate::init($data, 10);
                                     if ($status === 'approved' || $status === 'active' || $status === 'available') $badgeClass .= 'approved';
                                     elseif ($status === 'pending' || $status === 'pending') $badgeClass .= 'pending';
                                     elseif ($status === 'maintenance') $badgeClass .= 'pending';
+                                    elseif ($status === 'reserved') $badgeClass .= 'reserved';
                                     elseif ($status === 'occupied') $badgeClass .= 'occupied';
                                     else $badgeClass .= 'default';
                                     ?>

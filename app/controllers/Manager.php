@@ -141,7 +141,7 @@ class Manager extends Controller
         $dateToFilter = $_GET['date_to'] ?? '';
 
         // Calculate stats for all bookings (for stats cards - always show totals)
-        $activeBookings = array_filter($allBookings, fn($b) => $b->status === 'active' || $b->status === 'approved');
+        $activeBookings = array_filter($allBookings, fn($b) => $b->status === 'active');
         $pendingBookings = array_filter($allBookings, fn($b) => $b->status === 'pending');
         $vacatedBookings = array_filter($allBookings, fn($b) => $b->status === 'completed' || $b->status === 'cancelled');
 
@@ -151,7 +151,7 @@ class Manager extends Controller
         // Filter by status
         if ($statusFilter !== 'all') {
             if ($statusFilter === 'active') {
-                $filteredBookings = array_filter($filteredBookings, fn($b) => $b->status === 'active' || $b->status === 'approved');
+                $filteredBookings = array_filter($filteredBookings, fn($b) => $b->status === 'active');
             } elseif ($statusFilter === 'pending') {
                 $filteredBookings = array_filter($filteredBookings, fn($b) => $b->status === 'pending');
             } elseif ($statusFilter === 'vacated') {
@@ -598,7 +598,7 @@ class Manager extends Controller
 
         // Calculate stats for all bookings (for stats cards - always show totals)
         $pendingBookings = array_filter($allBookings, fn($b) => $b->status === 'pending');
-        $approvedBookings = array_filter($allBookings, fn($b) => $b->status === 'approved');
+        $activeBookings = array_filter($allBookings, fn($b) => $b->status === 'active');
         $rejectedBookings = array_filter($allBookings, fn($b) => $b->status === 'rejected');
 
         // Apply filters to bookings
@@ -637,7 +637,7 @@ class Manager extends Controller
             'allBookings' => $filteredBookings, // Filtered bookings for display
             'assignedProperties' => $assignedProperties, // For property filter dropdown
             'pendingCount' => count($pendingBookings), // Total stats
-            'approvedCount' => count($approvedBookings), // Total stats
+            'activeCount' => count($activeBookings), // Total stats
             'rejectedCount' => count($rejectedBookings), // Total stats
             // Current filter values (for maintaining form state)
             'currentStatusFilter' => $statusFilter,
@@ -879,8 +879,7 @@ class Manager extends Controller
             // Tenant stats
             case 'tenant_active':
                 $stats = $bookingModel->getBookingStats($manager_id, 'manager', $period);
-                $activeCount = ($stats->active ?? 0) + ($stats->approved ?? 0);
-                $response['value'] = $activeCount;
+                $response['value'] = $stats->active ?? 0;
                 $response['subtitle'] = 'Currently active tenants';
                 break;
 
@@ -952,8 +951,8 @@ class Manager extends Controller
 
             case 'booking_approved':
                 $stats = $bookingModel->getBookingStats($manager_id, 'manager', $period);
-                $response['value'] = $stats->approved ?? 0;
-                $response['subtitle'] = 'Accepted bookings';
+                $response['value'] = $stats->active ?? 0;
+                $response['subtitle'] = 'Active bookings';
                 break;
 
             case 'booking_rejected':

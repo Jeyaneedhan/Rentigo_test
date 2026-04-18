@@ -62,10 +62,10 @@
                             <label>Duration:</label>
                             <span>
                                 <?php
-                                    $start = new DateTime($booking->move_in_date);
-                                    $end = new DateTime($booking->move_out_date);
-                                    $interval = $start->diff($end);
-                                    echo $interval->days . ' days';
+                                $start = new DateTime($booking->move_in_date);
+                                $end = new DateTime($booking->move_out_date);
+                                $interval = $start->diff($end);
+                                echo $interval->days . ' days';
                                 ?>
                             </span>
                         </div>
@@ -117,6 +117,11 @@
                         <div class="alert alert-info">
                             <i class="fas fa-clock"></i>
                             <strong>Pending Approval:</strong> Your booking request is waiting for Property Manager approval.
+                        </div>
+                    <?php elseif ($booking->status === 'active'): ?>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Booking Active!</strong> Your booking is active and all verification steps are completed.
                         </div>
                     <?php elseif ($booking->status === 'approved'): ?>
                         <div class="alert alert-success">
