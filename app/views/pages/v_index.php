@@ -1,50 +1,58 @@
 <?php require APPROOT . '/views/inc/public_header.php'; ?>
 
 <!-- Hero Section -->
-<section class="hero-section" id="home">
-    <div class=" container">
+<section class="hero-section" id="home" style="background-image: url('<?php echo URLROOT; ?>/images/hero-property.jpg');">
+    <div class="hero-overlay"></div>
+    <div class="container hero-container">
         <div class="hero-content">
-            <div class="hero-text">
-                <h1 class="hero-title">
-                    <span class="text-primary">Your Complete</span><br>
-                    <span class="text-primary">Rental Solution</span>
-                </h1>
-                <p class="hero-description">
-                    Connecting quality tenants with great landlords through professional
-                    property management and seamless rental experiences
-                </p>
-                <div class="hero-buttons">
-                    <a href="<?php echo URLROOT; ?>/users/login" class="btn btn-primary btn-lg">
-                        Browse Properties
-                    </a>
-                    <a href="#how-it-works" class="btn btn-outline btn-lg">
-                        Learn More
-                    </a>
-                </div>
-
-                <!-- Quick Stats -->
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <h3>500+</h3>
-                        <p>Properties</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>10,000+</h3>
-                        <p>Happy Tenants</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>15+</h3>
-                        <p>Years Experience</p>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-image">
-                <img src="<?php echo URLROOT; ?>/images/hero-building.png" alt="Modern Properties">
+            <!-- Tagline Pill -->
+            <div class="hero-tagline-pill">
+                <span class="pill-dot"></span>
+                Sri Lanka's #1 Rental Platform
             </div>
 
-            <br>
-            <br>
+            <h1 class="hero-title">
+                <span class="text-white">Your Complete</span><br>
+                <span class="text-accent">Rental Solution</span>
+            </h1>
+
+            <p class="hero-description">
+                Connecting quality tenants with great landlords through professional
+                property management and seamless rental experiences across Colombo.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="<?php echo URLROOT; ?>/users/login" class="btn btn-hero-primary btn-lg">
+                    <i class="fas fa-search"></i> Browse Properties
+                </a>
+                <a href="#how-it-works" class="btn btn-hero-outline btn-lg">
+                    How It Works <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <h3>500+</h3>
+                    <p>Properties</p>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <h3>10,000+</h3>
+                    <p>Happy Tenants</p>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <h3>15+</h3>
+                    <p>Years Experience</p>
+                </div>
+            </div>
         </div>
+    </div>
+    <!-- Scroll Hint
+    <div class="hero-scroll-hint">
+        <span>Scroll Down</span>
+        <div class="scroll-line"></div> -->
     </div>
 </section>
 
