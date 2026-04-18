@@ -286,6 +286,35 @@ AutoPaginate::init($data, 5);
 <?php echo AutoPaginate::render($data['_pagination']); ?>
 
 <style>
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    .status-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-badge.in_progress {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-badge.resolved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
     /* Empty State Styles */
     .empty-state {
         display: flex;

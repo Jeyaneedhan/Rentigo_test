@@ -140,25 +140,7 @@ AutoPaginate::init($data, 5);
                     <tbody>
                         <?php foreach ($data['bookings'] as $booking): ?>
                             <?php
-                            $statusClass = '';
-                            switch ($booking->status) {
-                                case 'pending':
-                                    $statusClass = 'warning';
-                                    break;
-                                case 'approved':
-                                    $statusClass = 'success';
-                                    break;
-                                case 'active':
-                                    $statusClass = 'info';
-                                    break;
-                                case 'rejected':
-                                case 'cancelled':
-                                    $statusClass = 'danger';
-                                    break;
-                                case 'completed':
-                                    $statusClass = 'secondary';
-                                    break;
-                            }
+                            $statusClass = $booking->status;
                             ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($booking->address ?? 'N/A'); ?></td>
@@ -180,7 +162,7 @@ AutoPaginate::init($data, 5);
                                 <td>LKR <?php echo number_format($booking->monthly_rent, 2); ?></td>
                                 <td>LKR <?php echo number_format($booking->deposit_amount, 2); ?></td>
                                 <td>
-                                    <span class="badge badge-<?php echo $statusClass; ?>">
+                                    <span class="status-badge <?php echo $statusClass; ?>">
                                         <?php echo ucfirst($booking->status); ?>
                                     </span>
                                 </td>
@@ -282,6 +264,46 @@ AutoPaginate::init($data, 5);
     .empty-state span {
         font-size: 14px;
         color: #999;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.813rem;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+    }
+
+    .status-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #f59e0b;
+    }
+
+    .status-badge.approved {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+
+    .status-badge.active {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #3b82f6;
+    }
+
+    .status-badge.rejected,
+    .status-badge.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+
+    .status-badge.completed {
+        background: #e5e7eb;
+        color: #374151;
+        border: 1px solid #9ca3af;
     }
 </style>
 

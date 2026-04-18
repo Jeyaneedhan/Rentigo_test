@@ -272,6 +272,37 @@
     </div>
 </div>
 
+<style>
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .status-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-badge.approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.rejected,
+    .status-badge.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-badge.completed {
+        background: #e5e7eb;
+        color: #374151;
+    }
+</style>
+
 <!-- Cancel Booking Modal -->
 <div id="cancelBookingModal" class="modal" style="display: none;">
     <div class="modal-content">

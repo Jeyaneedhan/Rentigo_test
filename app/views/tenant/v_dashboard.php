@@ -513,6 +513,34 @@
         color: #999;
     }
 
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-badge.info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-badge.secondary {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
     .quick-action-item {
         position: relative;
     }

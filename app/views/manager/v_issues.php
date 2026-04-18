@@ -357,6 +357,34 @@
         background: #fff;
         cursor: pointer;
     }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-badge.in_progress {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-badge.resolved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 </style>
 
 
