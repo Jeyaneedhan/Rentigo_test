@@ -1,16 +1,32 @@
 # .htaccess for uploads directory
-# Allow access to image files
 
-<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
-    Allow from all
-</FilesMatch>
+# Allow safe uploaded file types used by the app (images + booking documents)
 
-# Prevent access to other file types
-<FilesMatch "\.txt$">
-    Deny from all
-</FilesMatch>
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|pdf|doc|docx)$">
+        Require all granted
+    </FilesMatch>
+
+    # Block direct access to executable/script files in uploads
+    <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|exe|js)$">
+        Require all denied
+    </FilesMatch>
+
+</IfModule>
+
+<IfModule mod_access_compat.c>
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|pdf|doc|docx)$">
+        Allow from all
+    </FilesMatch>
+
+    <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|exe|js)$">
+        Deny from all
+    </FilesMatch>
+
+</IfModule>
 
 # Optional: Enable browser caching for images
+
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType image/jpg "access plus 1 month"
@@ -21,6 +37,7 @@
 </IfModule>
 
 # Optional: Enable compression
+
 <IfModule mod_deflate.c>
     <FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
         SetOutputFilter DEFLATE
