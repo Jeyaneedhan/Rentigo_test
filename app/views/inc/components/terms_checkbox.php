@@ -8,9 +8,9 @@
         <span class="checkmark"></span>
         <span class="terms-text">
             I agree to the
-            <a href="<?php echo URLROOT; ?>/pages/terms" target="_blank" class="terms-link">Terms and Conditions</a>
+            <a href="<?php echo URLROOT; ?>/pages/terms" class="terms-link">Terms and Conditions</a>
             and
-            <a href="<?php echo URLROOT; ?>/pages/privacy" target="_blank" class="terms-link">Privacy Policy</a>
+            <a href="<?php echo URLROOT; ?>/pages/privacy" class="terms-link">Privacy Policy</a>
         </span>
     </label>
     <span class="error-message" id="terms-error" style="display: none;">

@@ -138,6 +138,69 @@
             font-weight: 400;
             font-size: 0.75rem;
         }
+
+        .legal-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 1rem;
+        }
+
+        .legal-modal.show {
+            display: flex;
+        }
+
+        .legal-modal-content {
+            width: min(1100px, 96vw);
+            height: min(88vh, 900px);
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .legal-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+
+        .legal-modal-title {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .legal-modal-close {
+            border: none;
+            background: transparent;
+            color: #4b5563;
+            font-size: 1.25rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0.25rem;
+        }
+
+        .legal-modal-close:hover {
+            color: #111827;
+        }
+
+        .legal-modal-frame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #ffffff;
+        }
     </style>
 </head>
 
@@ -296,7 +359,19 @@
         </div>
     </div>
 
+    <div class="legal-modal" id="legalModal" aria-hidden="true">
+        <div class="legal-modal-content" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
+            <div class="legal-modal-header">
+                <h4 class="legal-modal-title" id="legalModalTitle">Legal Document</h4>
+                <button type="button" class="legal-modal-close" id="legalModalClose" aria-label="Close">&times;</button>
+            </div>
+            <iframe id="legalModalFrame" class="legal-modal-frame" title="Legal Document"></iframe>
+        </div>
+    </div>
+
     <script>
+        const PM_REGISTER_FORM_STATE_KEY = 'rentigo_register_pm_form_state_v1';
+
         function togglePassword(inputId, eyeId) {
             const passwordInput = document.getElementById(inputId);
             const passwordEye = document.getElementById(eyeId);
@@ -311,6 +386,123 @@
                 passwordEye.classList.add('fa-eye');
             }
         }
+
+        function savePmRegisterFormState() {
+            const email = document.getElementById('email');
+            const name = document.getElementById('name');
+            const acceptTerms = document.getElementById('accept_terms');
+
+            const state = {
+                email: email ? email.value : '',
+                name: name ? name.value : '',
+                acceptTerms: acceptTerms ? acceptTerms.checked : false
+            };
+
+            sessionStorage.setItem(PM_REGISTER_FORM_STATE_KEY, JSON.stringify(state));
+        }
+
+        function restorePmRegisterFormState() {
+            const raw = sessionStorage.getItem(PM_REGISTER_FORM_STATE_KEY);
+            if (!raw) {
+                return;
+            }
+
+            try {
+                const state = JSON.parse(raw);
+                const email = document.getElementById('email');
+                const name = document.getElementById('name');
+                const acceptTerms = document.getElementById('accept_terms');
+
+                if (email && !email.value && state.email) {
+                    email.value = state.email;
+                }
+
+                if (name && !name.value && state.name) {
+                    name.value = state.name;
+                }
+
+                if (acceptTerms && !acceptTerms.checked && state.acceptTerms) {
+                    acceptTerms.checked = true;
+                }
+            } catch (e) {
+                sessionStorage.removeItem(PM_REGISTER_FORM_STATE_KEY);
+            }
+        }
+
+        // Restore saved values when returning from Terms/Privacy pages.
+        restorePmRegisterFormState();
+
+        ['email', 'name', 'accept_terms'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', savePmRegisterFormState);
+                el.addEventListener('change', savePmRegisterFormState);
+            }
+        });
+
+        document.querySelectorAll('.terms-link').forEach((link) => {
+            link.addEventListener('click', savePmRegisterFormState);
+        });
+
+        window.addEventListener('beforeunload', savePmRegisterFormState);
+
+        const legalModal = document.getElementById('legalModal');
+        const legalModalFrame = document.getElementById('legalModalFrame');
+        const legalModalTitle = document.getElementById('legalModalTitle');
+        const legalModalClose = document.getElementById('legalModalClose');
+
+        function openLegalModal(url, title) {
+            if (!legalModal || !legalModalFrame || !legalModalTitle) {
+                window.location.href = url;
+                return;
+            }
+
+            legalModalTitle.textContent = title;
+            legalModalFrame.src = url;
+            legalModal.classList.add('show');
+            legalModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLegalModal() {
+            if (!legalModal || !legalModalFrame) {
+                return;
+            }
+
+            legalModal.classList.remove('show');
+            legalModal.setAttribute('aria-hidden', 'true');
+            legalModalFrame.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('.terms-link').forEach((link) => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                savePmRegisterFormState();
+
+                const url = this.getAttribute('href');
+                const title = this.textContent.trim() || 'Legal Document';
+                openLegalModal(url, title);
+            });
+        });
+
+        if (legalModalClose) {
+            legalModalClose.addEventListener('click', closeLegalModal);
+        }
+
+        if (legalModal) {
+            legalModal.addEventListener('click', function(e) {
+                if (e.target === legalModal) {
+                    closeLegalModal();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && legalModal && legalModal.classList.contains('show')) {
+                closeLegalModal();
+            }
+        });
 
         // File upload handling
         const fileInput = document.getElementById('employee_id');
@@ -387,6 +579,8 @@
         const form = document.querySelector('.auth-form');
         if (form) {
             form.addEventListener('submit', function(e) {
+                savePmRegisterFormState();
+
                 const email = document.getElementById('email').value.trim();
                 const name = document.getElementById('name').value.trim();
                 const password = document.getElementById('password').value;

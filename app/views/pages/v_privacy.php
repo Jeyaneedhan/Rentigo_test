@@ -194,10 +194,6 @@
 </style>
 
 <div class="privacy-container">
-    <a href="javascript:history.back()" class="back-button">
-        <i class="fas fa-arrow-left"></i> Back
-    </a>
-
     <div class="privacy-header">
         <h1>Privacy Policy</h1>
         <p class="subtitle">Rentigo - Rental Property Management System</p>
@@ -222,6 +218,58 @@
                     protecting your personal information and your right to privacy.
                 </p>
             </div>
+            <div class="highlight-box" style="margin-top: 1rem; border-left-color: #0ea5e9;">
+                <p>
+                    <i class="fas fa-file-signature"></i> Important: Rentigo includes both in-system records and
+                    offline legal/physical processes. Certain legal steps are completed physically at the company,
+                    while proof documents are uploaded to the system for verification and decision-making.
+                </p>
+            </div>
+        </div>
+
+        <!-- Offline Legal and Verification Process -->
+        <div class="privacy-section">
+            <h2><i class="fas fa-building"></i> 1A. Offline Legal Process and Verification Records</h2>
+
+            <h3>1A.1 Landlord Onboarding and Property Verification</h3>
+            <p>
+                Before listing a property in Rentigo, the landlord completes legal procedures physically with the
+                company and authorizes the company to manage the property. After this process, the landlord adds
+                the property in the system and uploads a company verification document (landlord-company document).
+            </p>
+            <ul>
+                <li>This document is stored in the system as verification evidence.</li>
+                <li>Admin uses this document to verify the submission and approve or reject the property.</li>
+            </ul>
+
+            <h3>1A.2 Tenant Reservation, Physical Processing, and Booking Verification</h3>
+            <p>
+                After reserving a property, the tenant is expected to visit the company, complete legal procedures,
+                and physically visit the property. Once these steps are completed, the tenant submits the booking in
+                Rentigo and uploads a company verification document (tenant-company document).
+            </p>
+            <ul>
+                <li>This document is later reviewed by the assigned Property Manager.</li>
+                <li>Property Manager uses the document and process outcome to approve or reject the booking.</li>
+            </ul>
+
+            <h3>1A.3 Issue to Maintenance Workflow (Physical + System)</h3>
+            <p>
+                When a tenant raises an issue, the system notifies the Property Manager. The Property Manager then
+                verifies the issue by scheduling an inspection. If the issue is valid, the landlord is notified and
+                a maintenance request is raised for that issue.
+            </p>
+            <ul>
+                <li>Property Manager can assign a service provider.</li>
+                <li>Service provider and Property Manager can physically inspect and prepare a quotation.</li>
+                <li>Quotation amount and document are uploaded in the system for landlord review.</li>
+                <li>Landlord can approve or reject quotations, and approved work is expected to be paid and resolved.</li>
+            </ul>
+
+            <h3>1A.4 Landlord-Initiated Maintenance</h3>
+            <p>
+                Landlords can also create maintenance requests directly, even without a tenant-raised issue.
+            </p>
         </div>
 
         <!-- Information We Collect -->

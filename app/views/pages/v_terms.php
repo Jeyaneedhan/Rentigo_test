@@ -167,10 +167,6 @@
 </style>
 
 <div class="terms-container">
-    <a href="javascript:history.back()" class="back-button">
-        <i class="fas fa-arrow-left"></i> Back
-    </a>
-
     <div class="terms-header">
         <h1>Terms and Conditions</h1>
         <p class="subtitle">Rentigo - Rental Property Management System</p>
@@ -191,6 +187,55 @@
             <div class="highlight-box">
                 <p><i class="fas fa-info-circle"></i> Please read these Terms carefully before using Rentigo.</p>
             </div>
+            <div class="highlight-box" style="margin-top: 1rem; border-left-color: #0ea5e9;">
+                <p><i class="fas fa-file-signature"></i> Important: Some legal and verification activities are
+                    completed physically at the company and then recorded in Rentigo through documents,
+                    status updates, and approvals.</p>
+            </div>
+        </div>
+
+        <!-- Legal and Physical Process Acknowledgement -->
+        <div class="terms-section">
+            <h2><i class="fas fa-balance-scale"></i> 1A. Legal and Physical Process Acknowledgement</h2>
+
+            <h3>1A.1 Landlord Company Legal Process and Property Document</h3>
+            <p>
+                Landlords are expected to complete legal procedures physically with the company before property
+                management begins. After this, when adding a property in Rentigo, the landlord must provide a
+                landlord-company verification document.
+            </p>
+            <ul>
+                <li>This document supports administrative verification.</li>
+                <li>Admin may approve or reject the property based on verification outcomes.</li>
+            </ul>
+
+            <h3>1A.2 Tenant Reservation Legal Process and Booking Document</h3>
+            <p>
+                For reserved properties, tenants are expected to complete legal processing physically with the company
+                and perform a property visit before booking. At booking submission, tenant must attach a
+                tenant-company verification document.
+            </p>
+            <ul>
+                <li>Property Manager reviews this document with booking details.</li>
+                <li>Booking may be approved or rejected after verification.</li>
+            </ul>
+
+            <h3>1A.3 Tenant Issue Verification and Maintenance Escalation</h3>
+            <p>
+                When a tenant raises an issue, Property Manager is notified and should verify it by scheduling an
+                inspection. If validated, the issue is escalated to maintenance and landlord is notified.
+            </p>
+            <ul>
+                <li>Property Manager may assign a service provider.</li>
+                <li>Quotation can be prepared after physical assessment.</li>
+                <li>Quotation amount and supporting document are uploaded for landlord review.</li>
+                <li>Landlord may approve or reject quotations; approved work is expected to proceed to resolution.</li>
+            </ul>
+
+            <h3>1A.4 Landlord Direct Maintenance Requests</h3>
+            <p>
+                Landlord may also create maintenance requests directly without a tenant issue.
+            </p>
         </div>
 
         <!-- Definitions -->
