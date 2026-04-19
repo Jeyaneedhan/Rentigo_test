@@ -150,7 +150,14 @@ class Policies extends Controller
 
             // Check validation
             if (!$validator->hasErrors()) {
-                if ($this->policyModel->createPolicy($data)) {
+                $createdPolicyId = $this->policyModel->createPolicy($data);
+
+                if ($createdPolicyId) {
+                    // Notify all non-admin roles when a newly created policy is active
+                    if ($data['policy_status'] === 'active') {
+                        $this->sendPolicyStatusNotifications('active', $data['policy_name']);
+                    }
+
                     flash('policy_message', 'Policy created successfully!', 'alert alert-success');
                     redirect('policies/index');
                 } else {
@@ -314,7 +321,29 @@ class Policies extends Controller
 
             // Check validation
             if (!$validator->hasErrors()) {
+                $existingPolicy = $this->policyModel->getPolicyById($id);
+
+                if (!$existingPolicy) {
+                    flash('policy_message', 'Policy not found', 'alert alert-danger');
+                    redirect('policies/index');
+                    return;
+                }
+
                 if ($this->policyModel->updatePolicy($data)) {
+                    $oldStatus = $existingPolicy->policy_status;
+                    $newStatus = $data['policy_status'];
+
+                    // Notify all non-admin roles when:
+                    // 1) status becomes active, OR
+                    // 2) status changes from any status to inactive
+                    $shouldNotify =
+                        ($newStatus === 'active' && $oldStatus !== 'active') ||
+                        ($newStatus === 'inactive' && $oldStatus !== 'inactive');
+
+                    if ($shouldNotify) {
+                        $this->sendPolicyStatusNotifications($newStatus, $data['policy_name']);
+                    }
+
                     flash('policy_message', 'Policy updated successfully!', 'alert alert-success');
                     redirect('policies/index');
                 } else {
@@ -406,6 +435,7 @@ class Policies extends Controller
             }
 
             if ($this->policyModel->deletePolicy($id)) {
+                $this->sendPolicyDeletionNotifications($policy->policy_name);
                 flash('policy_message', 'Policy deleted successfully', 'alert alert-success');
             } else {
                 flash('policy_message', 'Failed to delete policy', 'alert alert-danger');
@@ -449,7 +479,7 @@ class Policies extends Controller
                 if ($this->policyModel->updatePolicyStatus($id, $status)) {
                     // Send notifications only if status changed to 'active' or 'inactive'
                     if ($statusChanged && ($status === 'active' || $status === 'inactive')) {
-                        $this->sendPolicyStatusNotifications($id, $status, $policy);
+                        $this->sendPolicyStatusNotifications($status, $policy->policy_name);
                     }
 
                     flash('policy_message', 'Status updated successfully', 'alert alert-success');
@@ -468,7 +498,7 @@ class Policies extends Controller
     }
 
     // Send notifications to all non-admin users when policy status changes
-    private function sendPolicyStatusNotifications($policyId, $newStatus, $policy)
+    private function sendPolicyStatusNotifications($newStatus, $policyName)
     {
         // Load required models
         $userModel = $this->model('M_Users');
@@ -494,7 +524,7 @@ class Policies extends Controller
         // Create notification message
         $notificationMessage = sprintf(
             'The policy "%s" has been %s on %s by %s.',
-            $policy->policy_name,
+            $policyName,
             $action,
             $dateTime,
             $adminName
@@ -515,6 +545,43 @@ class Policies extends Controller
 
         // Log notification count (optional - for debugging)
         // You can remove this or add it to a log file
+        return $sentCount;
+    }
+
+    // Send notifications to all non-admin users when a policy is deleted
+    private function sendPolicyDeletionNotifications($policyName)
+    {
+        $userModel = $this->model('M_Users');
+        $notificationModel = $this->model('M_Notifications');
+
+        $allUsers = array_merge(
+            $userModel->getAllUsersByType('tenant'),
+            $userModel->getAllUsersByType('landlord'),
+            $userModel->getAllUsersByType('property_manager')
+        );
+
+        $dateTime = date('F j, Y \a\t g:i A');
+        $adminName = $_SESSION['user_name'] ?? 'Administrator';
+
+        $notificationMessage = sprintf(
+            'The policy "%s" has been deleted on %s by %s.',
+            $policyName,
+            $dateTime,
+            $adminName
+        );
+
+        $sentCount = 0;
+        foreach ($allUsers as $user) {
+            $notificationModel->createNotification([
+                'user_id' => $user->id,
+                'type' => 'policy_update',
+                'title' => 'Policy Deleted',
+                'message' => $notificationMessage,
+                'link' => ''
+            ]);
+            $sentCount++;
+        }
+
         return $sentCount;
     }
     // Helper methods to get dropdown options

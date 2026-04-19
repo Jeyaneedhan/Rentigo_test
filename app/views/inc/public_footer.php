@@ -78,7 +78,6 @@
                 <div class="footer-bottom-links">
                     <a href="<?php echo URLROOT; ?>/pages/privacy">Privacy Policy</a>
                     <a href="<?php echo URLROOT; ?>/pages/terms">Terms of Service</a>
-                    <a href="<?php echo URLROOT; ?>/pages/cookies">Cookie Policy</a>
                 </div>
             </div>
         </div>

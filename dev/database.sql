@@ -382,13 +382,13 @@ CREATE TABLE `Posts` (
 
 -- --------------------------------------------------------
 -- Users (only 4: admin, landlord, tenant, property_manager)
--- Password: 'password123' hashed
+-- Password: 'rentigo12345' hashed
 -- --------------------------------------------------------
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `user_type`, `account_status`, `terms_accepted_at`, `created_at`) VALUES
-(1, 'Admin User', 'admin@rentigo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'active', '2025-01-01 00:00:00', '2025-01-01 00:00:00'),
-(2, 'Nimal Perera', 'nimal@landlord.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'landlord', 'active', '2025-01-15 00:00:00', '2025-01-15 00:00:00'),
-(3, 'Amal Fernando', 'amal@tenant.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'tenant', 'active', '2025-02-05 00:00:00', '2025-02-05 00:00:00'),
-(4, 'Samantha Perera', 'sam@pm.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'property_manager', 'active', '2025-01-10 00:00:00', '2025-01-10 00:00:00');
+(1, 'Admin User', 'admin@rentigo.com', '$2y$10$Sv7hEf2jHEjfgtmAlKjq5uGk9r0KUPP6i0fkTWIEd9TM4XSm09U5C', 'admin', 'active', '2025-01-01 00:00:00', '2025-01-01 00:00:00'),
+(2, 'Nimal Perera', 'nimal@landlord.com', '$2y$10$Sv7hEf2jHEjfgtmAlKjq5uGk9r0KUPP6i0fkTWIEd9TM4XSm09U5C', 'landlord', 'active', '2025-01-15 00:00:00', '2025-01-15 00:00:00'),
+(3, 'Amal Fernando', 'amal@tenant.com', '$2y$10$Sv7hEf2jHEjfgtmAlKjq5uGk9r0KUPP6i0fkTWIEd9TM4XSm09U5C', 'tenant', 'active', '2025-02-05 00:00:00', '2025-02-05 00:00:00'),
+(4, 'Samantha Perera', 'sam@pm.com', '$2y$10$Sv7hEf2jHEjfgtmAlKjq5uGk9r0KUPP6i0fkTWIEd9TM4XSm09U5C', 'property_manager', 'active', '2025-01-10 00:00:00', '2025-01-10 00:00:00');
 
 -- --------------------------------------------------------
 -- Properties (mix of 2025 and 2026)
@@ -642,18 +642,18 @@ INSERT INTO `property_manager` (`manager_id`, `user_id`, `employee_id_filename`,
 -- --------------------------------------------------------
 -- Policies
 -- --------------------------------------------------------
-INSERT INTO `policies` (`policy_id`, `policy_name`, `policy_category`, `policy_description`, `policy_content`, `policy_status`, `policy_type`, `effective_date`, `created_by`, `created_at`) VALUES
-(1, 'Rental Policy', 'rental', 'Rent terms', 'Rent due on 1st of each month. Late fee 5% after 5 days.', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
-(2, 'Maintenance Policy', 'maintenance', 'Request rules', 'Emergency: 24h, Non-emergency: 7 days.', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
-(3, 'Security Deposit Policy', 'financial', 'Deposit rules', 'Refundable within 30 days after lease end minus damages.', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
-(4, 'Privacy Policy', 'privacy', 'Data privacy', 'User data is not shared with third parties.', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
-(5, 'Terms of Service', 'terms_of_service', 'Platform terms', 'By using this platform you agree to all terms.', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
-(6, 'Privacy Policy - Data Use', 'privacy', 'Data use', 'We only use data to provide services and improve support.', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
-(7, 'Privacy Policy - Security', 'privacy', 'Data security', 'We apply encryption and access controls to protect data.', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
-(8, 'Privacy Policy - Cookies', 'privacy', 'Cookie notice', 'Cookies are used for login, preferences, and analytics.', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
-(9, 'Terms of Service - Usage', 'terms_of_service', 'Service usage', 'Users must follow platform rules and applicable laws.', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
-(10, 'Terms of Service - Payments', 'terms_of_service', 'Payment terms', 'Late payments may incur fees and account restrictions.', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
-(11, 'Terms of Service - Termination', 'terms_of_service', 'Account termination', 'Accounts may be suspended for misuse or fraud.', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00');
+INSERT INTO `policies` (`policy_id`, `policy_name`, `policy_category`, `policy_description`, `policy_content`, `policy_version`, `policy_status`, `policy_type`, `effective_date`, `created_by`, `created_at`) VALUES
+(1, 'Rental Policy', 'rental', 'Rental terms', 'Rent due on 1st of each month. Late fee 5% after 5 days.', 'v1.0', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
+(2, 'Maintenance Policy', 'maintenance', 'Request rules', 'Emergency: 24h, Non-emergency: 7 days.', 'v1.0', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
+(3, 'Security Deposit Policy', 'financial', 'Deposit rules', 'Refundable within 30 days after lease end minus damages.', 'v1.0', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
+(4, 'Privacy Policy', 'privacy', 'Data privacy', 'User data is not shared with third parties.', 'v1.0', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
+(5, 'Terms of Service', 'terms_of_service', 'Platform terms', 'By using this platform you agree to all terms.', 'v1.0', 'active', 'standard', '2025-01-01', 1, '2025-01-01 00:00:00'),
+(6, 'Privacy Policy - Data Use', 'privacy', 'Data usage policy', 'We only use data to provide services and improve support.', 'v2.0', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
+(7, 'Privacy Policy - Security', 'privacy', 'Data security', 'We apply encryption and access controls to protect data.', 'v2.0', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
+(8, 'Privacy Policy - Cookies', 'privacy', 'Cookie notice', 'Cookies are used for login, preferences, and analytics.', 'v2.0', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
+(9, 'Terms of Service - Usage', 'terms_of_service', 'Service usage', 'Users must follow platform rules and applicable laws.', 'v3.0', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
+(10, 'Terms of Service - Payments', 'terms_of_service', 'Payment terms', 'Late payments may incur fees and account restrictions.', 'v3.0', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00'),
+(11, 'Terms of Service - Termination', 'terms_of_service', 'Account termination', 'Accounts may be suspended for misuse or fraud.', 'v3.0', 'active', 'standard', '2025-02-01', 1, '2025-02-01 00:00:00');
 
 -- --------------------------------------------------------
 -- Reviews
